@@ -32,16 +32,28 @@ export function getTreasuryConfig(): TreasuryConfig | null {
     process.env.TREASURY_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY,
     "TREASURY_PUBLIC_KEY"
   );
-  const privateKeyB58 = process.env.TREASURY_PRIVATE_KEY?.trim();
+  const rawPrivateKey = process.env.TREASURY_PRIVATE_KEY?.trim();
+  const privateKeyB58 = rawPrivateKey?.replace(/^["']|["']$/g, "");
 
   if (!mint || !treasuryPublicKey || !privateKeyB58) {
     return null;
   }
 
-  const treasuryPrivateKey = bs58.decode(privateKeyB58);
+  let treasuryPrivateKey: Uint8Array;
+  try {
+    if (privateKeyB58.startsWith("[")) {
+      treasuryPrivateKey = Uint8Array.from(JSON.parse(privateKeyB58) as number[]);
+    } else {
+      treasuryPrivateKey = bs58.decode(privateKeyB58);
+    }
+  } catch {
+    throw new Error(
+      "TREASURY_PRIVATE_KEY must be base58 (run: npm run treasury:export-key)"
+    );
+  }
 
   if (treasuryPrivateKey.length !== 64) {
-    throw new Error("TREASURY_PRIVATE_KEY must be a base58-encoded 64-byte secret key");
+    throw new Error("TREASURY_PRIVATE_KEY must be a 64-byte Solana secret key");
   }
 
   return {
