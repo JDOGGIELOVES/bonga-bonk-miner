@@ -101,13 +101,17 @@ export function saveMint(minted: MintedNFT) {
 }
 
 export async function fetchMintStatus(): Promise<MintStatus | null> {
-  try {
-    const res = await fetch("/api/mint", { cache: "no-store" });
-    if (!res.ok) return null;
-    return (await res.json()) as MintStatus;
-  } catch {
-    return null;
+  const endpoints = ["/api/mint", "/api/claim?mint=status"];
+  for (const path of endpoints) {
+    try {
+      const res = await fetch(path, { cache: "no-store" });
+      if (!res.ok) continue;
+      return (await res.json()) as MintStatus;
+    } catch {
+      continue;
+    }
   }
+  return null;
 }
 
 export async function mintBongaNFT(

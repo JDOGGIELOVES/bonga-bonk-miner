@@ -129,7 +129,22 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  if (url.searchParams.get("mint") === "status") {
+    try {
+      const { getMintStatusPayload } = await import("@/lib/mint-status-server");
+      return NextResponse.json(await getMintStatusPayload());
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Mint status unavailable.";
+      return NextResponse.json(
+        { simulated: true, live: false, error: message },
+        { status: 502 }
+      );
+    }
+  }
+
   try {
     const config = getTreasuryConfig();
     if (!config) {
