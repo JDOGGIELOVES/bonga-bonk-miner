@@ -38,8 +38,14 @@ export async function mintBongaNFTOnChain(
   walletAddress: string,
   status?: MintStatus | null
 ): Promise<{ success: true; minted: MintedNFT } | { success: false; error: string }> {
-  if (!wallet.publicKey || !wallet.signTransaction) {
+  if (!wallet.publicKey) {
     return { success: false, error: "Connect Phantom or Solflare to mint" };
+  }
+  if (!wallet.signTransaction && !wallet.signAllTransactions) {
+    return {
+      success: false,
+      error: "Your wallet cannot sign transactions. Use Phantom or Solflare.",
+    };
   }
 
   const candyMachineAddress =

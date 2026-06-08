@@ -9,7 +9,7 @@ export const NFT_SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://bongabonks.com";
 
 export const NFT_DEPLOY_SUPPLY = Number(
-  process.env.NFT_DEPLOY_SUPPLY || process.env.NEXT_PUBLIC_NFT_SUPPLY || "8888"
+  process.env.NFT_DEPLOY_SUPPLY || process.env.NEXT_PUBLIC_NFT_SUPPLY || "2000"
 );
 
 function buildWeightedPool(supply: number): number[] {

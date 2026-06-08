@@ -100,13 +100,21 @@ export function saveMint(minted: MintedNFT) {
   localStorage.setItem(MINT_STORAGE_KEY, JSON.stringify(existing));
 }
 
+function normalizeMintStatus(data: MintStatus): MintStatus {
+  const hasMachine = Boolean(data.candyMachineAddress);
+  if (hasMachine && !data.simulated) {
+    return { ...data, live: true };
+  }
+  return data;
+}
+
 export async function fetchMintStatus(): Promise<MintStatus | null> {
   const endpoints = ["/api/mint", "/api/claim?mint=status"];
   for (const path of endpoints) {
     try {
       const res = await fetch(path, { cache: "no-store" });
       if (!res.ok) continue;
-      return (await res.json()) as MintStatus;
+      return normalizeMintStatus((await res.json()) as MintStatus);
     } catch {
       continue;
     }
