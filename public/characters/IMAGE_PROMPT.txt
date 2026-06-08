@@ -3,9 +3,9 @@ Bonga — Official Character Reference Prompts
 
 Drop generated PNGs in /public/characters/ to override the live SVG.
 
-Base reference traits (all poses):
+Base reference traits (all poses — EVERY NFT TRAIT MUST INCLUDE THESE):
 - Orange Shiba Inu face (warm #FF9F4A fur, cream muzzle)
-- Long thick brown dreadlocks with red accent bands/beads (not flowers)
+- Long thick brown DREADLOCKS past shoulders with red accent bands/beads (NEVER omit dreads, not flowers, not straight hair)
 - Green / yellow / orange horizontal striped hippie headband
 - Chill relaxed expression, slightly closed half-lidded eyes
 - Smoking a stylized cartoon joint, wispy smoke
