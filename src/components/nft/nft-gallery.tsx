@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NFTCard } from "@/components/nft/nft-card";
 import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
 import { BONGA_NFTS, type BongaNFT, type RarityTier } from "@/lib/nft-collection";
+import { getTraitPose } from "@/lib/nft-trait-poses";
 import { Badge } from "@/components/ui/badge";
 
 const FILTERS: Array<RarityTier | "All"> = [
@@ -96,6 +97,11 @@ export function NFTGallery() {
                   <Badge variant="purple">{selected.rarity}</Badge>
                 </div>
                 <div className="mt-4 space-y-2 text-sm">
+                  {getTraitPose(selected.id) && (
+                    <p className="rounded-lg bg-bonga-orange/10 px-3 py-2 text-xs font-medium text-bonga-orange">
+                      <strong>Activity:</strong> {getTraitPose(selected.id)?.activity}
+                    </p>
+                  )}
                   <p>
                     <strong>Outfit:</strong> {selected.outfit}
                   </p>

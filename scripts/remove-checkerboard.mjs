@@ -9,6 +9,9 @@ const TARGETS = [
   "characters/bonga-idle.png",
   "characters/bonga-swing-impact.png",
   "characters/bonga-bonk-happy.png",
+  ...(await readdir(path.join(PUBLIC, "nft", "traits")).catch(() => []))
+    .filter((f) => f.endsWith(".png"))
+    .map((f) => `nft/traits/${f}`),
 ];
 
 function isBackground(r, g, b, a) {

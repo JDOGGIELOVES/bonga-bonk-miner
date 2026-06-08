@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
 import type { BongaNFT } from "@/lib/nft-collection";
+import { getTraitPose } from "@/lib/nft-trait-poses";
 
 interface NFTCardProps {
   nft: BongaNFT;
@@ -34,7 +35,7 @@ export function NFTCard({ nft, onClick, selected, compact }: NFTCardProps) {
         <div className="p-3">
           <h3 className="font-display font-bold">{nft.name}</h3>
           <p className="text-xs text-muted-foreground">
-            {nft.outfit} · {nft.background}
+            {getTraitPose(nft.id)?.activity ?? `${nft.outfit} · ${nft.background}`}
           </p>
         </div>
       )}

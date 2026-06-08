@@ -1,12 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   type BongaNFT,
   RARITY_BADGE_VARIANT,
 } from "@/lib/nft-collection";
-import { getNFTArtStyle } from "@/lib/nft-art";
+import { BONGA_POSES, getNFTArtStyle } from "@/lib/nft-art";
+import { getTraitScene } from "@/lib/nft-trait-scenes";
+import { getTraitPose } from "@/lib/nft-trait-poses";
 import { cn } from "@/lib/utils";
 
 interface BongaNFTArtProps {
@@ -26,11 +29,30 @@ const SIZE_CLASS = {
 };
 
 const IMAGE_PAD = {
-  xs: "p-1.5",
-  sm: "p-2",
-  md: "p-3",
-  lg: "p-4",
+  xs: "p-1",
+  sm: "p-1.5",
+  md: "p-2.5",
+  lg: "p-3",
 };
+
+function SceneEmoji({
+  layer,
+}: {
+  layer: { emoji: string; className: string; size?: string };
+}) {
+  return (
+    <span
+      className={cn(
+        "pointer-events-none absolute z-20 drop-shadow-md",
+        layer.size ?? "text-xl",
+        layer.className
+      )}
+      aria-hidden
+    >
+      {layer.emoji}
+    </span>
+  );
+}
 
 export function BongaNFTArt({
   nft,
@@ -41,7 +63,19 @@ export function BongaNFTArt({
   className,
 }: BongaNFTArtProps) {
   const art = getNFTArtStyle(nft);
-  const scale = art.scale ?? 1;
+  const scene = getTraitScene(nft.id);
+  const trait = getTraitPose(nft.id);
+  const [useDedicated, setUseDedicated] = useState(Boolean(trait?.image));
+
+  const poseImage = scene
+    ? BONGA_POSES[scene.pose]
+    : BONGA_POSES.default;
+  const dedicatedImage = trait?.image;
+  const showingDedicated = useDedicated && Boolean(dedicatedImage);
+  const imageSrc = showingDedicated ? dedicatedImage! : poseImage;
+
+  const scale = showingDedicated ? 1 : (scene?.scale ?? art.scale ?? 1);
+  const showSceneLayers = !showingDedicated && Boolean(scene);
 
   return (
     <div
@@ -49,11 +83,18 @@ export function BongaNFTArt({
         "relative overflow-hidden rounded-2xl bg-gradient-to-br shadow-lg",
         nft.gradient,
         fillContainer ? "aspect-square h-auto w-full" : SIZE_CLASS[size],
-        art.glow,
+        scene?.glow ?? art.glow,
         className
       )}
     >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.18),transparent_55%)]" />
       <div className="absolute inset-0 bg-black/10" />
+
+      {showSceneLayers &&
+        scene?.background.map((layer, i) => (
+          <SceneEmoji key={`bg-${i}`} layer={layer} />
+        ))}
+
       <div
         className={cn(
           "relative flex h-full w-full items-end justify-center",
@@ -61,33 +102,47 @@ export function BongaNFTArt({
         )}
       >
         <div
-          className="relative h-[88%] w-[88%]"
+          className={cn(
+            "relative h-[90%] w-[90%] transition-transform",
+            scene?.yOffset,
+            scene?.characterClass
+          )}
           style={{
-            filter: art.filter,
+            filter: showingDedicated
+              ? undefined
+              : (scene?.filter ?? art.filter),
             transform: `scale(${scale})`,
           }}
         >
           <Image
-            src={art.image}
-            alt={nft.name}
+            src={imageSrc}
+            alt={`${nft.name} — ${trait?.activity ?? nft.vibe}`}
             fill
             className="object-contain object-bottom drop-shadow-xl"
             sizes="(max-width: 768px) 50vw, 256px"
+            onError={() => {
+              if (dedicatedImage) setUseDedicated(false);
+            }}
           />
         </div>
       </div>
 
+      {showSceneLayers &&
+        scene?.foreground.map((layer, i) => (
+          <SceneEmoji key={`fg-${i}`} layer={layer} />
+        ))}
+
       {showBadge && (
         <Badge
           variant={RARITY_BADGE_VARIANT[nft.rarity]}
-          className="absolute left-2 top-2 z-10 text-[10px]"
+          className="absolute left-2 top-2 z-30 text-[10px]"
         >
           {nft.rarity}
         </Badge>
       )}
 
       {showAccessory && (
-        <span className="absolute bottom-2 right-2 z-10 rounded-full bg-black/35 px-2 py-0.5 text-sm backdrop-blur-sm">
+        <span className="absolute bottom-2 right-2 z-30 rounded-full bg-black/40 px-2 py-0.5 text-sm backdrop-blur-sm">
           {nft.emoji}
         </span>
       )}
