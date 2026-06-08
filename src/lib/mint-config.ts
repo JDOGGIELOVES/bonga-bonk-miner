@@ -2,7 +2,7 @@
 export const DEPLOYED_CANDY_MACHINE =
   "BbWqpzPW95VDnbK5niSxWSaH4KDuifvHHqa89XQTTmt1";
 export const DEPLOYED_COLLECTION =
-  "DbMJsyBqVDeBc9EcRu8Nbw3RS1nZMdsYw1SnUX6dZNNT";
+  "29euf1CexRvPydBUnu9HtSpMBUanKADoicie3MT4nBPY";
 
 export function getCandyMachineAddress(): string {
   return (

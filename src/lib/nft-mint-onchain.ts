@@ -5,7 +5,10 @@ import {
   mplCandyMachine,
   safeFetchCandyGuard,
 } from "@metaplex-foundation/mpl-candy-machine";
-import { mplTokenMetadata } from "@metaplex-foundation/mpl-token-metadata";
+import {
+  mplTokenMetadata,
+  TokenStandard,
+} from "@metaplex-foundation/mpl-token-metadata";
 import { setComputeUnitLimit } from "@metaplex-foundation/mpl-toolbox";
 import {
   generateSigner,
@@ -73,6 +76,14 @@ export async function mintBongaNFTOnChain(
       return { success: false, error: "Collection sold out" };
     }
 
+    if (Number(candyMachine.itemsLoaded) < Number(candyMachine.data.itemsAvailable)) {
+      return {
+        success: false,
+        error:
+          "Candy Machine is not fully loaded yet. Items are still being inserted on-chain — try again shortly.",
+      };
+    }
+
     const candyGuard = await safeFetchCandyGuard(
       umi,
       candyMachine.mintAuthority
@@ -93,6 +104,7 @@ export async function mintBongaNFTOnChain(
           nftMint,
           collectionMint: candyMachine.collectionMint,
           collectionUpdateAuthority: candyMachine.authority,
+          tokenStandard: candyMachine.tokenStandard ?? TokenStandard.NonFungible,
           mintArgs: {
             solPayment: some({ destination: publicKey(getTreasuryDestination()) }),
             mintLimit: some({ id: 1 }),

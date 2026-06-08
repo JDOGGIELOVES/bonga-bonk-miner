@@ -11,7 +11,10 @@
     "treasury:check": "node scripts/check-treasury.mjs",
     "treasury:export-key": "node scripts/export-treasury-key.mjs",
     "nft:setup": "node scripts/setup-nft-collection.mjs",
-    "nft:deploy": "node scripts/deploy-candy-machine.mjs"
+    "nft:deploy": "node scripts/deploy-candy-machine.mjs",
+    "nft:load-items": "node scripts/load-cm-items.mjs",
+    "nft:diagnose": "node scripts/diagnose-cm.mjs",
+    "nft:simulate": "node scripts/simulate-mint.mjs"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-candy-machine": "^6.1.0",

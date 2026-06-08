@@ -11,8 +11,8 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { createSignerFromKeypair, keypairIdentity, publicKey, generateSigner, percentAmount, some, sol } from "@metaplex-foundation/umi";
-import { create, mplCandyMachine } from "@metaplex-foundation/mpl-candy-machine";
+import { createSignerFromKeypair, keypairIdentity, publicKey, generateSigner, percentAmount, some, none, sol } from "@metaplex-foundation/umi";
+import { addConfigLines, create, fetchCandyMachine, mplCandyMachine } from "@metaplex-foundation/mpl-candy-machine";
 import { createNft, mplTokenMetadata, TokenStandard } from "@metaplex-foundation/mpl-token-metadata";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,6 +55,7 @@ if (!collectionMintKey) {
     uri: `${siteUrl}/api/nft/collection`,
     sellerFeeBasisPoints: percentAmount(5, 2),
     isCollection: true,
+    collectionDetails: none(),
   }).sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
   collectionMintKey = collectionMint.publicKey.toString();
   console.log("Collection:", collectionMintKey);
@@ -70,7 +71,7 @@ const candyTx = await create(umi, {
   collectionUpdateAuthority: umi.identity,
   symbol: "BONGA",
   sellerFeeBasisPoints: percentAmount(5, 2),
-  creators: [{ address: treasury, verified: true, share: 100 }],
+  creators: [{ address: treasury, verified: true, percentageShare: 100 }],
   tokenStandard: TokenStandard.NonFungible,
   itemsAvailable: supply,
   configLineSettings: some({
@@ -86,6 +87,27 @@ const candyTx = await create(umi, {
   },
 });
 await candyTx.sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
+
+console.log("\n3/3 Loading config lines (required before mint)...");
+const batchSize = Number(process.env.BATCH_SIZE || "40");
+const pad4 = (n) => String(n).padStart(4, "0");
+let cmAccount = await fetchCandyMachine(umi, candyMachine.publicKey);
+while (Number(cmAccount.itemsLoaded) < supply) {
+  const index = Number(cmAccount.itemsLoaded);
+  const count = Math.min(batchSize, supply - index);
+  const configLines = Array.from({ length: count }, (_, i) => {
+    const suffix = pad4(index + i + 1);
+    return { name: suffix, uri: suffix };
+  });
+  console.log(`  Inserting ${count} lines at index ${index}...`);
+  await addConfigLines(umi, {
+    candyMachine: candyMachine.publicKey,
+    index,
+    configLines,
+  }).sendAndConfirm(umi, { confirm: { commitment: "confirmed" } });
+  cmAccount = await fetchCandyMachine(umi, candyMachine.publicKey);
+}
+console.log("  Loaded:", cmAccount.itemsLoaded, "/", supply);
 
 const deployInfo = {
   deployedAt: new Date().toISOString(),
