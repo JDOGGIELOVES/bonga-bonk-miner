@@ -246,9 +246,39 @@ export function NFTMintPanel() {
                       Website preview
                     </Badge>
                   )}
-                  <p className="mt-2 font-mono text-[10px] text-muted-foreground">
-                    {lastMint.txSignature}
+                  {lastMint.simulated === false && (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Phantom can take a few minutes to show new NFTs. Pull down
+                      to refresh Collectibles, or view on{" "}
+                      <a
+                        href={`https://solscan.io/token/${lastMint.mint}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-bonga-teal underline"
+                      >
+                        Solscan
+                      </a>
+                      .
+                    </p>
+                  )}
+                  <p className="mt-2 font-mono text-[10px] text-muted-foreground break-all">
+                    Mint: {lastMint.mint}
                   </p>
+                  {lastMint.simulated === false && (
+                    <a
+                      href={`https://solscan.io/tx/${lastMint.txSignature}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block font-mono text-[10px] text-bonga-teal underline break-all"
+                    >
+                      Tx: {lastMint.txSignature}
+                    </a>
+                  )}
+                  {lastMint.simulated !== false && (
+                    <p className="mt-2 font-mono text-[10px] text-muted-foreground">
+                      {lastMint.txSignature}
+                    </p>
+                  )}
                 </motion.div>
               ) : (
                 <motion.div

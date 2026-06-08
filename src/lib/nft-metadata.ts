@@ -53,6 +53,7 @@ export function buildItemMetadata(index: number) {
     description: `${COLLECTION_META.description} — ${pose?.activity ?? nft.vibe}`,
     image: imageUrl,
     external_url: COLLECTION_META.externalUrl,
+    seller_fee_basis_points: COLLECTION_META.sellerFeeBasisPoints,
     attributes: [
       { trait_type: "Rarity", value: nft.rarity },
       { trait_type: "Trait ID", value: String(traitId) },
@@ -65,6 +66,12 @@ export function buildItemMetadata(index: number) {
     properties: {
       category: "image",
       files: [{ uri: imageUrl, type: "image/png" }],
+      creators: [
+        {
+          address: "8w1KpwzpAttJAonNHohTyAhzcw4iYuCrQPhppPRw5ASb",
+          share: 100,
+        },
+      ],
     },
   };
 }
