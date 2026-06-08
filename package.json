@@ -9,7 +9,8 @@
     "lint": "next lint",
     "treasury:setup": "node scripts/setup-treasury.mjs",
     "treasury:check": "node scripts/check-treasury.mjs",
-    "treasury:export-key": "node scripts/export-treasury-key.mjs"
+    "treasury:export-key": "node scripts/export-treasury-key.mjs",
+    "nft:setup": "node scripts/setup-nft-collection.mjs"
   },
   "dependencies": {
     "@radix-ui/react-progress": "^1.1.1",

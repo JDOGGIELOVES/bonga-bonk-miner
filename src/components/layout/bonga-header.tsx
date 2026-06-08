@@ -22,12 +22,7 @@ export function BongaHeader({
   return (
     <header className="sticky top-0 z-40 border-b border-border/40 bg-card/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link
-          href="https://bonga.uno"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group min-w-0 flex-1"
-        >
+        <Link href="/" className="group min-w-0 flex-1">
           <p className="font-display text-xl font-extrabold tracking-tight text-bonga-orange sm:text-2xl">
             BONGA
           </p>
@@ -40,6 +35,12 @@ export function BongaHeader({
         </Link>
 
         <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/nft"
+            className="hidden rounded-full border border-bonga-orange/30 px-3 py-1.5 text-xs font-semibold text-bonga-orange transition-colors hover:bg-bonga-orange/10 sm:inline-block"
+          >
+            NFTs
+          </Link>
           {soundSlot}
           <Button
             variant="ghost"

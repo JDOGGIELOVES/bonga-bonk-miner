@@ -25,12 +25,10 @@ export function NFTWhitelistBanner() {
         </div>
       </div>
       <a
-        href="https://bonga.uno"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="/nft"
         className="shrink-0 rounded-full bg-bonga-orange px-5 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-[#E55800]"
       >
-        Learn more
+        Mint NFTs
       </a>
     </motion.div>
   );

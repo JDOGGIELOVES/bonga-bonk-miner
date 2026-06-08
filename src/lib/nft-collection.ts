@@ -258,9 +258,18 @@ export const BONGA_NFTS: BongaNFT[] = [
   },
 ];
 
+export const COLLECTION_META = {
+  name: "Bonga NFT Collection",
+  symbol: "BONGA",
+  description:
+    "8,888 peaceful chibi Shiba warriors from Bonk's Sister. Hippie, cosmic, and bonk-powered vibes on Solana.",
+  externalUrl: "https://bongabonks.com/nft",
+  sellerFeeBasisPoints: 500,
+};
+
 export const COLLECTION_STATS = {
   totalSupply: 8888,
-  minted: 1247,
+  minted: 0,
   maxPerWallet: 3,
 };
 
@@ -323,7 +332,7 @@ export const UTILITY = [
 ];
 
 export const COMMUNITY_LINKS = [
+  { label: "Website", href: "https://bongabonks.com", icon: "🌐" },
+  { label: "Bonk Miner", href: "https://bongabonks.com", icon: "🔨" },
   { label: "X / Twitter", href: "https://x.com", icon: "𝕏" },
-  { label: "Telegram", href: "https://t.me", icon: "✈️" },
-  { label: "Discord", href: "https://discord.com", icon: "💬" },
 ];
