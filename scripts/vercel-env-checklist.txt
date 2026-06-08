@@ -1,0 +1,24 @@
+Bonga Bonk Miner — Vercel Environment Variables Checklist
+=========================================================
+
+Add in: Vercel → bonga-bonk-miner → Settings → Environment Variables → Production
+
+NEXT_PUBLIC_TREASURY_PUBLIC_KEY=8w1KpwzpAttJAonNHohTyAhzcw4iYuCrQPhppPRw5ASb
+TREASURY_PUBLIC_KEY=8w1KpwzpAttJAonNHohTyAhzcw4iYuCrQPhppPRw5ASb
+TREASURY_PRIVATE_KEY=<from .treasury/treasury-keypair.json — NEVER commit>
+BONGA_MINT_ADDRESS=7YoAymCyauHAXus3snMEKcLgRx546MrHuBW3EuUNKKQs
+NEXT_PUBLIC_BONGA_MINT_ADDRESS=7YoAymCyauHAXus3snMEKcLgRx546MrHuBW3EuUNKKQs
+BONGA_TOKEN_DECIMALS=9
+SOLANA_RPC_URL=<your Helius/Alchemy mainnet RPC>
+NEXT_PUBLIC_SOLANA_RPC_URL=<same RPC URL>
+NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
+ON_CHAIN_CLAIMS_ENABLED=true
+NEXT_PUBLIC_ON_CHAIN_CLAIMS_ENABLED=true
+DAILY_CLAIM_LIMIT=10
+
+Fund treasury wallet before enabling claims:
+  Address: 8w1KpwzpAttJAonNHohTyAhzcw4iYuCrQPhppPRw5ASb
+  Token account (auto-created on first claim): 7dYmXqbaEVGkWxdzGQRwwKKntw6zGjCanGZre3pUGAR5
+  Send: SOL (fees) + $BONGA SPL tokens
+
+After saving env vars → Redeploy → test https://bongabonks.com/api/claim

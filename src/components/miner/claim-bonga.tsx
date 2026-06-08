@@ -12,38 +12,82 @@ import {
   type GameState,
 } from "@/lib/miner-game";
 import { gameAudio } from "@/lib/audio/audio-manager";
-import { Wallet } from "lucide-react";
+import { requestOnChainClaim, isOnChainClaimsEnabled } from "@/lib/claim-client";
+import { Wallet, ExternalLink } from "lucide-react";
 
 interface ClaimBongaProps {
   state: GameState;
   onStateChange: (state: GameState) => void;
 }
 
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, signMessage } = useWallet();
   const { setVisible } = useWalletModal();
   const [claiming, setClaiming] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const claimable = getClaimableBonga(state);
+  const onChainEnabled = isOnChainClaimsEnabled();
 
   const handleClaim = async () => {
     if (!connected || !publicKey || claimable <= 0) return;
 
     setClaiming(true);
-    await new Promise((r) => setTimeout(r, 1200));
+    setErrorMsg("");
+    setExplorerUrl(null);
 
-    const next = processClaim(state, publicKey.toBase58());
-    onStateChange(next);
-    gameAudio.playCoinCollect();
-    setSuccessMsg(
-      `Claimed ${claimable} $BONGA successfully. On-chain rewards coming soon.`
-    );
-    setClaiming(false);
-    setTimeout(() => setSuccessMsg(""), 5000);
+    try {
+      const wallet = publicKey.toBase58();
+
+      if (onChainEnabled) {
+        if (!signMessage) {
+          throw new Error(
+            "Your wallet cannot sign claim messages. Try Phantom or Solflare."
+          );
+        }
+
+        const result = await requestOnChainClaim({
+          wallet,
+          amount: claimable,
+          date: todayKey(),
+          signMessage,
+        });
+
+        const next = processClaim(state, wallet);
+        onStateChange(next);
+        gameAudio.playCoinCollect();
+        setSuccessMsg(
+          `Sent ${claimable} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
+        );
+        setExplorerUrl(result.explorerUrl);
+      } else {
+        await new Promise((r) => setTimeout(r, 1200));
+        const next = processClaim(state, wallet);
+        onStateChange(next);
+        gameAudio.playCoinCollect();
+        setSuccessMsg(
+          `Claimed ${claimable} $BONGA (simulated). Enable on-chain claims in production.`
+        );
+      }
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Claim failed.");
+    } finally {
+      setClaiming(false);
+      setTimeout(() => {
+        setSuccessMsg("");
+        setExplorerUrl(null);
+        setErrorMsg("");
+      }, 8000);
+    }
   };
 
-  if (claimable <= 0 && !successMsg) return null;
+  if (claimable <= 0 && !successMsg && !errorMsg) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -56,6 +100,26 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
           className="bonga-card border-bonga-teal/30 bg-bonga-teal/5 p-5 text-center"
         >
           <p className="text-sm font-medium text-bonga-teal">{successMsg}</p>
+          {explorerUrl && (
+            <a
+              href={explorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1 text-xs text-bonga-teal underline"
+            >
+              View on Solscan <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
+        </motion.div>
+      ) : errorMsg ? (
+        <motion.div
+          key="error"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="bonga-card border-red-300/40 bg-red-50/50 p-5 text-center dark:bg-red-950/20"
+        >
+          <p className="text-sm font-medium text-red-600 dark:text-red-400">{errorMsg}</p>
         </motion.div>
       ) : (
         <motion.div
@@ -65,14 +129,16 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
           className="bonga-card p-5"
         >
           <Badge variant="default" className="mb-3">
-            Ready to claim
+            {onChainEnabled ? "On-chain claim ready" : "Ready to claim"}
           </Badge>
           <p className="font-display text-xl font-bold tracking-tight">
             {claimable} $BONGA
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {connected
-              ? "Your mined rewards are waiting."
+              ? onChainEnabled
+                ? "Sign to receive real $BONGA from the treasury wallet."
+                : "Your mined rewards are waiting."
               : "Connect your wallet to claim."}
           </p>
 
@@ -83,7 +149,13 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
               onClick={() => void handleClaim()}
               disabled={claiming}
             >
-              {claiming ? "Claiming..." : `Claim Mined $BONGA`}
+              {claiming
+                ? onChainEnabled
+                  ? "Sending on-chain..."
+                  : "Claiming..."
+                : onChainEnabled
+                  ? `Claim ${claimable} $BONGA On-Chain`
+                  : `Claim Mined $BONGA`}
             </Button>
           ) : (
             <Button

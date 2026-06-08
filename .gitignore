@@ -31,6 +31,9 @@ yarn-error.log*
 # env files
 .env*.local
 
+# treasury keypair backup (never commit)
+/.treasury/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
