@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { buildItemMetadata, NFT_DEPLOY_SUPPLY } from "@/lib/nft-metadata";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET(
   _request: Request,

@@ -7,19 +7,25 @@ import {
 import { publicKey } from "@metaplex-foundation/umi";
 import { getSolanaRpcEndpoint } from "@/lib/solana";
 import { NFT_DEPLOY_SUPPLY } from "@/lib/nft-metadata";
+import {
+  getCandyMachineAddress,
+  getCollectionAddress,
+  getMintPriceSol,
+  isMintSimulated,
+} from "@/lib/mint-config";
 
 export const dynamic = "force-dynamic";
-
-const candyMachineAddress =
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ADDRESS || "";
-const simulated = process.env.NEXT_PUBLIC_MINT_SIMULATED !== "false";
+export const runtime = "nodejs";
 
 export async function GET() {
+  const candyMachineAddress = getCandyMachineAddress();
+  const simulated = isMintSimulated();
+
   const base = {
     simulated,
     candyMachineAddress: candyMachineAddress || null,
-    collectionAddress: process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || null,
-    priceSol: Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL || "0.08"),
+    collectionAddress: getCollectionAddress() || null,
+    priceSol: getMintPriceSol(),
     supply: NFT_DEPLOY_SUPPLY,
     itemsRedeemed: null as number | null,
     itemsAvailable: null as number | null,
@@ -39,13 +45,16 @@ export async function GET() {
 
     return NextResponse.json({
       ...base,
+      simulated: false,
       live: true,
       itemsRedeemed: Number(candyMachine.itemsRedeemed),
       itemsAvailable: Number(candyMachine.data.itemsAvailable),
-      collectionAddress: candyMachine.collectionMint?.toString() ?? base.collectionAddress,
+      collectionAddress:
+        candyMachine.collectionMint?.toString() ?? base.collectionAddress,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to fetch mint status";
+    const message =
+      err instanceof Error ? err.message : "Failed to fetch mint status";
     return NextResponse.json({ ...base, error: message }, { status: 502 });
   }
 }

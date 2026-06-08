@@ -34,7 +34,10 @@ export function NFTMintPanel() {
 
   const wallet = publicKey?.toBase58();
   const whitelist = getWhitelistStatus(wallet);
-  const price = getMintPrice(wallet);
+  const isLive = mintStatus?.live === true;
+  const isPreview =
+    mintStatus === null ? MINT_CONFIG.simulated : !isLive;
+  const price = getMintPrice(wallet, mintStatus?.priceSol);
   const supplyTotal =
     mintStatus?.itemsAvailable ?? COLLECTION_STATS.totalSupply;
   const totalMinted = mintStatus?.itemsRedeemed ?? COLLECTION_STATS.minted;
@@ -60,7 +63,7 @@ export function NFTMintPanel() {
     setError("");
     setLastMint(null);
 
-    const result = await mintBongaNFT(wallet, walletAdapter);
+    const result = await mintBongaNFT(wallet, walletAdapter, mintStatus);
 
     if (result.success && result.minted) {
       setLastMint(result.minted);
@@ -78,12 +81,12 @@ export function NFTMintPanel() {
           Mint Your <span className="text-gradient">Bonga</span>
         </h2>
         <p className="mt-2 text-center text-muted-foreground">
-          {MINT_CONFIG.simulated
-            ? "Try the collection now — real Solana mints coming soon"
-            : "Live on Solana via Candy Machine v3"}
+          {isLive
+            ? "Live on Solana via Candy Machine v3"
+            : "Try the collection now — real Solana mints coming soon"}
         </p>
 
-        {mintStatus?.live && (
+        {isLive && (
           <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-bonga-green/40 bg-bonga-green/10 p-4 text-center">
             <p className="text-sm font-semibold text-bonga-green">
               Live on Solana — mints appear in Phantom & Solflare
@@ -94,7 +97,7 @@ export function NFTMintPanel() {
           </div>
         )}
 
-        {MINT_CONFIG.simulated && (
+        {isPreview && (
           <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-400/40 bg-amber-50/80 p-4 text-center dark:bg-amber-950/30">
             <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
               Preview mint only — not a real on-chain NFT yet
@@ -181,7 +184,7 @@ export function NFTMintPanel() {
                   </>
                 ) : myMints.length >= COLLECTION_STATS.maxPerWallet ? (
                   "Max Mints Reached"
-                ) : MINT_CONFIG.simulated ? (
+                ) : isPreview ? (
                   `Preview Mint ${price === 0 ? "(Free)" : ""}`
                 ) : (
                   `Mint Bonga NFT ${price === 0 ? "(Free)" : ""}`
@@ -205,7 +208,7 @@ export function NFTMintPanel() {
 
             <p className="mt-3 text-center text-[10px] text-muted-foreground">
               Max {COLLECTION_STATS.maxPerWallet} per wallet
-              {MINT_CONFIG.simulated
+              {isPreview
                 ? " · Preview saves to this browser only"
                 : " · Phantom & Solflare supported"}
             </p>

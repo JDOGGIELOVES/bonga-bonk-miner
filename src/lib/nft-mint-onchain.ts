@@ -16,12 +16,14 @@ import {
 import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 import bs58 from "bs58";
+import { DEPLOYED_CANDY_MACHINE } from "@/lib/mint-config";
 import { getSolanaRpcEndpoint } from "@/lib/solana";
 import {
   getNftByTraitId,
   getTraitIdForItemIndex,
 } from "@/lib/nft-metadata";
-import { MINT_CONFIG, type MintedNFT } from "@/lib/nft-mint";
+import type { MintedNFT } from "@/lib/nft-mint";
+import type { MintStatus } from "@/lib/nft-mint";
 
 function getTreasuryDestination(): string {
   return (
@@ -33,13 +35,17 @@ function getTreasuryDestination(): string {
 
 export async function mintBongaNFTOnChain(
   wallet: WalletContextState,
-  walletAddress: string
+  walletAddress: string,
+  status?: MintStatus | null
 ): Promise<{ success: true; minted: MintedNFT } | { success: false; error: string }> {
   if (!wallet.publicKey || !wallet.signTransaction) {
     return { success: false, error: "Connect Phantom or Solflare to mint" };
   }
 
-  if (!MINT_CONFIG.candyMachineAddress) {
+  const candyMachineAddress =
+    status?.candyMachineAddress || DEPLOYED_CANDY_MACHINE;
+
+  if (!candyMachineAddress) {
     return {
       success: false,
       error: "Candy Machine not configured yet. Check back soon.",
@@ -54,7 +60,7 @@ export async function mintBongaNFTOnChain(
 
     const candyMachine = await fetchCandyMachine(
       umi,
-      publicKey(MINT_CONFIG.candyMachineAddress)
+      publicKey(candyMachineAddress)
     );
 
     if (candyMachine.itemsRedeemed >= candyMachine.data.itemsAvailable) {
@@ -70,6 +76,7 @@ export async function mintBongaNFTOnChain(
     const nextIndex = Number(candyMachine.itemsRedeemed) + 1;
     const traitId = getTraitIdForItemIndex(nextIndex);
     const nft = getNftByTraitId(traitId);
+    const pricePaid = status?.priceSol ?? 0.08;
 
     const builder = transactionBuilder()
       .add(setComputeUnitLimit(umi, { units: 800_000 }))
@@ -101,7 +108,7 @@ export async function mintBongaNFTOnChain(
         wallet: walletAddress,
         timestamp: Date.now(),
         txSignature,
-        pricePaid: MINT_CONFIG.priceSol,
+        pricePaid,
         simulated: false,
       },
     };

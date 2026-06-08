@@ -1,5 +1,6 @@
 import { BONGA_NFTS, type BongaNFT } from "@/lib/nft-collection";
 import { getWhitelistStatus } from "@/lib/bonga-whitelist";
+import { isMintSimulatedBuildHint } from "@/lib/mint-config";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 import { mintBongaNFTOnChain } from "@/lib/nft-mint-onchain";
 
@@ -11,7 +12,8 @@ export const MINT_CONFIG = {
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ADDRESS || "",
   collectionAddress:
     process.env.NEXT_PUBLIC_COLLECTION_ADDRESS || "",
-  simulated: process.env.NEXT_PUBLIC_MINT_SIMULATED !== "false",
+  /** Build-time hint — use fetchMintStatus() / mintStatus.live in UI. */
+  simulated: isMintSimulatedBuildHint(),
 };
 
 export interface MintedNFT {
@@ -39,6 +41,7 @@ export interface MintStatus {
   supply: number;
   itemsRedeemed: number | null;
   itemsAvailable: number | null;
+  error?: string;
 }
 
 function rollRarity(): BongaNFT {
@@ -52,13 +55,13 @@ function rollRarity(): BongaNFT {
   return BONGA_NFTS[0];
 }
 
-export function getMintPrice(walletAddress?: string): number {
+export function getMintPrice(walletAddress?: string, priceSol = MINT_CONFIG.priceSol): number {
   const wl = getWhitelistStatus(walletAddress);
   if (wl.tier === "free") return 0;
   if (wl.tier === "discount") {
-    return MINT_CONFIG.priceSol * (1 - wl.discountPercent / 100);
+    return priceSol * (1 - wl.discountPercent / 100);
   }
-  return MINT_CONFIG.priceSol;
+  return priceSol;
 }
 
 function normalizeMint(entry: MintedNFT): MintedNFT {
@@ -98,16 +101,6 @@ export function saveMint(minted: MintedNFT) {
   localStorage.setItem(MINT_STORAGE_KEY, JSON.stringify(existing));
 }
 
-export function getTotalMinted(): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const raw = localStorage.getItem(MINT_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as MintedNFT[]).length : 0;
-  } catch {
-    return 0;
-  }
-}
-
 export async function fetchMintStatus(): Promise<MintStatus | null> {
   try {
     const res = await fetch("/api/mint", { cache: "no-store" });
@@ -120,16 +113,20 @@ export async function fetchMintStatus(): Promise<MintStatus | null> {
 
 export async function mintBongaNFT(
   walletAddress: string,
-  wallet?: WalletContextState
+  wallet?: WalletContextState,
+  status?: MintStatus | null
 ): Promise<MintResult> {
+  const mintStatus = status ?? (await fetchMintStatus());
+  const isLive = mintStatus?.live === true;
+
   const existing = loadWalletMints(walletAddress);
   if (existing.length >= 3) {
     return { success: false, error: "Max 3 mints per wallet reached" };
   }
 
-  const price = getMintPrice(walletAddress);
+  const price = getMintPrice(walletAddress, mintStatus?.priceSol);
 
-  if (MINT_CONFIG.simulated) {
+  if (!isLive) {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 1000));
 
     const nft = rollRarity();
@@ -151,7 +148,7 @@ export async function mintBongaNFT(
     return { success: false, error: "Connect your wallet to mint on-chain" };
   }
 
-  const onChain = await mintBongaNFTOnChain(wallet, walletAddress);
+  const onChain = await mintBongaNFTOnChain(wallet, walletAddress, mintStatus);
   if (!onChain.success) {
     return onChain;
   }

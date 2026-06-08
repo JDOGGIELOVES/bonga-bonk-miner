@@ -26,6 +26,7 @@ After saving env vars → Redeploy → test https://bongabonks.com/api/claim
 
 ── NFT Live Mint (Candy Machine v3) ─────────────────────────────
 NEXT_PUBLIC_SITE_URL=https://bongabonks.com
+MINT_SIMULATED=false
 NEXT_PUBLIC_MINT_SIMULATED=false
 NEXT_PUBLIC_CANDY_MACHINE_ADDRESS=BbWqpzPW95VDnbK5niSxWSaH4KDuifvHHqa89XQTTmt1
 NEXT_PUBLIC_COLLECTION_ADDRESS=DbMJsyBqVDeBc9EcRu8Nbw3RS1nZMdsYw1SnUX6dZNNT
