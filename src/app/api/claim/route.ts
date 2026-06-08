@@ -102,18 +102,26 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  const config = getTreasuryConfig();
-  if (!config) {
-    return NextResponse.json({ enabled: false });
+  try {
+    const config = getTreasuryConfig();
+    if (!config) {
+      return NextResponse.json({
+        enabled: false,
+        hint: "Set ON_CHAIN_CLAIMS_ENABLED=true and treasury env vars in Vercel.",
+      });
+    }
+
+    const balances = await getTreasuryBalances(config);
+
+    return NextResponse.json({
+      enabled: true,
+      treasury: config.treasuryPublicKey.toBase58(),
+      mint: config.mint.toBase58(),
+      dailyLimit: config.dailyLimit,
+      balances,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Treasury status unavailable.";
+    return NextResponse.json({ enabled: false, error: message }, { status: 500 });
   }
-
-  const balances = await getTreasuryBalances(config);
-
-  return NextResponse.json({
-    enabled: true,
-    treasury: config.treasuryPublicKey.toBase58(),
-    mint: config.mint.toBase58(),
-    dailyLimit: config.dailyLimit,
-    balances,
-  });
 }
