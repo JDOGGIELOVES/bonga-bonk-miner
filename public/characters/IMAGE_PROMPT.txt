@@ -1,0 +1,43 @@
+Bonga — Official Character Reference Prompts
+=============================================
+
+Drop generated PNGs in /public/characters/ to override the live SVG.
+
+Base reference traits (all poses):
+- Orange Shiba Inu face (warm #FF9F4A fur, cream muzzle)
+- Long thick brown dreadlocks with red accent bands/beads (not flowers)
+- Green / yellow / orange horizontal striped hippie headband
+- Chill relaxed expression, slightly closed half-lidded eyes
+- Smoking a stylized cartoon joint, wispy smoke
+- Tie-dye hippie top, peace vibe
+- Oversized wooden BONK club
+- Bold orange "$BONGA" text below the character
+
+Recommended size: 1024x1024 PNG, transparent background
+Style: high-quality kawaii mascot, clean vector-like shading, vibrant but soft
+
+---
+
+IDLE POSE — bonga-idle.png
+PROMPT:
+Cute orange Shiba Inu mascot character "Bonga", chibi proportions, long thick brown dreadlocks with small red accent wraps, green yellow and orange striped headband, half-closed relaxed chill eyes, gentle smile, holding a lit cartoon joint in left paw with soft smoke curls, oversized wooden bonk club resting on right shoulder, tie-dye hippie shirt, front-facing full body, transparent background, bold orange "$BONGA" text centered below the character, kawaii game mascot art, crisp clean shading
+
+---
+
+CLUB SWING FRAME 1 (wind-up) — bonga-swing-windup.png
+PROMPT:
+Same Bonga orange Shiba mascot, dreadlocks flowing back, striped headband, chill half-closed eyes focused forward, joint in mouth or left hand, body twisted left as she winds up a huge wooden bonk club high behind her right shoulder, dynamic action pose frame 1 of swing animation, transparent background, "$BONGA" in orange below, game sprite style
+
+---
+
+CLUB SWING FRAME 2 (impact) — bonga-swing-impact.png
+PROMPT:
+Same Bonga orange Shiba mascot, dreadlocks bouncing outward from motion, striped headband tilted, eyes squinting happily, club swung forward in powerful bonk impact pose with orange speed lines, joint smoke puff, transparent background, "$BONGA" in orange below, game sprite style
+
+---
+
+HAPPY BONK REACTION — bonga-bonk-happy.png
+PROMPT:
+Same Bonga orange Shiba mascot after a successful bonk, big relaxed grin, eyes happily squinted, dreadlocks bouncing, red accent beads visible, striped headband, holding bonk club low with one paw, other paw still holding joint with smoke, small sparkles and "bonk!" energy, transparent background, "$BONGA" in orange below, celebratory game reaction sprite
+
+NEGATIVE (all): realistic human, scary, angry, low quality, blurry, watermark, blue sparkly anime eyes, pink flowers in hair, plain orange BONGA text headband
