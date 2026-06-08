@@ -29,7 +29,7 @@ function todayKey() {
 }
 
 export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
-  const { connected, publicKey, signMessage } = useWallet();
+  const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
   const { setVisible } = useWalletModal();
   const [claiming, setClaiming] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -63,16 +63,11 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
       const wallet = publicKey.toBase58();
 
       if (onChainEnabled) {
-        if (!signMessage) {
-          throw new Error(
-            "Your wallet cannot sign claim messages. Try Phantom or Solflare."
-          );
-        }
-
         const result = await requestOnChainClaim({
           wallet,
           amount: claimable,
           date: todayKey(),
+          connectedWallet,
           signMessage,
         });
 

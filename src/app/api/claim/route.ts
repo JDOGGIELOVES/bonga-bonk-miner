@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       amount?: number;
       date?: string;
       signature?: string;
+      signedMessage?: string;
     };
 
     const wallet = body.wallet?.trim();
@@ -69,7 +70,22 @@ export async function POST(request: Request) {
     }
 
     const signature = bs58.decode(signatureB58);
-    const valid = verifyClaimSignature({ wallet, amount, date, signature });
+    let signedMessage: Uint8Array | undefined;
+    if (body.signedMessage?.trim()) {
+      try {
+        signedMessage = bs58.decode(body.signedMessage.trim());
+      } catch {
+        return NextResponse.json({ error: "Invalid signed message payload." }, { status: 400 });
+      }
+    }
+
+    const valid = verifyClaimSignature({
+      wallet,
+      amount,
+      date,
+      signature,
+      signedMessage,
+    });
     if (!valid) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }

@@ -1,5 +1,7 @@
 import bs58 from "bs58";
+import type { Wallet } from "@solana/wallet-adapter-react";
 import { buildClaimMessage } from "@/lib/treasury/messages";
+import { signClaimMessage } from "@/lib/wallet-claim-sign";
 
 export interface ClaimStatus {
   enabled: boolean;
@@ -41,7 +43,8 @@ export async function requestOnChainClaim(params: {
   wallet: string;
   amount: number;
   date: string;
-  signMessage: (message: Uint8Array) => Promise<Uint8Array>;
+  connectedWallet: Wallet | null;
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<ClaimApiSuccess> {
   const message = buildClaimMessage({
     wallet: params.wallet,
@@ -49,17 +52,31 @@ export async function requestOnChainClaim(params: {
     date: params.date,
   });
   const messageBytes = new TextEncoder().encode(message);
-  const signature = await params.signMessage(messageBytes);
+  const { signature, signedMessage } = await signClaimMessage({
+    wallet: params.connectedWallet,
+    signMessage: params.signMessage,
+    walletAddress: params.wallet,
+    messageBytes,
+  });
+
+  const payload: Record<string, string | number> = {
+    wallet: params.wallet,
+    amount: params.amount,
+    date: params.date,
+    signature: bs58.encode(signature),
+  };
+
+  const signedDiffers =
+    signedMessage.length !== messageBytes.length ||
+    signedMessage.some((byte, index) => byte !== messageBytes[index]);
+  if (signedDiffers) {
+    payload.signedMessage = bs58.encode(signedMessage);
+  }
 
   const response = await fetch("/api/claim", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      wallet: params.wallet,
-      amount: params.amount,
-      date: params.date,
-      signature: bs58.encode(signature),
-    }),
+    body: JSON.stringify(payload),
   });
 
   const data = (await response.json()) as ClaimApiSuccess | ClaimApiError;
