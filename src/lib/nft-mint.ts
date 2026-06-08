@@ -1,5 +1,7 @@
 import { BONGA_NFTS, type BongaNFT } from "@/lib/nft-collection";
 import { getWhitelistStatus } from "@/lib/bonga-whitelist";
+import type { WalletContextState } from "@solana/wallet-adapter-react";
+import { mintBongaNFTOnChain } from "@/lib/nft-mint-onchain";
 
 export const MINT_STORAGE_KEY = "bonga-nft-mints";
 
@@ -26,6 +28,17 @@ export interface MintResult {
   success: boolean;
   minted?: MintedNFT;
   error?: string;
+}
+
+export interface MintStatus {
+  simulated: boolean;
+  live: boolean;
+  candyMachineAddress: string | null;
+  collectionAddress: string | null;
+  priceSol: number;
+  supply: number;
+  itemsRedeemed: number | null;
+  itemsAvailable: number | null;
 }
 
 function rollRarity(): BongaNFT {
@@ -95,19 +108,19 @@ export function getTotalMinted(): number {
   }
 }
 
-/**
- * Simulated mint — replace with Metaplex Candy Machine v3 / UMI when contract is live.
- *
- * Real mint pseudocode:
- * ```
- * import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
- * import { mplCandyMachine } from '@metaplex-foundation/mpl-candy-machine'
- * const umi = createUmi(rpc).use(mplCandyMachine())
- * await mintV2(umi, { candyMachine, minter: wallet }).sendAndConfirm(umi)
- * ```
- */
+export async function fetchMintStatus(): Promise<MintStatus | null> {
+  try {
+    const res = await fetch("/api/mint", { cache: "no-store" });
+    if (!res.ok) return null;
+    return (await res.json()) as MintStatus;
+  } catch {
+    return null;
+  }
+}
+
 export async function mintBongaNFT(
-  walletAddress: string
+  walletAddress: string,
+  wallet?: WalletContextState
 ): Promise<MintResult> {
   const existing = loadWalletMints(walletAddress);
   if (existing.length >= 3) {
@@ -134,15 +147,15 @@ export async function mintBongaNFT(
     return { success: true, minted };
   }
 
-  if (!MINT_CONFIG.candyMachineAddress) {
-    return {
-      success: false,
-      error: "Candy Machine not configured. Set NEXT_PUBLIC_CANDY_MACHINE_ADDRESS",
-    };
+  if (!wallet) {
+    return { success: false, error: "Connect your wallet to mint on-chain" };
   }
 
-  return {
-    success: false,
-    error: "On-chain minting not yet enabled. Set NEXT_PUBLIC_MINT_SIMULATED=true",
-  };
+  const onChain = await mintBongaNFTOnChain(wallet, walletAddress);
+  if (!onChain.success) {
+    return onChain;
+  }
+
+  saveMint(onChain.minted);
+  return onChain;
 }

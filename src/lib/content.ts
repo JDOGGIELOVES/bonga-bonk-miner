@@ -106,7 +106,7 @@ export const ILLUSTRATION_PROMPTS = [
     id: "wallet",
     title: "Wallet & Keys",
     prompt:
-      "Adorable chibi Shiba Inu holding a golden key next to a digital wallet on a phone, orange BONGA headband, flowers and Bitcoin symbols around, hippie bohemian style, warm peaceful colors",
+      "Adorable chibi Shiba Inu with brown dreadlocks and orange BONGA headband holding a golden key next to a digital wallet on a phone, flowers and Bitcoin symbols around, hippie bohemian style, warm peaceful colors",
   },
   {
     id: "mining",
@@ -118,7 +118,7 @@ export const ILLUSTRATION_PROMPTS = [
     id: "lightning",
     title: "Lightning Network",
     prompt:
-      "Chibi Shiba Inu sending instant Bitcoin through a cute lightning bolt pathway between two phones, blue eyes sparkling, orange headband, fast and fun energy, teal and purple accents",
+      "Chibi Shiba Inu with brown dreadlocks sending instant Bitcoin through a cute lightning bolt pathway between two phones, blue eyes sparkling, orange BONGA headband, fast and fun energy, teal and purple accents",
   },
   {
     id: "community",

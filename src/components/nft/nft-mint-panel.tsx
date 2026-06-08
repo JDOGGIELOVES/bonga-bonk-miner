@@ -9,44 +9,45 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
-import { NFTPlaceholderArt } from "@/components/nft/nft-placeholder-art";
 import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import {
+  fetchMintStatus,
   getMintPrice,
-  getTotalMinted,
   loadWalletMints,
   mintBongaNFT,
   MINT_CONFIG,
   type MintedNFT,
+  type MintStatus,
 } from "@/lib/nft-mint";
 import { COLLECTION_STATS } from "@/lib/nft-collection";
 import { Sparkles, Wallet, Loader2 } from "lucide-react";
 
 export function NFTMintPanel() {
-  const { connected, publicKey } = useWallet();
+  const walletAdapter = useWallet();
+  const { connected, publicKey } = walletAdapter;
   const { setVisible } = useWalletModal();
   const [minting, setMinting] = useState(false);
   const [error, setError] = useState("");
   const [lastMint, setLastMint] = useState<MintedNFT | null>(null);
   const [myMints, setMyMints] = useState<MintedNFT[]>([]);
-  const [globalMinted, setGlobalMinted] = useState(0);
+  const [mintStatus, setMintStatus] = useState<MintStatus | null>(null);
 
   const wallet = publicKey?.toBase58();
   const whitelist = getWhitelistStatus(wallet);
   const price = getMintPrice(wallet);
-  const totalMinted = COLLECTION_STATS.minted + globalMinted;
-  const mintedPct = Math.min(
-    100,
-    (totalMinted / COLLECTION_STATS.totalSupply) * 100
-  );
+  const supplyTotal =
+    mintStatus?.itemsAvailable ?? COLLECTION_STATS.totalSupply;
+  const totalMinted = mintStatus?.itemsRedeemed ?? COLLECTION_STATS.minted;
+  const mintedPct = Math.min(100, (totalMinted / supplyTotal) * 100);
 
-  const refreshMints = useCallback(() => {
-    setGlobalMinted(getTotalMinted());
+  const refreshMints = useCallback(async () => {
+    const status = await fetchMintStatus();
+    setMintStatus(status);
     if (wallet) setMyMints(loadWalletMints(wallet));
   }, [wallet]);
 
   useEffect(() => {
-    refreshMints();
+    void refreshMints();
   }, [refreshMints]);
 
   const handleMint = async () => {
@@ -59,11 +60,11 @@ export function NFTMintPanel() {
     setError("");
     setLastMint(null);
 
-    const result = await mintBongaNFT(wallet);
+    const result = await mintBongaNFT(wallet, walletAdapter);
 
     if (result.success && result.minted) {
       setLastMint(result.minted);
-      refreshMints();
+      await refreshMints();
     } else {
       setError(result.error || "Mint failed");
     }
@@ -81,6 +82,17 @@ export function NFTMintPanel() {
             ? "Try the collection now — real Solana mints coming soon"
             : "Live on Solana via Candy Machine v3"}
         </p>
+
+        {mintStatus?.live && (
+          <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-bonga-green/40 bg-bonga-green/10 p-4 text-center">
+            <p className="text-sm font-semibold text-bonga-green">
+              Live on Solana — mints appear in Phantom & Solflare
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {mintStatus.itemsRedeemed ?? 0} / {mintStatus.itemsAvailable ?? COLLECTION_STATS.totalSupply} minted on-chain
+            </p>
+          </div>
+        )}
 
         {MINT_CONFIG.simulated && (
           <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-400/40 bg-amber-50/80 p-4 text-center dark:bg-amber-950/30">
@@ -103,8 +115,7 @@ export function NFTMintPanel() {
                 Collection progress
               </span>
               <span className="font-bold text-bonga-orange">
-                {totalMinted.toLocaleString()} /{" "}
-                {COLLECTION_STATS.totalSupply.toLocaleString()}
+                {totalMinted.toLocaleString()} / {supplyTotal.toLocaleString()}
               </span>
             </div>
             <Progress value={mintedPct} className="mt-2" />
@@ -221,7 +232,7 @@ export function NFTMintPanel() {
                       : "Welcome to the fam — check your wallet"}
                   </p>
                   <div className="mt-4 flex justify-center">
-                    <NFTPlaceholderArt nft={lastMint.nft} size="sm" />
+                    <BongaNFTArt nft={lastMint.nft} size="sm" />
                   </div>
                   <p className="mt-3 font-bold">{lastMint.nft.name}</p>
                   <Badge variant="purple" className="mt-1">

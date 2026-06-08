@@ -31,6 +31,14 @@ export const RARITY_BADGE_VARIANT: Record<
   "Cosmic Bonga": "default",
 };
 
+/** Required on every Bonga — visible dreadlocks, never straight hair or flower hair */
+export const BONGA_DREADLOCK_PROMPT =
+  "long thick brown dreadlocks past shoulders with red accent beads, green-yellow-orange striped hippie headband";
+
+function bongaPrompt(scene: string): string {
+  return `Orange chibi Shiba Inu, ${BONGA_DREADLOCK_PROMPT}, ${scene}`;
+}
+
 export const BONGA_NFTS: BongaNFT[] = [
   {
     id: 1,
@@ -43,8 +51,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-orange-300 via-pink-300 to-teal-300",
     emoji: "✌️",
     weight: 30,
-    imagePrompt:
-      "Chibi Shiba Inu girl, blue eyes, brown dreads, orange BONGA headband, tie-dye hoodie, peace sign, sunset meadow, hippie aesthetic, kawaii",
+    imagePrompt: bongaPrompt(
+      "blue eyes, tie-dye hoodie, double peace sign, sunset meadow, hippie aesthetic, kawaii"
+    ),
   },
   {
     id: 2,
@@ -57,8 +66,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-cyan-300 via-teal-200 to-amber-200",
     emoji: "🏖️",
     weight: 30,
-    imagePrompt:
-      "Chibi Shiba at tropical beach, dreads, BONGA headband, floral sarong, shell necklace, palm trees, peaceful summer vibes",
+    imagePrompt: bongaPrompt(
+      "tropical beach, floral sarong, shell necklace, palm trees, peaceful summer vibes"
+    ),
   },
   {
     id: 3,
@@ -71,8 +81,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-purple-400 via-pink-400 to-orange-300",
     emoji: "🎪",
     weight: 28,
-    imagePrompt:
-      "Chibi Shiba at music festival, glow paint, fringe vest, flower crown, colorful stage lights, bohemian rave aesthetic",
+    imagePrompt: bongaPrompt(
+      "music festival, glow paint, fringe vest, flower crown, colorful stage lights, bohemian rave aesthetic"
+    ),
   },
   {
     id: 4,
@@ -85,8 +96,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-green-300 via-lime-200 to-yellow-200",
     emoji: "🌻",
     weight: 30,
-    imagePrompt:
-      "Chibi Shiba in community garden, overalls, bandana, watering flowers, sunflowers, earthy peaceful vibes",
+    imagePrompt: bongaPrompt(
+      "community garden, overalls, bandana, watering flowers, sunflowers, earthy peaceful vibes"
+    ),
   },
   {
     id: 5,
@@ -99,8 +111,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-sky-300 via-orange-200 to-rose-200",
     emoji: "🛹",
     weight: 28,
-    imagePrompt:
-      "Chibi Shiba on skateboard, Venice boardwalk, baggy jeans, orange BONGA headband, dreads flowing, chill California vibe",
+    imagePrompt: bongaPrompt(
+      "skateboard, Venice boardwalk, baggy jeans, chill California vibe"
+    ),
   },
   {
     id: 6,
@@ -113,8 +126,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-indigo-300 via-purple-200 to-teal-200",
     emoji: "🧘",
     weight: 15,
-    imagePrompt:
-      "Chibi Shiba meditating in zen garden, linen robes, mala beads, lotus flowers, serene spiritual aesthetic",
+    imagePrompt: bongaPrompt(
+      "meditating in zen garden, linen robes, mala beads, lotus flowers, serene spiritual aesthetic"
+    ),
   },
   {
     id: 7,
@@ -127,8 +141,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-violet-500 via-purple-400 to-cyan-400",
     emoji: "🌊",
     weight: 12,
-    imagePrompt:
-      "Chibi Shiba surfing nebula wave, galaxy wetsuit, star surfboard, cosmic ocean, purple teal orange palette",
+    imagePrompt: bongaPrompt(
+      "surfing nebula wave, galaxy wetsuit, star surfboard, cosmic ocean, purple teal orange palette"
+    ),
   },
   {
     id: 8,
@@ -141,8 +156,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-fuchsia-500 via-purple-500 to-cyan-500",
     emoji: "🤖",
     weight: 12,
-    imagePrompt:
-      "Chibi Shiba cyberpunk style, neon tech jacket, holographic visor, futuristic city, orange BONGA headband glow, synthwave",
+    imagePrompt: bongaPrompt(
+      "cyberpunk style, neon tech jacket, holographic visor, futuristic city, synthwave"
+    ),
   },
   {
     id: 9,
@@ -155,8 +171,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-red-400 via-yellow-300 to-blue-400",
     emoji: "🌈",
     weight: 14,
-    imagePrompt:
-      "Chibi Shiba with rainbow cape, heart sunglasses, pride celebration, colorful sky, love and peace theme",
+    imagePrompt: bongaPrompt(
+      "rainbow cape, heart sunglasses, pride celebration, colorful sky, love and peace theme"
+    ),
   },
   {
     id: 10,
@@ -169,8 +186,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-amber-400 via-orange-400 to-purple-500",
     emoji: "🔮",
     weight: 11,
-    imagePrompt:
-      "Chibi Shiba desert shaman, crystal staff, cloak, dusk desert, mystical bohemian aesthetic",
+    imagePrompt: bongaPrompt(
+      "desert shaman, crystal staff, cloak, dusk desert, mystical bohemian aesthetic"
+    ),
   },
   {
     id: 11,
@@ -183,8 +201,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-yellow-400 via-amber-300 to-orange-400",
     emoji: "👑",
     weight: 5,
-    imagePrompt:
-      "Chibi Shiba in gold-trim kimono, golden bonk club, cherry blossom temple, regal peaceful aesthetic, legendary NFT",
+    imagePrompt: bongaPrompt(
+      "gold-trim kimono, golden bonk club, cherry blossom temple, regal peaceful aesthetic, legendary NFT"
+    ),
   },
   {
     id: 12,
@@ -197,8 +216,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-emerald-400 via-teal-300 to-violet-500",
     emoji: "❄️",
     weight: 4,
-    imagePrompt:
-      "Chibi Shiba under aurora borealis, ice crystal crown, northern lights cloak, arctic magical scene",
+    imagePrompt: bongaPrompt(
+      "aurora borealis, ice crystal crown, northern lights cloak, arctic magical scene"
+    ),
   },
   {
     id: 13,
@@ -211,8 +231,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-red-500 via-orange-500 to-yellow-400",
     emoji: "🌋",
     weight: 4,
-    imagePrompt:
-      "Chibi Shiba near volcano, flame accessories, lava glow, powerful legendary fire spirit aesthetic",
+    imagePrompt: bongaPrompt(
+      "active volcano, flame accessories, lava glow, powerful legendary fire spirit aesthetic"
+    ),
   },
   {
     id: 14,
@@ -225,8 +246,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-sky-200 via-indigo-300 to-purple-400",
     emoji: "💎",
     weight: 3,
-    imagePrompt:
-      "Chibi Shiba in crystal armor, diamond bonk club, gem cave, sparkling legendary NFT art",
+    imagePrompt: bongaPrompt(
+      "crystal armor, diamond bonk club, gem cave, sparkling legendary NFT art"
+    ),
   },
   {
     id: 15,
@@ -239,8 +261,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-orange-400 via-purple-600 to-teal-500",
     emoji: "🌌",
     weight: 2,
-    imagePrompt:
-      "Ultimate Cosmic Bonga chibi Shiba, stardust suit, orbiting moons, deep galaxy background, divine peaceful energy, 1/1 tier art",
+    imagePrompt: bongaPrompt(
+      "stardust suit, orbiting moons, deep galaxy background, divine peaceful energy, 1/1 tier art"
+    ),
   },
   {
     id: 16,
@@ -253,8 +276,9 @@ export const BONGA_NFTS: BongaNFT[] = [
     gradient: "from-pink-500 via-violet-600 to-cyan-400",
     emoji: "☮️",
     weight: 1,
-    imagePrompt:
-      "Transcendent Cosmic Bonga, celestial robes, universe peace sign, infinite rainbow void, most rare NFT in collection",
+    imagePrompt: bongaPrompt(
+      "celestial robes, universe peace sign, infinite rainbow void, most rare NFT in collection"
+    ),
   },
 ];
 

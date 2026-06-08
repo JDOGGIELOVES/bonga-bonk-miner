@@ -33,7 +33,7 @@ export function NFTGallery() {
         </h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-muted-foreground">
           16 unique vibes — hippie, cosmic, beach, cyber and more. Each one a
-          peaceful warrior.
+          peaceful warrior with dreadlocks.
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-2">

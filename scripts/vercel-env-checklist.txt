@@ -23,3 +23,18 @@ Fund treasury wallet before enabling claims:
   Send: SOL (fees) + $BONGA SPL tokens
 
 After saving env vars → Redeploy → test https://bongabonks.com/api/claim
+
+── NFT Live Mint (Candy Machine v3) ─────────────────────────────
+NEXT_PUBLIC_SITE_URL=https://bongabonks.com
+NEXT_PUBLIC_MINT_SIMULATED=false
+NEXT_PUBLIC_CANDY_MACHINE_ADDRESS=BbWqpzPW95VDnbK5niSxWSaH4KDuifvHHqa89XQTTmt1
+NEXT_PUBLIC_COLLECTION_ADDRESS=DbMJsyBqVDeBc9EcRu8Nbw3RS1nZMdsYw1SnUX6dZNNT
+NEXT_PUBLIC_MINT_PRICE_SOL=0.08
+NFT_DEPLOY_SUPPLY=2000
+
+Metadata API (must be live before minting):
+  https://bongabonks.com/api/nft/metadata/1
+  https://bongabonks.com/api/nft/collection
+
+Deploy candy machine: npm run nft:deploy
+Mint page: https://bongabonks.com/nft
