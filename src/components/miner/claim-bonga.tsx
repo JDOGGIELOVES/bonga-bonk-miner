@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +12,11 @@ import {
   type GameState,
 } from "@/lib/miner-game";
 import { gameAudio } from "@/lib/audio/audio-manager";
-import { requestOnChainClaim, isOnChainClaimsEnabled } from "@/lib/claim-client";
+import {
+  fetchClaimStatus,
+  requestOnChainClaim,
+  type ClaimStatus,
+} from "@/lib/claim-client";
 import { Wallet, ExternalLink } from "lucide-react";
 
 interface ClaimBongaProps {
@@ -31,9 +35,22 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
   const [successMsg, setSuccessMsg] = useState("");
   const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [claimStatus, setClaimStatus] = useState<ClaimStatus | null>(null);
 
   const claimable = getClaimableBonga(state);
-  const onChainEnabled = isOnChainClaimsEnabled();
+  const onChainEnabled = claimStatus?.enabled === true;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void fetchClaimStatus().then((status) => {
+      if (!cancelled) setClaimStatus(status);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleClaim = async () => {
     if (!connected || !publicKey || claimable <= 0) return;
@@ -129,16 +146,24 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
           className="bonga-card p-5"
         >
           <Badge variant="default" className="mb-3">
-            {onChainEnabled ? "On-chain claim ready" : "Ready to claim"}
+            {claimStatus === null
+              ? "Checking treasury..."
+              : onChainEnabled
+                ? "On-chain claim ready"
+                : "Ready to claim"}
           </Badge>
           <p className="font-display text-xl font-bold tracking-tight">
             {claimable} $BONGA
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {connected
-              ? onChainEnabled
-                ? "Sign to receive real $BONGA from the treasury wallet."
-                : "Your mined rewards are waiting."
+              ? claimStatus === null
+                ? "Checking if on-chain claims are live..."
+                : onChainEnabled
+                  ? "Sign to receive real $BONGA from the treasury wallet."
+                  : claimStatus.error
+                    ? `On-chain claims unavailable: ${claimStatus.error}`
+                    : "Treasury not configured — claims are simulated only."
               : "Connect your wallet to claim."}
           </p>
 
@@ -147,15 +172,17 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
               variant="peace"
               className="mt-4 w-full"
               onClick={() => void handleClaim()}
-              disabled={claiming}
+              disabled={claiming || claimStatus === null}
             >
               {claiming
                 ? onChainEnabled
                   ? "Sending on-chain..."
                   : "Claiming..."
-                : onChainEnabled
-                  ? `Claim ${claimable} $BONGA On-Chain`
-                  : `Claim Mined $BONGA`}
+                : claimStatus === null
+                  ? "Loading..."
+                  : onChainEnabled
+                    ? `Claim ${claimable} $BONGA On-Chain`
+                    : `Claim Mined $BONGA`}
             </Button>
           ) : (
             <Button
