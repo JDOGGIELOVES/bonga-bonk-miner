@@ -2,7 +2,6 @@ import { BONGA_NFTS, type BongaNFT } from "@/lib/nft-collection";
 import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import { isMintSimulatedBuildHint } from "@/lib/mint-config";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
-import { mintBongaNFTOnChain } from "@/lib/nft-mint-onchain";
 
 export const MINT_STORAGE_KEY = "bonga-nft-mints";
 
@@ -148,6 +147,7 @@ export async function mintBongaNFT(
     return { success: false, error: "Connect your wallet to mint on-chain" };
   }
 
+  const { mintBongaNFTOnChain } = await import("@/lib/nft-mint-onchain");
   const onChain = await mintBongaNFTOnChain(wallet, walletAddress, mintStatus);
   if (!onChain.success) {
     return onChain;
