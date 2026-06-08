@@ -15,4 +15,7 @@ const privateKey = bs58.encode(secret);
 
 console.log("\nPaste this EXACT value into Vercel → TREASURY_PRIVATE_KEY:\n");
 console.log(privateKey);
-console.log("\nDo NOT use the JSON array. No quotes. No spaces.\n");
+console.log(`\nLength: ${privateKey.length} characters (should be 88)`);
+console.log(`Starts with: ${privateKey.slice(0, 4)}... Ends with: ...${privateKey.slice(-4)}`);
+console.log("\nDo NOT use the JSON array. No quotes. No spaces.");
+console.log("In Vercel: delete the old variable first, then add a fresh one.\n");

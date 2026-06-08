@@ -32,8 +32,11 @@ export function getTreasuryConfig(): TreasuryConfig | null {
     process.env.TREASURY_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_TREASURY_PUBLIC_KEY,
     "TREASURY_PUBLIC_KEY"
   );
-  const rawPrivateKey = process.env.TREASURY_PRIVATE_KEY?.trim();
-  const privateKeyB58 = rawPrivateKey?.replace(/^["']|["']$/g, "");
+  const rawPrivateKey = process.env.TREASURY_PRIVATE_KEY;
+  const privateKeyB58 = rawPrivateKey
+    ?.trim()
+    .replace(/^["']|["']$/g, "")
+    .replace(/\s+/g, "");
 
   if (!mint || !treasuryPublicKey || !privateKeyB58) {
     return null;
