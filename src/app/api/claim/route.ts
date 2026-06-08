@@ -1,13 +1,24 @@
 import { NextResponse } from "next/server";
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
+import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const STATUS_CACHE_MS = 60_000;
+let statusCache: {
+  at: number;
+  payload: Record<string, unknown>;
+} | null = null;
+
+function rpcRateLimitMessage() {
+  return "Solana RPC rate limit hit. Add a dedicated RPC URL (Helius/QuickNode) to SOLANA_RPC_URL in Vercel, then redeploy.";
+}
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -63,9 +74,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
-    const connection = new Connection(config.rpcUrl, "confirmed");
     const alreadyClaimed = await getTodayClaimedFromTreasury({
-      connection,
       treasury: config.treasuryPublicKey,
       recipientWallet: recipient,
       mint: config.mint,
@@ -96,6 +105,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Claim failed:", error);
+    if (isRpcRateLimitError(error)) {
+      return NextResponse.json({ error: rpcRateLimitMessage() }, { status: 503 });
+    }
     const message = error instanceof Error ? error.message : "Claim failed.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -111,15 +123,38 @@ export async function GET() {
       });
     }
 
-    const balances = await getTreasuryBalances(config);
+    const now = Date.now();
+    if (statusCache && now - statusCache.at < STATUS_CACHE_MS) {
+      return NextResponse.json(statusCache.payload);
+    }
 
-    return NextResponse.json({
+    let balances;
+    try {
+      balances = await getTreasuryBalances(config);
+    } catch (error) {
+      if (isRpcRateLimitError(error)) {
+        return NextResponse.json({
+          enabled: true,
+          treasury: config.treasuryPublicKey.toBase58(),
+          mint: config.mint.toBase58(),
+          dailyLimit: config.dailyLimit,
+          balancesUnavailable: true,
+          hint: rpcRateLimitMessage(),
+        });
+      }
+      throw error;
+    }
+
+    const payload = {
       enabled: true,
       treasury: config.treasuryPublicKey.toBase58(),
       mint: config.mint.toBase58(),
       dailyLimit: config.dailyLimit,
       balances,
-    });
+    };
+    statusCache = { at: now, payload };
+
+    return NextResponse.json(payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Treasury status unavailable.";
     return NextResponse.json({ enabled: false, error: message }, { status: 500 });

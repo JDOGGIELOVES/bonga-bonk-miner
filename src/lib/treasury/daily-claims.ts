@@ -1,18 +1,20 @@
+import { Connection, PublicKey, type ParsedTransactionWithMeta } from "@solana/web3.js";
 import {
-  Connection,
-  PublicKey,
-  type ParsedTransactionWithMeta,
-} from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+  getAssociatedTokenAddressSync,
+  TokenAccountNotFoundError,
+  getAccount,
+} from "@solana/spl-token";
+import { withRpcRetry } from "@/lib/treasury/rpc";
 
 function utcDayBounds(date: string) {
   const start = Math.floor(new Date(`${date}T00:00:00.000Z`).getTime() / 1000);
   return { start, end: start + 86_400 };
 }
 
-function getSplTransferToAccount(
+function getSplTransferFromTreasury(
   tx: ParsedTransactionWithMeta,
   mint: PublicKey,
+  treasuryAta: PublicKey,
   recipientAta: PublicKey
 ): number | null {
   const instructions = tx.transaction.message.instructions;
@@ -37,8 +39,11 @@ function getSplTransferToAccount(
     const type = (parsed as { type?: string }).type;
     if (type !== "transfer" && type !== "transferChecked") continue;
 
+    const source = info.source as string | undefined;
     const destination = info.destination as string | undefined;
-    if (!destination || destination !== recipientAta.toBase58()) continue;
+    if (source !== treasuryAta.toBase58() || destination !== recipientAta.toBase58()) {
+      continue;
+    }
 
     if (type === "transferChecked") {
       const mintAddress = info.mint as string | undefined;
@@ -55,38 +60,67 @@ function getSplTransferToAccount(
   return null;
 }
 
+async function getParsedTransactionsLight(
+  connection: Connection,
+  signatures: string[]
+): Promise<(ParsedTransactionWithMeta | null)[]> {
+  if (signatures.length === 0) return [];
+
+  const results: (ParsedTransactionWithMeta | null)[] = [];
+  const chunkSize = 5;
+
+  for (let i = 0; i < signatures.length; i += chunkSize) {
+    const chunk = signatures.slice(i, i + chunkSize);
+    const batch = await connection.getParsedTransactions(chunk, {
+      maxSupportedTransactionVersion: 0,
+    });
+    results.push(...batch);
+  }
+
+  return results;
+}
+
 export async function getTodayClaimedFromTreasury(params: {
-  connection: Connection;
   treasury: PublicKey;
   recipientWallet: PublicKey;
   mint: PublicKey;
   date: string;
 }): Promise<number> {
-  const { connection, treasury, recipientWallet, mint, date } = params;
+  const { treasury, recipientWallet, mint, date } = params;
   const { start, end } = utcDayBounds(date);
+  const treasuryAta = getAssociatedTokenAddressSync(mint, treasury, false);
   const recipientAta = getAssociatedTokenAddressSync(mint, recipientWallet, false);
 
-  const signatures = await connection.getSignaturesForAddress(treasury, {
-    limit: 200,
+  return withRpcRetry(async (connection) => {
+    try {
+      await getAccount(connection, recipientAta);
+    } catch (err) {
+      if (err instanceof TokenAccountNotFoundError) return 0;
+      throw err;
+    }
+
+    const signatures = await connection.getSignaturesForAddress(recipientAta, {
+      limit: 15,
+    });
+
+    const todays = signatures.filter(
+      (entry) => entry.blockTime != null && entry.blockTime >= start && entry.blockTime < end
+    );
+
+    if (todays.length === 0) return 0;
+
+    const txs = await getParsedTransactionsLight(
+      connection,
+      todays.map((s) => s.signature)
+    );
+
+    let total = 0;
+    for (const tx of txs) {
+      if (!tx) continue;
+      const amount = getSplTransferFromTreasury(tx, mint, treasuryAta, recipientAta);
+      if (amount != null) total += amount;
+    }
+
+    return total;
   });
-
-  const todays = signatures.filter(
-    (entry) => entry.blockTime != null && entry.blockTime >= start && entry.blockTime < end
-  );
-
-  if (todays.length === 0) return 0;
-
-  const txs = await connection.getParsedTransactions(
-    todays.map((s) => s.signature),
-    { maxSupportedTransactionVersion: 0 }
-  );
-
-  let total = 0;
-  for (const tx of txs) {
-    if (!tx) continue;
-    const amount = getSplTransferToAccount(tx, mint, recipientAta);
-    if (amount != null) total += amount;
-  }
-
-  return total;
 }
