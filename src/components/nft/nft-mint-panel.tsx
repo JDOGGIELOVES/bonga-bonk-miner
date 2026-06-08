@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
 import { NFTPlaceholderArt } from "@/components/nft/nft-placeholder-art";
 import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import {
@@ -77,9 +78,23 @@ export function NFTMintPanel() {
         </h2>
         <p className="mt-2 text-center text-muted-foreground">
           {MINT_CONFIG.simulated
-            ? "Preview mint live — on-chain Candy Machine deploys next"
+            ? "Try the collection now — real Solana mints coming soon"
             : "Live on Solana via Candy Machine v3"}
         </p>
+
+        {MINT_CONFIG.simulated && (
+          <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-400/40 bg-amber-50/80 p-4 text-center dark:bg-amber-950/30">
+            <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+              Preview mint only — not a real on-chain NFT yet
+            </p>
+            <p className="mt-1 text-xs text-amber-800/90 dark:text-amber-100/80">
+              Your mint is saved on this website only. It will{" "}
+              <strong>not</strong> appear in Solflare, Phantom, or Magic Eden
+              until we deploy the on-chain Candy Machine. No SOL is charged in
+              preview mode.
+            </p>
+          </div>
+        )}
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="bonga-card border-bonga-orange/30 bg-gradient-to-br from-bonga-orange/5 to-bonga-purple/5 p-6">
@@ -155,6 +170,8 @@ export function NFTMintPanel() {
                   </>
                 ) : myMints.length >= COLLECTION_STATS.maxPerWallet ? (
                   "Max Mints Reached"
+                ) : MINT_CONFIG.simulated ? (
+                  `Preview Mint ${price === 0 ? "(Free)" : ""}`
                 ) : (
                   `Mint Bonga NFT ${price === 0 ? "(Free)" : ""}`
                 )}
@@ -176,8 +193,10 @@ export function NFTMintPanel() {
             )}
 
             <p className="mt-3 text-center text-[10px] text-muted-foreground">
-              Max {COLLECTION_STATS.maxPerWallet} per wallet · Phantom & Solflare
-              supported
+              Max {COLLECTION_STATS.maxPerWallet} per wallet
+              {MINT_CONFIG.simulated
+                ? " · Preview saves to this browser only"
+                : " · Phantom & Solflare supported"}
             </p>
           </div>
 
@@ -192,10 +211,14 @@ export function NFTMintPanel() {
                 >
                   <p className="text-4xl">🎉</p>
                   <h3 className="mt-2 font-display text-xl font-bold">
-                    Bonga Minted!
+                    {lastMint.simulated !== false
+                      ? "Preview Bonga Saved!"
+                      : "Bonga Minted!"}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Welcome to the fam
+                    {lastMint.simulated !== false
+                      ? "Visible here on bongabonks.com — on-chain mint coming soon"
+                      : "Welcome to the fam — check your wallet"}
                   </p>
                   <div className="mt-4 flex justify-center">
                     <NFTPlaceholderArt nft={lastMint.nft} size="sm" />
@@ -204,6 +227,11 @@ export function NFTMintPanel() {
                   <Badge variant="purple" className="mt-1">
                     {lastMint.nft.rarity}
                   </Badge>
+                  {lastMint.simulated !== false && (
+                    <Badge variant="default" className="mt-2">
+                      Website preview
+                    </Badge>
+                  )}
                   <p className="mt-2 font-mono text-[10px] text-muted-foreground">
                     {lastMint.txSignature}
                   </p>
@@ -231,11 +259,12 @@ export function NFTMintPanel() {
                 <div className="mt-3 grid grid-cols-3 gap-2">
                   {myMints.map((m) => (
                     <div key={m.mint} className="text-center">
-                      <div
-                        className={`flex aspect-square items-center justify-center rounded-xl bg-gradient-to-br ${m.nft.gradient} text-2xl`}
-                      >
-                        {m.nft.emoji}
-                      </div>
+                      <BongaNFTArt
+                        nft={m.nft}
+                        size="xs"
+                        fillContainer
+                        className="rounded-xl shadow-none"
+                      />
                       <p className="mt-1 truncate text-[10px] font-medium">
                         {m.nft.name}
                       </p>

@@ -1,11 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
-import {
-  type BongaNFT,
-  RARITY_BADGE_VARIANT,
-} from "@/lib/nft-collection";
+import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
+import type { BongaNFT } from "@/lib/nft-collection";
 
 interface NFTCardProps {
   nft: BongaNFT;
@@ -27,18 +24,12 @@ export function NFTCard({ nft, onClick, selected, compact }: NFTCardProps) {
           : "border-border/50 hover:border-bonga-teal/40"
       }`}
     >
-      <div
-        className={`relative flex aspect-square items-center justify-center bg-gradient-to-br ${nft.gradient} ${compact ? "text-4xl" : "text-6xl"}`}
-      >
-        <span className="drop-shadow-lg">{nft.emoji}</span>
-        <div className="absolute inset-0 bg-black/10" />
-        <Badge
-          variant={RARITY_BADGE_VARIANT[nft.rarity]}
-          className="absolute left-2 top-2 text-[10px]"
-        >
-          {nft.rarity}
-        </Badge>
-      </div>
+      <BongaNFTArt
+        nft={nft}
+        size={compact ? "sm" : "md"}
+        fillContainer
+        className="rounded-none shadow-none"
+      />
       {!compact && (
         <div className="p-3">
           <h3 className="font-display font-bold">{nft.name}</h3>

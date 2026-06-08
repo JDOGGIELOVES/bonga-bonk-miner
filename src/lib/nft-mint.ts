@@ -19,6 +19,7 @@ export interface MintedNFT {
   timestamp: number;
   txSignature: string;
   pricePaid: number;
+  simulated: boolean;
 }
 
 export interface MintResult {
@@ -47,13 +48,24 @@ export function getMintPrice(walletAddress?: string): number {
   return MINT_CONFIG.priceSol;
 }
 
+function normalizeMint(entry: MintedNFT): MintedNFT {
+  const simulated =
+    entry.simulated ??
+    (entry.txSignature.startsWith("sim_") ||
+      entry.txSignature.startsWith("preview_") ||
+      entry.mint.startsWith("Bonga") ||
+      entry.mint.startsWith("preview-"));
+
+  return { ...entry, simulated };
+}
+
 export function loadWalletMints(wallet: string): MintedNFT[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(MINT_STORAGE_KEY);
     if (!raw) return [];
     const all = JSON.parse(raw) as MintedNFT[];
-    return all.filter((m) => m.wallet === wallet);
+    return all.filter((m) => m.wallet === wallet).map(normalizeMint);
   } catch {
     return [];
   }
@@ -109,12 +121,13 @@ export async function mintBongaNFT(
 
     const nft = rollRarity();
     const minted: MintedNFT = {
-      mint: `Bonga${nft.id}-${Date.now().toString(36)}`,
+      mint: `preview-${nft.id}-${Date.now().toString(36)}`,
       nft,
       wallet: walletAddress,
       timestamp: Date.now(),
-      txSignature: `sim_${Math.random().toString(36).slice(2, 14)}`,
+      txSignature: `preview_${Math.random().toString(36).slice(2, 14)}`,
       pricePaid: price,
+      simulated: true,
     };
 
     saveMint(minted);

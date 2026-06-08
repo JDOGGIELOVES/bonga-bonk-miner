@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NFTCard } from "@/components/nft/nft-card";
+import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
 import { BONGA_NFTS, type BongaNFT, type RarityTier } from "@/lib/nft-collection";
 import { Badge } from "@/components/ui/badge";
 
@@ -85,10 +86,8 @@ export function NFTGallery() {
                 onClick={(e) => e.stopPropagation()}
                 className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-2xl border border-bonga-orange/30 bg-card p-6"
               >
-                <div
-                  className={`mx-auto flex h-48 w-48 items-center justify-center rounded-2xl bg-gradient-to-br ${selected.gradient} text-6xl`}
-                >
-                  {selected.emoji}
+                <div className="mx-auto flex justify-center">
+                  <BongaNFTArt nft={selected} size="md" />
                 </div>
                 <h3 className="mt-4 text-center font-display text-2xl font-bold">
                   {selected.name}
