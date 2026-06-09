@@ -94,6 +94,7 @@ export async function mintBongaNFTOnChain(
     const traitId = getTraitIdForItemIndex(nextIndex);
     const nft = getNftByTraitId(traitId);
     const pricePaid = status?.priceSol ?? 0.08;
+    const walletMinimum = pricePaid + 0.02;
 
     const builder = transactionBuilder()
       .add(setComputeUnitLimit(umi, { units: 800_000 }))
@@ -131,8 +132,15 @@ export async function mintBongaNFTOnChain(
       },
     };
   } catch (err) {
-    const message =
+    const raw =
       err instanceof Error ? err.message : "On-chain mint failed";
+    const pricePaid = status?.priceSol ?? 0.08;
+    const walletMinimum = pricePaid + 0.02;
+    const insufficient =
+      /insufficient|lamports|0x1|not enough sol/i.test(raw);
+    const message = insufficient
+      ? `Not enough SOL. Live mint costs ${pricePaid} SOL — keep about ${walletMinimum.toFixed(2)} SOL in your wallet for mint + fees.`
+      : raw;
     return { success: false, error: message };
   }
 }

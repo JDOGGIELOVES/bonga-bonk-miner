@@ -13,6 +13,7 @@ import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import {
   fetchMintStatus,
   getMintPrice,
+  getMintWalletMinimumSol,
   loadWalletMints,
   mintBongaNFT,
   MINT_CONFIG,
@@ -37,7 +38,9 @@ export function NFTMintPanel() {
   const isLive = mintStatus?.live === true;
   const isPreview =
     mintStatus === null ? MINT_CONFIG.simulated : !isLive;
-  const price = getMintPrice(wallet, mintStatus?.priceSol);
+  const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
+  const price = getMintPrice(wallet, onChainPrice, { live: isLive });
+  const walletMinimum = getMintWalletMinimumSol(onChainPrice);
   const supplyTotal =
     mintStatus?.itemsAvailable ?? COLLECTION_STATS.totalSupply;
   const totalMinted = mintStatus?.itemsRedeemed ?? COLLECTION_STATS.minted;
@@ -135,10 +138,18 @@ export function NFTMintPanel() {
                   </span>
                 )}
               </p>
-              {price > 0 && price < MINT_CONFIG.priceSol && (
-                <p className="text-xs text-muted-foreground line-through">
-                  Standard: {MINT_CONFIG.priceSol} SOL
+              {isLive ? (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Keep ~{walletMinimum.toFixed(2)} SOL in your wallet (mint + network
+                  fees)
                 </p>
+              ) : (
+                price > 0 &&
+                price < onChainPrice && (
+                  <p className="text-xs text-muted-foreground line-through">
+                    Standard: {onChainPrice} SOL
+                  </p>
+                )
               )}
             </div>
 
@@ -157,7 +168,13 @@ export function NFTMintPanel() {
                 Total mined: {whitelist.totalBonga} $BONGA · Today:{" "}
                 {whitelist.bongaToday}
               </p>
-              {!whitelist.eligible && (
+              {isLive && whitelist.eligible && (
+                <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
+                  Whitelist perks apply to preview mints only right now. Live
+                  on-chain mint is {onChainPrice} SOL for everyone.
+                </p>
+              )}
+              {!isLive && !whitelist.eligible && (
                 <Link
                   href="/"
                   className="mt-2 inline-block text-xs font-bold text-bonga-orange hover:underline"
@@ -185,9 +202,9 @@ export function NFTMintPanel() {
                 ) : myMints.length >= COLLECTION_STATS.maxPerWallet ? (
                   "Max Mints Reached"
                 ) : isPreview ? (
-                  `Preview Mint ${price === 0 ? "(Free)" : ""}`
+                  price === 0 ? "Preview Mint (Free)" : `Preview Mint (${price.toFixed(3)} SOL)`
                 ) : (
-                  `Mint Bonga NFT ${price === 0 ? "(Free)" : ""}`
+                  `Mint Bonga NFT (${onChainPrice.toFixed(2)} SOL)`
                 )}
               </Button>
             ) : (

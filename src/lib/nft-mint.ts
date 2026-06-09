@@ -54,13 +54,30 @@ function rollRarity(): BongaNFT {
   return BONGA_NFTS[0];
 }
 
-export function getMintPrice(walletAddress?: string, priceSol = MINT_CONFIG.priceSol): number {
+/**
+ * Display mint price. Bonk Miner whitelist only applies to preview mints —
+ * live Candy Guard always charges the on-chain solPayment (0.08 SOL).
+ */
+export function getMintPrice(
+  walletAddress?: string,
+  priceSol = MINT_CONFIG.priceSol,
+  options?: { live?: boolean }
+): number {
+  if (options?.live) {
+    return priceSol;
+  }
+
   const wl = getWhitelistStatus(walletAddress);
   if (wl.tier === "free") return 0;
   if (wl.tier === "discount") {
     return priceSol * (1 - wl.discountPercent / 100);
   }
   return priceSol;
+}
+
+/** Rough wallet balance needed for mint + rent/fees */
+export function getMintWalletMinimumSol(priceSol: number): number {
+  return Math.ceil((priceSol + 0.02) * 100) / 100;
 }
 
 function normalizeMint(entry: MintedNFT): MintedNFT {
@@ -135,7 +152,8 @@ export async function mintBongaNFT(
     return { success: false, error: "Max 3 mints per wallet reached" };
   }
 
-  const price = getMintPrice(walletAddress, mintStatus?.priceSol);
+  const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
+  const price = getMintPrice(walletAddress, onChainPrice, { live: isLive });
 
   if (!isLive) {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 1000));
