@@ -325,9 +325,12 @@ export function PetLoveModule() {
                 On-chain rewards are not enabled on this deployment yet.
               </p>
             )}
-            {status?.dailyOnChainLimit != null && (
-              <p className="text-[11px] text-muted-foreground">
-                Daily on-chain cap is {status.dailyOnChainLimit} $BONGA total (miner + pet).
+            {status?.dailyOnChainLimit != null &&
+              status.dailyOnChainLimit < PET_LOVE_REWARD && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                Treasury daily cap is {status.dailyOnChainLimit} $BONGA — raise
+                DAILY_CLAIM_LIMIT to {PET_LOVE_REWARD}+ in Vercel for full pet
+                payouts.
               </p>
             )}
           </div>

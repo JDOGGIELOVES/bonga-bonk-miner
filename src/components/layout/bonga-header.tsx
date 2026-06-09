@@ -48,6 +48,12 @@ export function BongaHeader({
             Peace
           </Link>
           <Link
+            href="/pet-love"
+            className="hidden rounded-full border border-bonga-orange/30 px-3 py-1.5 text-xs font-semibold text-bonga-orange transition-colors hover:bg-bonga-orange/10 sm:inline-block"
+          >
+            Pet Love
+          </Link>
+          <Link
             href="/nft"
             className="hidden rounded-full border border-bonga-orange/30 px-3 py-1.5 text-xs font-semibold text-bonga-orange transition-colors hover:bg-bonga-orange/10 sm:inline-block"
           >

@@ -49,6 +49,12 @@ export function AboutHeader() {
           >
             Peace
           </Link>
+          <Link
+            href="/pet-love"
+            className="text-sm font-medium text-bonga-orange hover:underline"
+          >
+            Pet Love
+          </Link>
         </nav>
 
         <Button

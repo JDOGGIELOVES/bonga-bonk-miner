@@ -6,12 +6,10 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bonga Peace — Mindfulness & Bonk Breaks the Bonga Way",
   description:
-    "Bonga Peace from Bonk's Sister — Pet Love daily rewards, guided breathing, transcendental meditation, stretching, Tai Chi, Bonk Break, affirmations, and check-ins. Mindfulness with good bonks at bongabonks.com.",
+    "Bonga Peace from Bonk's Sister — guided breathing, transcendental meditation, stretching, Tai Chi, Bonk Break, affirmations, and check-ins. Mindfulness with good bonks at bongabonks.com.",
   path: "/peace",
   keywords: [
     "Bonga Peace",
-    "Bonga Pet Love",
-    "pet photo reward",
     "Bonga mindfulness",
     "transcendental meditation",
     "Bonga meditation",

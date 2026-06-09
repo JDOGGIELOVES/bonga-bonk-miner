@@ -12,6 +12,7 @@ const NAV = [
   { href: "#utility", label: "Utility" },
   { href: "#peace", label: "Tai Chi" },
   { href: "/peace", label: "Peace App", isRoute: true },
+  { href: "/pet-love", label: "Pet Love", isRoute: true },
   { href: "#roadmap", label: "Roadmap" },
 ];
 
