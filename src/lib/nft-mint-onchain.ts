@@ -94,7 +94,6 @@ export async function mintBongaNFTOnChain(
     const traitId = getTraitIdForItemIndex(nextIndex);
     const nft = getNftByTraitId(traitId);
     const pricePaid = status?.priceSol ?? 0.08;
-    const walletMinimum = pricePaid + 0.02;
 
     const builder = transactionBuilder()
       .add(setComputeUnitLimit(umi, { units: 800_000 }))
