@@ -28,16 +28,41 @@ function walletsMatch(a: string, b: string): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }
 
-function blobToken(): string | undefined {
-  return process.env.BLOB_READ_WRITE_TOKEN?.trim();
-}
-
-function useBlobStorage(): boolean {
-  return Boolean(blobToken());
+function envFlag(name: string): boolean {
+  return Boolean(process.env[name]?.trim());
 }
 
 function isVercelRuntime(): boolean {
   return process.env.VERCEL === "1";
+}
+
+export function getPetLoveStorageStatus() {
+  const blobToken = envFlag("BLOB_READ_WRITE_TOKEN");
+  const blobStoreId = envFlag("BLOB_STORE_ID");
+  const oidc = envFlag("VERCEL_OIDC_TOKEN");
+  const vercel = isVercelRuntime();
+  const oidcReady = blobStoreId && oidc;
+  return {
+    vercel,
+    blobToken,
+    blobStoreId,
+    oidc,
+    oidcReady,
+    storageReady: vercel ? blobToken || oidcReady : true,
+    mode: useBlobStorage() ? "blob" : "local",
+  };
+}
+
+function hasBlobCredentials(): boolean {
+  if (envFlag("BLOB_READ_WRITE_TOKEN")) return true;
+  return envFlag("BLOB_STORE_ID") && envFlag("VERCEL_OIDC_TOKEN");
+}
+
+function useBlobStorage(): boolean {
+  if (isVercelRuntime()) {
+    return hasBlobCredentials();
+  }
+  return envFlag("BLOB_READ_WRITE_TOKEN");
 }
 
 function getLocalDataDir(): string {
@@ -55,33 +80,57 @@ function getLocalImagesDir(): string {
   return path.join(getLocalDataDir(), "images");
 }
 
+function storageConfigMessage(): string {
+  return (
+    "Pet Love storage is not configured on Vercel. In Dashboard → Storage → Blob, connect your store to this project (OIDC), or set BLOB_READ_WRITE_TOKEN, then redeploy Production."
+  );
+}
+
 function assertStorageReady() {
-  if (isVercelRuntime() && !useBlobStorage()) {
-    throw new Error(
-      "Pet Love storage is not configured. Add BLOB_READ_WRITE_TOKEN in Vercel project settings, then redeploy."
-    );
+  if (isVercelRuntime() && !hasBlobCredentials()) {
+    throw new Error(storageConfigMessage());
   }
 }
 
+async function streamToText(
+  stream: ReadableStream<Uint8Array> | NodeJS.ReadableStream
+): Promise<string> {
+  if ("getReader" in stream) {
+    const reader = stream.getReader();
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) chunks.push(value);
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  }
+
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
+function parseIndex(raw: string): PetLoveIndex {
+  const data = JSON.parse(raw) as PetLoveIndex;
+  return {
+    submissions: data.submissions ?? [],
+    imageHashes: data.imageHashes ?? [],
+    petClaims: data.petClaims ?? {},
+  };
+}
+
 async function readIndexFromBlob(): Promise<PetLoveIndex> {
-  const token = blobToken();
-  if (!token) return emptyIndex();
-
   try {
-    const { list } = await import("@vercel/blob");
-    const result = await list({ prefix: INDEX_BLOB_PATH, token });
-    const blob = result.blobs.find((item) => item.pathname === INDEX_BLOB_PATH);
-    if (!blob) return emptyIndex();
-
-    const response = await fetch(blob.url, { cache: "no-store" });
-    if (!response.ok) return emptyIndex();
-
-    const data = JSON.parse(await response.text()) as PetLoveIndex;
-    return {
-      submissions: data.submissions ?? [],
-      imageHashes: data.imageHashes ?? [],
-      petClaims: data.petClaims ?? {},
-    };
+    const { get } = await import("@vercel/blob");
+    const result = await get(INDEX_BLOB_PATH, {
+      access: "public",
+      useCache: false,
+    });
+    if (!result?.stream) return emptyIndex();
+    return parseIndex(await streamToText(result.stream));
   } catch (error) {
     console.error("Pet Love index blob read failed:", error);
     return emptyIndex();
@@ -89,20 +138,12 @@ async function readIndexFromBlob(): Promise<PetLoveIndex> {
 }
 
 async function writeIndexToBlob(index: PetLoveIndex): Promise<void> {
-  const token = blobToken();
-  if (!token) {
-    throw new Error(
-      "Pet Love storage is not configured. Add BLOB_READ_WRITE_TOKEN in Vercel."
-    );
-  }
-
   const { put } = await import("@vercel/blob");
   await put(INDEX_BLOB_PATH, JSON.stringify(index), {
     access: "public",
     contentType: "application/json",
     addRandomSuffix: false,
     allowOverwrite: true,
-    token,
   });
 }
 
@@ -113,12 +154,7 @@ async function ensureLocalDirs() {
 async function readIndexFromDisk(): Promise<PetLoveIndex> {
   try {
     const raw = await readFile(getLocalIndexPath(), "utf8");
-    const data = JSON.parse(raw) as PetLoveIndex;
-    return {
-      submissions: data.submissions ?? [],
-      imageHashes: data.imageHashes ?? [],
-      petClaims: data.petClaims ?? {},
-    };
+    return parseIndex(raw);
   } catch {
     return emptyIndex();
   }
@@ -139,8 +175,13 @@ async function readIndex(): Promise<PetLoveIndex> {
 async function writeIndex(index: PetLoveIndex) {
   assertStorageReady();
   if (useBlobStorage()) {
-    await writeIndexToBlob(index);
-    return;
+    try {
+      await writeIndexToBlob(index);
+      return;
+    } catch (error) {
+      console.error("Pet Love index blob write failed:", error);
+      throw new Error(storageConfigMessage());
+    }
   }
   await writeIndexToDisk(index);
 }
@@ -196,9 +237,6 @@ async function saveImageBlob(params: {
   imageBuffer: Buffer;
   contentType: string;
 }): Promise<string | null> {
-  const token = blobToken();
-  if (!token) return null;
-
   try {
     const { put } = await import("@vercel/blob");
     const blob = await put(
@@ -208,7 +246,6 @@ async function saveImageBlob(params: {
         access: "public",
         contentType: params.contentType,
         addRandomSuffix: false,
-        token,
       }
     );
     return blob.url;
@@ -241,20 +278,19 @@ export async function savePetSubmission(params: {
 
   const id = newSubmissionId();
   const ext = params.contentType.includes("png") ? "png" : "jpg";
-  const blobUrl = await saveImageBlob({
-    id,
-    ext,
-    imageBuffer: params.imageBuffer,
-    contentType: params.contentType,
-  });
+  let imagePath: string | null = null;
 
-  let imagePath = blobUrl;
-  if (!imagePath) {
-    if (isVercelRuntime()) {
-      throw new Error(
-        "Pet Love image storage failed. Ensure BLOB_READ_WRITE_TOKEN is set in Vercel."
-      );
+  if (useBlobStorage()) {
+    imagePath = await saveImageBlob({
+      id,
+      ext,
+      imageBuffer: params.imageBuffer,
+      contentType: params.contentType,
+    });
+    if (!imagePath) {
+      throw new Error(storageConfigMessage());
     }
+  } else {
     await ensureLocalDirs();
     const filename = `${id}.${ext}`;
     await writeFile(path.join(getLocalImagesDir(), filename), params.imageBuffer);
