@@ -3,11 +3,11 @@
 export interface TaiChiStep {
   title: string;
   instruction: string;
-  /** Seconds to hold or move through this step */
   durationSec: number;
   poseStart: string;
   poseMiddle: string;
-  poseEnd: string;
+  /** Peak / fullest expression of the move */
+  poseTop: string;
 }
 
 export interface TaiChiSession {
@@ -38,7 +38,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 45,
         poseStart: "stand-neutral",
         poseMiddle: "shoulders-drop-mid",
-        poseEnd: "stand-relaxed",
+        poseTop: "stand-relaxed",
       },
       {
         title: "Raise the sun",
@@ -46,8 +46,8 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Slowly lift both arms like you're raising the morning sun. Palms turn down as arms lower. Repeat three times — smooth, no rush.",
         durationSec: 60,
         poseStart: "arms-down",
-        poseMiddle: "arms-raised",
-        poseEnd: "palms-down",
+        poseMiddle: "arms-half",
+        poseTop: "arms-raised",
       },
       {
         title: "Cloud hands",
@@ -56,7 +56,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 90,
         poseStart: "cloud-left",
         poseMiddle: "cloud-center",
-        poseEnd: "cloud-right",
+        poseTop: "cloud-right",
       },
       {
         title: "Bonk the stress away",
@@ -65,7 +65,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 60,
         poseStart: "brush-left",
         poseMiddle: "brush-center",
-        poseEnd: "brush-right",
+        poseTop: "brush-right",
       },
       {
         title: "Close with peace",
@@ -74,7 +74,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 45,
         poseStart: "stand-relaxed",
         poseMiddle: "hands-rise",
-        poseEnd: "hands-belly",
+        poseTop: "hands-belly",
       },
     ],
   },
@@ -94,7 +94,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 30,
         poseStart: "stand-neutral",
         poseMiddle: "soft-knees",
-        poseEnd: "ground-feet",
+        poseTop: "ground-feet",
       },
       {
         title: "Wave arms",
@@ -103,7 +103,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 50,
         poseStart: "wave-low",
         poseMiddle: "wave-mid",
-        poseEnd: "wave-high",
+        poseTop: "wave-high",
       },
       {
         title: "Hold the ball",
@@ -112,7 +112,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 50,
         poseStart: "hold-ball",
         poseMiddle: "shift-left-ball",
-        poseEnd: "shift-right-ball",
+        poseTop: "shift-right-ball",
       },
       {
         title: "Release",
@@ -121,7 +121,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 40,
         poseStart: "hold-ball",
         poseMiddle: "press-mid",
-        poseEnd: "press-down",
+        poseTop: "press-down",
       },
     ],
   },
@@ -141,7 +141,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 50,
         poseStart: "stand-neutral",
         poseMiddle: "breathe-open",
-        poseEnd: "meadow-root",
+        poseTop: "meadow-root",
       },
       {
         title: "Open the gate",
@@ -150,7 +150,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 70,
         poseStart: "gate-center",
         poseMiddle: "gate-open-left",
-        poseEnd: "gate-open-right",
+        poseTop: "gate-open-right",
       },
       {
         title: "Repulse the monkey",
@@ -159,7 +159,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 80,
         poseStart: "repulse-left",
         poseMiddle: "repulse-center",
-        poseEnd: "repulse-right",
+        poseTop: "repulse-right",
       },
       {
         title: "Gather qi",
@@ -168,7 +168,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 80,
         poseStart: "gather-in",
         poseMiddle: "gather-mid",
-        poseEnd: "gather-out",
+        poseTop: "gather-out",
       },
       {
         title: "Garden close",
@@ -177,7 +177,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 60,
         poseStart: "stand-relaxed",
         poseMiddle: "hands-rise-heart",
-        poseEnd: "hands-heart",
+        poseTop: "hands-heart",
       },
     ],
   },
@@ -197,7 +197,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 40,
         poseStart: "stand-neutral",
         poseMiddle: "knees-soft-mid",
-        poseEnd: "float-stance",
+        poseTop: "float-stance",
       },
       {
         title: "Golden rooster",
@@ -206,7 +206,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 70,
         poseStart: "rooster-left",
         poseMiddle: "rooster-center",
-        poseEnd: "rooster-right",
+        poseTop: "rooster-right",
       },
       {
         title: "Wave rider",
@@ -215,16 +215,16 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         durationSec: 70,
         poseStart: "wave-rider-left",
         poseMiddle: "wave-rider-center",
-        poseEnd: "wave-rider-right",
+        poseTop: "wave-rider-right",
       },
       {
         title: "Star close",
         instruction:
           "Feet settle. Palms up at sides, then down to rest. You are the still point. The universe can wait.",
         durationSec: 50,
-        poseStart: "palms-up",
+        poseStart: "palms-rest",
         poseMiddle: "palms-mid",
-        poseEnd: "palms-rest",
+        poseTop: "palms-up",
       },
     ],
   },

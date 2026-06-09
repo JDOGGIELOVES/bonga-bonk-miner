@@ -17,7 +17,7 @@ export const DEFAULT_PEACE_AUDIO_SETTINGS = {
   musicEnabled: true,
   voiceEnabled: true,
   sfxVolume: 0.75,
-  musicVolume: 0.3,
+  musicVolume: 0.55,
 } as const;
 
 export type PeaceAudioSettings = {
@@ -205,12 +205,15 @@ class PeaceAudioManager {
 
   async startSession(mode: PeaceMusicMode = "ambient") {
     await this.resume();
-    if (!this.ctx || !this.sfxGain || this.settings.muted) return;
+    if (!this.ctx) return;
     this.musicMode = mode;
     this.sessionActive = true;
-    playPeaceBeginChime(this.ctx, this.sfxGain, this.settings.sfxVolume);
-    if (this.settings.musicEnabled) {
-      window.setTimeout(() => this.startSessionMusic(), 400);
+
+    if (this.sfxGain && !this.settings.muted) {
+      playPeaceBeginChime(this.ctx, this.sfxGain, this.settings.sfxVolume);
+    }
+    if (this.settings.musicEnabled && !this.settings.muted) {
+      window.setTimeout(() => this.startSessionMusic(), 350);
     }
   }
 

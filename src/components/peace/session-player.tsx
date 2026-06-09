@@ -18,7 +18,7 @@ export interface SessionStep {
   durationSec: number;
   poseStart?: string;
   poseMiddle?: string;
-  poseEnd?: string;
+  poseTop?: string;
 }
 
 export interface GuidedSession {
@@ -142,6 +142,7 @@ export function SessionPlayer({
       if (next) {
         if (!sessionStartedRef.current) {
           sessionStartedRef.current = true;
+          peaceNarration.warmUp();
           if (soundEnabled) {
             void peaceAudio.resume().then(() => peaceAudio.startSession(musicMode));
             lastNarratedStepRef.current = stepIndex;
@@ -250,11 +251,11 @@ export function SessionPlayer({
             {step?.instruction}
           </p>
 
-          {step?.poseStart && step?.poseMiddle && step?.poseEnd && (
+          {step?.poseStart && step?.poseMiddle && step?.poseTop && (
             <TaiChiPoseDiagram
               poseStart={step.poseStart}
               poseMiddle={step.poseMiddle}
-              poseEnd={step.poseEnd}
+              poseTop={step.poseTop}
             />
           )}
 

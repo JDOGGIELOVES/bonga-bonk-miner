@@ -2,11 +2,12 @@ import { peaceAudio } from "./peace-audio";
 
 const VOICE_CACHE_KEY = "bonga-peace-voice-uri";
 
-/** Natural-sounding female voices, best first */
 const PREFERRED_FEMALE_VOICES = [
+  "Microsoft Aria Online (Natural) - English (United States)",
   "Microsoft Aria Online (Natural)",
   "Microsoft Jenny Online (Natural)",
   "Microsoft Michelle Online (Natural)",
+  "Microsoft Ana Online (Natural)",
   "Google UK English Female",
   "Google US English Female",
   "Samantha",
@@ -16,24 +17,29 @@ const PREFERRED_FEMALE_VOICES = [
   "Victoria",
   "Tessa",
   "Serena",
+  "Aria",
+  "Jenny",
+  "Michelle",
   "Zira",
   "Susan",
   "Hazel",
   "Kate",
   "Sonia",
   "Emma",
+  "Linda",
+  "Heather",
 ];
 
 const ROBOTIC_VOICE_PATTERN =
-  /eSpeak|novelty|bad news|good news|whisper|cellos|trinoids|bahh|bells|boing|bubbles|deranged|klatt|zarvox/i;
+  /eSpeak|novelty|bad news|good news|whisper|cellos|trinoids|bahh|bells|boing|bubbles|deranged|klatt|zarvox|compact|desktop.*english.*david|microsoft david|microsoft mark|microsoft richard/i;
 
 const MALE_VOICE_PATTERN =
-  /male|david|mark|james|daniel|richard|thomas|george|alex(?!a)|fred|gordon|lee|bruce|tom\b/i;
+  /\bmale\b|david|mark\b|james|daniel|richard|thomas|george|fred|gordon|bruce|tom\b|alex\b(?!a)/i;
 
 function sanitizeForSpeech(text: string): string {
   return text
     .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, "")
-    .replace(/✌️|🌅|🧘|🌇|🌌|🪵|💻|🦋|🌄|🌙|📦|🌬️/g, "peace")
+    .replace(/✌️|🌅|🧘|🌇|🌌|🪵|💻|🦋|🌄|🌙|📦|🌬️/g, "")
     .replace(/—/g, ", ")
     .replace(/[""]/g, "")
     .replace(/\s+/g, " ")
@@ -47,32 +53,42 @@ function humanizeInstruction(instruction: string): string {
     .replace(/Go bonk something nice/gi, "Now go bonk something nice");
 }
 
-function scoreVoice(voice: SpeechSynthesisVoice): number {
-  let score = 0;
-  const name = voice.name;
+function splitIntoChunks(text: string): string[] {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
 
+function scoreVoice(voice: SpeechSynthesisVoice): number {
+  const name = voice.name;
   if (ROBOTIC_VOICE_PATTERN.test(name)) return -100;
   if (MALE_VOICE_PATTERN.test(name)) return -50;
+  if (/google us english$/i.test(name) && !/female/i.test(name)) return -40;
+
+  let score = 0;
 
   for (let i = 0; i < PREFERRED_FEMALE_VOICES.length; i++) {
     if (name.includes(PREFERRED_FEMALE_VOICES[i])) {
-      score += 100 - i * 3;
+      score += 120 - i * 2;
       break;
     }
   }
 
-  if (/natural|neural|premium|enhanced/i.test(name)) score += 25;
-  if (/female|woman/i.test(name)) score += 20;
+  if (/natural|neural|premium|enhanced|online/i.test(name)) score += 35;
+  if (/female|woman|samantha|aria|jenny/i.test(name)) score += 25;
   if (voice.lang.startsWith("en")) score += 10;
-  if (voice.localService) score += 5;
+  if (!voice.localService && /online|natural/i.test(name)) score += 15;
 
   return score;
 }
 
 class PeaceNarrationManager {
   private cachedVoiceUri: string | null = null;
-  private voicesReady = false;
   private voiceLoadPromise: Promise<void> | null = null;
+  private speechQueue: string[] = [];
+  private queueActive = false;
+  private queueRate = 0.76;
 
   constructor() {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -84,20 +100,25 @@ class PeaceNarrationManager {
     this.voiceLoadPromise = this.loadVoices();
   }
 
+  /** Call on first user tap so voices are ready */
+  warmUp() {
+    if (!this.isSupported()) return;
+    void this.loadVoices();
+    window.speechSynthesis.getVoices();
+  }
+
   private loadVoices(): Promise<void> {
     return new Promise((resolve) => {
+      let resolved = false;
       const finish = () => {
-        this.voicesReady = window.speechSynthesis.getVoices().length > 0;
+        if (resolved) return;
+        resolved = true;
         resolve();
       };
 
-      finish();
-      if (!this.voicesReady) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          finish();
-        };
-        window.setTimeout(finish, 500);
-      }
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => finish();
+      window.setTimeout(finish, 2000);
     });
   }
 
@@ -116,12 +137,18 @@ class PeaceNarrationManager {
 
     if (this.cachedVoiceUri) {
       const cached = voices.find((v) => v.voiceURI === this.cachedVoiceUri);
-      if (cached && scoreVoice(cached) > 0) return cached;
+      if (cached && scoreVoice(cached) >= 20) return cached;
+      this.cachedVoiceUri = null;
+      try {
+        localStorage.removeItem(VOICE_CACHE_KEY);
+      } catch {
+        /* */
+      }
     }
 
     const ranked = voices
       .map((v) => ({ voice: v, score: scoreVoice(v) }))
-      .filter((v) => v.score > 0)
+      .filter((v) => v.score >= 20)
       .sort((a, b) => b.score - a.score);
 
     const best = ranked[0]?.voice;
@@ -139,6 +166,8 @@ class PeaceNarrationManager {
 
   cancel() {
     if (!this.isSupported()) return;
+    this.speechQueue = [];
+    this.queueActive = false;
     window.speechSynthesis.cancel();
   }
 
@@ -153,37 +182,70 @@ class PeaceNarrationManager {
     if (!this.isSupported()) return;
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
+    } else if (!this.queueActive && this.speechQueue.length > 0) {
+      void this.drainQueue();
     }
   }
 
   isSpeaking(): boolean {
-    return this.isSupported() && window.speechSynthesis.speaking;
+    return (
+      this.isSupported() &&
+      (window.speechSynthesis.speaking || this.queueActive)
+    );
   }
 
   isPaused(): boolean {
     return this.isSupported() && window.speechSynthesis.paused;
   }
 
-  private applyWarmVoice(utter: SpeechSynthesisUtterance) {
+  private buildUtterance(text: string, rate: number): SpeechSynthesisUtterance {
+    const utter = new SpeechSynthesisUtterance(text);
     const voice = this.pickVoice();
     if (voice) utter.voice = voice;
-    utter.rate = 0.82;
-    utter.pitch = 1.08;
-    utter.volume = 0.95;
+    utter.rate = rate;
+    utter.pitch = 1.05;
+    utter.volume = 1;
+    return utter;
   }
 
-  async speak(text: string, options?: { rate?: number; delayMs?: number }) {
+  private async drainQueue(): Promise<void> {
+    if (!this.canSpeak() || this.speechQueue.length === 0) {
+      this.queueActive = false;
+      return;
+    }
+
+    this.queueActive = true;
+    const text = this.speechQueue.shift()!;
+    const utter = this.buildUtterance(text, this.queueRate);
+
+    await new Promise<void>((resolve) => {
+      utter.onend = () => resolve();
+      utter.onerror = () => resolve();
+      window.speechSynthesis.speak(utter);
+    });
+
+    if (this.speechQueue.length > 0) {
+      await new Promise((r) => window.setTimeout(r, 420));
+      await this.drainQueue();
+    } else {
+      this.queueActive = false;
+    }
+  }
+
+  async speakSequence(chunks: string[], rate = 0.76) {
     if (!this.canSpeak()) return;
     await (this.voiceLoadPromise ?? this.loadVoices());
 
-    const run = () => {
-      this.cancel();
-      const utter = new SpeechSynthesisUtterance(sanitizeForSpeech(text));
-      this.applyWarmVoice(utter);
-      if (options?.rate) utter.rate = options.rate;
-      window.speechSynthesis.speak(utter);
-    };
+    this.cancel();
+    this.queueRate = rate;
+    this.speechQueue = chunks.map((c) => sanitizeForSpeech(c)).filter(Boolean);
+    await this.drainQueue();
+  }
 
+  async speak(text: string, options?: { rate?: number; delayMs?: number }) {
+    const run = () => {
+      void this.speakSequence([text], options?.rate ?? 0.76);
+    };
     if (options?.delayMs) {
       window.setTimeout(run, options.delayMs);
     } else {
@@ -192,26 +254,31 @@ class PeaceNarrationManager {
   }
 
   speakStep(title: string, instruction: string, options?: { intro?: string }) {
-    const parts: string[] = [];
+    const chunks: string[] = [];
 
     if (options?.intro) {
-      parts.push(options.intro);
+      chunks.push(options.intro);
     } else {
-      parts.push(`Now, ${title.toLowerCase()}.`);
+      chunks.push(`Let's gently move into ${title.toLowerCase()}.`);
     }
 
-    parts.push(humanizeInstruction(instruction));
-    parts.push("Take your time with this one.");
+    chunks.push(...splitIntoChunks(humanizeInstruction(instruction)));
+    chunks.push("Take your time with this one.");
 
-    void this.speak(parts.join(" "), { delayMs: 0 });
+    void this.speakSequence(chunks, 0.76);
   }
 
   speakBreathCue(label: string) {
-    void this.speak(label.replace(/✌️/g, "").trim(), { rate: 0.78 });
+    void this.speakSequence(
+      [label.replace(/✌️/g, "").trim()],
+      0.74
+    );
   }
 
   speakComplete(message: string) {
-    void this.speak(`Beautiful. ${message}`, { rate: 0.8, delayMs: 1400 });
+    window.setTimeout(() => {
+      void this.speakSequence(["Beautiful.", message], 0.75);
+    }, 1400);
   }
 }
 

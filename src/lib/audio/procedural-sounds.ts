@@ -467,11 +467,11 @@ export function startProceduralFluteBgm(
   masterFilter.connect(dest);
 
   const fluteGain = ctx.createGain();
-  fluteGain.gain.value = volume * 0.22;
+  fluteGain.gain.value = volume * 0.55;
   fluteGain.connect(masterFilter);
 
   const padGain = ctx.createGain();
-  padGain.gain.value = volume * 0.07;
+  padGain.gain.value = volume * 0.14;
   padGain.connect(masterFilter);
 
   const activeNodes: (OscillatorNode | AudioBufferSourceNode)[] = [];
@@ -564,11 +564,11 @@ export function startProceduralFluteBgm(
     fade: (to: number, sec = 0.6) => {
       const t = ctx.currentTime;
       fluteGain.gain.exponentialRampToValueAtTime(
-        Math.max(0.001, to * volume * 0.22),
+        Math.max(0.001, to * volume * 0.55),
         t + sec
       );
       padGain.gain.exponentialRampToValueAtTime(
-        Math.max(0.001, to * volume * 0.07),
+        Math.max(0.001, to * volume * 0.14),
         t + sec
       );
     },
