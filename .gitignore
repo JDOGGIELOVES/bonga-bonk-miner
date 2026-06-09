@@ -37,6 +37,9 @@ yarn-error.log*
 # pet love uploads (local dev)
 /.pet-love-data/
 
+# global claim tally (local dev)
+/.bonga-claim-data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

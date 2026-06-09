@@ -22,13 +22,14 @@ import { Wallet, ExternalLink } from "lucide-react";
 interface ClaimBongaProps {
   state: GameState;
   onStateChange: (state: GameState) => void;
+  onClaimSuccess?: () => void;
 }
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
+export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaProps) {
   const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
   const { setVisible } = useWalletModal();
   const [claiming, setClaiming] = useState(false);
@@ -78,6 +79,7 @@ export function ClaimBonga({ state, onStateChange }: ClaimBongaProps) {
           `Sent ${claimable} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
         );
         setExplorerUrl(result.explorerUrl);
+        onClaimSuccess?.();
       } else {
         await new Promise((r) => setTimeout(r, 1200));
         const next = processClaim(state, wallet);

@@ -9,6 +9,7 @@ import {
   hasClaimedPetRewardToday,
   recordPetClaim,
 } from "@/lib/pet-love-store";
+import { recordGlobalClaim } from "@/lib/claim-tally-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
@@ -143,6 +144,7 @@ export async function POST(request: Request) {
       amount,
     });
 
+    await recordGlobalClaim(amount);
     await recordPetClaim(wallet, date, submissionId);
 
     return NextResponse.json({

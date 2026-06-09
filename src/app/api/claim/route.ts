@@ -4,6 +4,7 @@ import bs58 from "bs58";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { recordGlobalClaim } from "@/lib/claim-tally-store";
 import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 
@@ -112,6 +113,8 @@ export async function POST(request: Request) {
       recipientWallet: recipient,
       amount,
     });
+
+    await recordGlobalClaim(amount);
 
     return NextResponse.json({
       ok: true,

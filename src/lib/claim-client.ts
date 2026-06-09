@@ -17,6 +17,12 @@ export interface ClaimStatus {
   hint?: string;
 }
 
+export interface GlobalClaimTally {
+  totalBonga: number;
+  claimCount: number;
+  updatedAt?: string;
+}
+
 export interface ClaimApiSuccess {
   ok: true;
   signature: string;
@@ -27,6 +33,20 @@ export interface ClaimApiSuccess {
 export interface ClaimApiError {
   error: string;
   alreadyClaimed?: number;
+}
+
+export async function fetchGlobalClaimTally(): Promise<GlobalClaimTally> {
+  try {
+    const response = await fetch("/api/claim/tally", { cache: "no-store" });
+    const data = (await response.json()) as GlobalClaimTally;
+    return {
+      totalBonga: Number(data.totalBonga) || 0,
+      claimCount: Number(data.claimCount) || 0,
+      updatedAt: data.updatedAt,
+    };
+  } catch {
+    return { totalBonga: 0, claimCount: 0 };
+  }
 }
 
 export async function fetchClaimStatus(): Promise<ClaimStatus> {

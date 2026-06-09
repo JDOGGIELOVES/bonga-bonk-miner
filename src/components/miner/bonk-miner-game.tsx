@@ -15,6 +15,7 @@ import {
   type Particle,
 } from "@/components/miner/bonk-effects";
 import { GameStats } from "@/components/miner/game-stats";
+import { GlobalClaimTally } from "@/components/miner/global-claim-tally";
 import { UpgradeShop } from "@/components/miner/upgrade-shop";
 import { LeaderboardPanel } from "@/components/miner/leaderboard-panel";
 import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
@@ -51,6 +52,7 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [shareMsg, setShareMsg] = useState("");
+  const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const comboTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const effectIdRef = useRef(0);
@@ -252,8 +254,13 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
         ) : (
           <>
         <div className="mt-4 space-y-4">
+          <GlobalClaimTally refreshKey={tallyRefreshKey} />
           <GameStats state={gameState} combo={combo} connected={connected} />
-          <ClaimBonga state={gameState} onStateChange={setGameState} />
+          <ClaimBonga
+            state={gameState}
+            onStateChange={setGameState}
+            onClaimSuccess={() => setTallyRefreshKey((key) => key + 1)}
+          />
         </div>
 
         {/* Game arena */}
