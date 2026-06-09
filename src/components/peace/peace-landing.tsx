@@ -7,6 +7,7 @@ import { PeaceHero } from "@/components/peace/peace-hero";
 import { BreathingModule } from "@/components/peace/breathing-module";
 import { BonkBreakModule } from "@/components/peace/bonk-break-module";
 import { TaiChiModule } from "@/components/peace/tai-chi-module";
+import { StretchingModule } from "@/components/peace/stretching-module";
 import { DailyCheckIn } from "@/components/peace/daily-checkin";
 
 export function PeaceLanding() {
@@ -40,6 +41,25 @@ export function PeaceLanding() {
           </p>
           <div className="mt-10">
             <BonkBreakModule />
+          </div>
+        </div>
+      </section>
+
+      <section id="stretch" className="section-anchor bg-muted/20 py-16">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="text-center font-display text-3xl font-bold">
+            Daily <span className="text-gradient">Stretching</span>
+          </h2>
+          <p className="mt-2 text-center text-muted-foreground">
+            Gentle mobility routines — a new pick every day plus desk relief, hip
+            openers, and evening wind-down
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
+            Stretch within your comfort. Not medical advice — skip anything that
+            doesn&apos;t feel right.
+          </p>
+          <div className="mt-10">
+            <StretchingModule />
           </div>
         </div>
       </section>

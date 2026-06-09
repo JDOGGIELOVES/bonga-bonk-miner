@@ -38,8 +38,9 @@ export function PeaceHero() {
           transition={{ delay: 0.2 }}
           className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg"
         >
-          Slow flows, deep breaths, playful bonk release — mindfulness that
-          doesn&apos;t take itself too seriously. Peace, love, and good bonks.
+          Slow flows, daily stretches, deep breaths, playful bonk release —
+          mindfulness that doesn&apos;t take itself too seriously. Peace, love,
+          and good bonks.
         </motion.p>
 
         <motion.div
@@ -49,9 +50,12 @@ export function PeaceHero() {
           className="mt-8 flex flex-wrap justify-center gap-3"
         >
           <Button variant="peace" size="lg" asChild>
-            <a href="#breathe">Start breathing</a>
+            <a href="#stretch">Today&apos;s stretch</a>
           </Button>
           <Button variant="outline" size="lg" asChild>
+            <a href="#breathe">Breathe</a>
+          </Button>
+          <Button variant="ghost" size="lg" asChild>
             <Link href="/nft#mint">Mint a Bonga NFT</Link>
           </Button>
         </motion.div>

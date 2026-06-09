@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -35,10 +35,12 @@ export function SessionPlayer({
   session,
   onBack,
   completeMessage = "You showed up for peace. That's the Bonga way.",
+  onComplete,
 }: {
   session: GuidedSession;
   onBack: () => void;
   completeMessage?: string;
+  onComplete?: () => void;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [remaining, setRemaining] = useState(session.steps[0]?.durationSec ?? 0);
@@ -54,6 +56,16 @@ export function SessionPlayer({
 
   const pose = getTraitPose(session.guideTraitId);
   const guideImage = pose?.image ?? "/bonga-character.png";
+
+  const completedRef = useRef(false);
+
+  useEffect(() => {
+    if (finished && !completedRef.current) {
+      completedRef.current = true;
+      onComplete?.();
+    }
+    if (!finished) completedRef.current = false;
+  }, [finished, onComplete]);
 
   const goNext = useCallback(() => {
     if (stepIndex >= session.steps.length - 1) {

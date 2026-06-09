@@ -8,6 +8,7 @@ import { useTheme } from "@/components/theme-provider";
 const NAV = [
   { href: "#breathe", label: "Breathe" },
   { href: "#bonk-break", label: "Bonk Break" },
+  { href: "#stretch", label: "Stretch" },
   { href: "#tai-chi", label: "Tai Chi" },
   { href: "#checkin", label: "Check-in" },
 ];
