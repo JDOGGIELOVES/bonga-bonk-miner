@@ -44,6 +44,9 @@ export function NFTLanding() {
           <Link href="/nft#mint" className="text-bonga-teal hover:underline">
             Mint NFT
           </Link>
+          <Link href="/peace" className="text-bonga-teal hover:underline">
+            Bonga Peace
+          </Link>
           <Link href="/nft#peace" className="text-bonga-purple hover:underline">
             Tai Chi
           </Link>

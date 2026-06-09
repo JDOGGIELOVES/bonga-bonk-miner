@@ -36,6 +36,12 @@ export function BongaHeader({
 
         <div className="flex shrink-0 items-center gap-2">
           <Link
+            href="/peace"
+            className="hidden rounded-full border border-bonga-teal/30 px-3 py-1.5 text-xs font-semibold text-bonga-teal transition-colors hover:bg-bonga-teal/10 sm:inline-block"
+          >
+            Peace
+          </Link>
+          <Link
             href="/nft"
             className="hidden rounded-full border border-bonga-orange/30 px-3 py-1.5 text-xs font-semibold text-bonga-orange transition-colors hover:bg-bonga-orange/10 sm:inline-block"
           >

@@ -11,6 +11,7 @@ const NAV = [
   { href: "#mint", label: "Mint" },
   { href: "#utility", label: "Utility" },
   { href: "#peace", label: "Tai Chi" },
+  { href: "/peace", label: "Peace App", isRoute: true },
   { href: "#roadmap", label: "Roadmap" },
 ];
 
@@ -25,15 +26,25 @@ export function NFTHeader() {
         </Link>
 
         <nav className="hidden gap-4 md:flex">
-          {NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </a>
-          ))}
+          {NAV.map((item) =>
+            "isRoute" in item && item.isRoute ? (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-bonga-teal transition-colors hover:text-bonga-teal/80"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <a
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {item.label}
+              </a>
+            )
+          )}
           <Link
             href="/"
             className="text-sm font-medium text-bonga-orange hover:underline"
