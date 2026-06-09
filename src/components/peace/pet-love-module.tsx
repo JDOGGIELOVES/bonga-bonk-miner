@@ -366,7 +366,7 @@ export function PetLoveModule() {
                   Choose a hand + pet photo
                 </span>
                 <span className="mt-1 text-xs text-muted-foreground">
-                  Crop close — faces optional, hands required
+                  Include your hand and some of your pet in frame — faces optional
                 </span>
               </button>
             )}
