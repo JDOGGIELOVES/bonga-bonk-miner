@@ -1,3 +1,5 @@
+import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
+
 export const ABOUT_FAQ = [
   {
     question: "Who is Bonga Bonk's Sister?",
@@ -15,9 +17,13 @@ export const ABOUT_FAQ = [
       "Play Bonga Bonk Miner to tap and mine $BONGA, mint Bonga NFTs on Solana, and use Bonga Peace for breathing, stretching, Tai Chi, Bonk Breaks, and daily affirmations — all free in the browser.",
   },
   {
+    question: "What is the Bonga Bonk's Sister CA?",
+    answer: `The official Bonga Bonk's Sister contract address (CA) for $BONGA on Solana is ${BONGA_TOKEN_CA}. Always verify this CA on bongabonks.com/about before buying or adding liquidity.`,
+  },
+  {
     question: "What is $BONGA?",
     answer:
-      "$BONGA is the Bonga community token earned through the Bonk Miner game. Tap to bonk, stack bonks, and claim mined $BONGA on Solana when you connect your wallet.",
+      "$BONGA is the Bonga Bonk's Sister community token on Solana. Earn it in the Bonk Miner game — tap to bonk, stack bonks, and claim mined $BONGA when you connect your wallet.",
   },
   {
     question: "Is Bonga Bonk's Sister affiliated with Bonk?",

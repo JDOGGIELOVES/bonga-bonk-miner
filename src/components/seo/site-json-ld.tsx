@@ -1,5 +1,6 @@
 import { JsonLd } from "@/components/seo/json-ld";
 import { ABOUT_FAQ } from "@/lib/about-content";
+import { BONGA_TOKEN_CA, BONGA_TOKEN_SOLSCAN_URL } from "@/lib/bonga-token";
 import {
   absoluteUrl,
   SITE_NAME,
@@ -158,7 +159,13 @@ export function AboutJsonLd() {
           about: { "@id": ORG_ID },
           inLanguage: "en-US",
           primaryImageOfPage: absoluteUrl("/bonga-character.png"),
-          mainEntity: { "@id": ORG_ID },
+          mainEntity: {
+            "@type": "CryptoCurrency",
+            name: "$BONGA",
+            alternateName: "Bonga Bonk's Sister token",
+            identifier: BONGA_TOKEN_CA,
+            url: BONGA_TOKEN_SOLSCAN_URL,
+          },
         },
         {
           "@context": "https://schema.org",

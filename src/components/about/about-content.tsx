@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
 import { ABOUT_FAQ, ECOSYSTEM_LINKS } from "@/lib/about-content";
 import { SOCIAL_LINKS } from "@/lib/site-seo";
 
@@ -25,6 +26,9 @@ export function AboutContent() {
             Bonga is Bonk&apos;s Sister — the peaceful bonk on Solana. Peace,
             love, good bonks, and raising the frequency for the whole fam.
           </p>
+
+          <BongaCaBanner prominent />
+
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button variant="peace" size="lg" asChild>
               <Link href="/">Play Bonk Miner</Link>

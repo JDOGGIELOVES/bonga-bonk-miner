@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "About Bonga Bonk's Sister — Who Is Bonga on Solana?",
   description:
-    "Meet Bonga Bonk's Sister — Bonk's Sister on Solana. Learn who Bonga is, how Bonga and Bonk connect, the $BONGA token, NFT collection, Bonk Miner game, and Bonga Peace. Official story at bongabonks.com.",
+    "Meet Bonga Bonk's Sister — Bonk's Sister on Solana. Official $BONGA CA on the About page. Learn who Bonga is, how Bonga and Bonk connect, the NFT collection, Bonk Miner game, and Bonga Peace at bongabonks.com.",
   path: "/about",
   keywords: [
     "Bonga Bonk's Sister",
