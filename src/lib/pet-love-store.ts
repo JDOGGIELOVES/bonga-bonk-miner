@@ -96,18 +96,12 @@ async function writeIndexToBlob(index: PetLoveIndex): Promise<void> {
     );
   }
 
-  const { del, list, put } = await import("@vercel/blob");
-  const existing = await list({ prefix: INDEX_BLOB_PATH, token });
-  for (const blob of existing.blobs) {
-    if (blob.pathname === INDEX_BLOB_PATH) {
-      await del(blob.url, { token });
-    }
-  }
-
+  const { put } = await import("@vercel/blob");
   await put(INDEX_BLOB_PATH, JSON.stringify(index), {
     access: "public",
     contentType: "application/json",
     addRandomSuffix: false,
+    allowOverwrite: true,
     token,
   });
 }
