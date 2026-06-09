@@ -12,6 +12,8 @@ import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { DailyCheckIn } from "@/components/peace/daily-checkin";
 import { DailyAffirmations } from "@/components/peace/daily-affirmations";
 import { TranscendentalMeditationModule } from "@/components/peace/transcendental-meditation-module";
+import { PetLoveModule } from "@/components/peace/pet-love-module";
+import { PET_LOVE_REWARD } from "@/lib/pet-love";
 
 export function PeaceLanding() {
   return (
@@ -19,7 +21,26 @@ export function PeaceLanding() {
       <PeaceHeader />
       <PeaceHero />
 
-      <section id="breathe" className="section-anchor py-16">
+      <section id="pet-love" className="section-anchor py-16">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="text-center font-display text-3xl font-bold">
+            Pet <span className="text-gradient">Love</span>
+          </h2>
+          <p className="mt-2 text-center text-muted-foreground">
+            Share a hand-petting moment with any pet — build community, stay
+            anonymous, earn {PET_LOVE_REWARD} $BONGA once per wallet per day
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
+            Photos are checked on your device before upload. Only one submission
+            per connected wallet per UTC day. Gallery shows pets, not wallets.
+          </p>
+          <div className="mt-10">
+            <PetLoveModule />
+          </div>
+        </div>
+      </section>
+
+      <section id="breathe" className="section-anchor bg-muted/20 py-16">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="text-center font-display text-3xl font-bold">
             Guided <span className="text-gradient">Breathing</span>
@@ -37,7 +58,7 @@ export function PeaceLanding() {
         </div>
       </section>
 
-      <section id="meditate" className="section-anchor bg-muted/20 py-16">
+      <section id="meditate" className="section-anchor py-16">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="text-center font-display text-3xl font-bold">
             Transcendental <span className="text-gradient">Meditation</span>

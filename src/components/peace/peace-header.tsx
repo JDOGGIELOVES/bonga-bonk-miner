@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 
 const NAV = [
+  { href: "#pet-love", label: "Pet Love" },
   { href: "#breathe", label: "Breathe" },
   { href: "#meditate", label: "Meditate" },
   { href: "#bonk-break", label: "Bonk Break" },

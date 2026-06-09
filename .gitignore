@@ -34,6 +34,9 @@ yarn-error.log*
 # treasury keypair backup (never commit)
 /.treasury/
 
+# pet love uploads (local dev)
+/.pet-love-data/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
