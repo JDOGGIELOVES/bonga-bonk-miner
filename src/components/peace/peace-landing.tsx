@@ -10,6 +10,7 @@ import { TaiChiModule } from "@/components/peace/tai-chi-module";
 import { StretchingModule } from "@/components/peace/stretching-module";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { DailyCheckIn } from "@/components/peace/daily-checkin";
+import { DailyAffirmations } from "@/components/peace/daily-affirmations";
 
 export function PeaceLanding() {
   return (
@@ -89,6 +90,21 @@ export function PeaceLanding() {
           </p>
           <div className="mt-10">
             <TaiChiModule />
+          </div>
+        </div>
+      </section>
+
+      <section id="affirmations" className="section-anchor py-16">
+        <div className="mx-auto max-w-2xl px-4">
+          <h2 className="text-center font-display text-3xl font-bold">
+            Daily <span className="text-gradient">Affirmations</span>
+          </h2>
+          <p className="mt-2 text-center text-muted-foreground">
+            Peace, love, good bonks — one line to raise your frequency, the Bonga
+            way
+          </p>
+          <div className="mt-10">
+            <DailyAffirmations />
           </div>
         </div>
       </section>

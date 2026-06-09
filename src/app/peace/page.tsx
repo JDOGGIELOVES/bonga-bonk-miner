@@ -4,10 +4,11 @@ import { PeaceShell } from "@/components/peace/peace-shell";
 export const metadata: Metadata = {
   title: "Bonga Peace | Mindfulness the Bonga Way",
   description:
-    "Voice-guided stretching and exercises, breathing, Bonk Break, Tai Chi flows, and peace check-ins. Slow, playful mindfulness on bongabonks.com.",
+    "Voice-guided stretching and exercises, breathing, Bonk Break, Tai Chi flows, daily affirmations, and peace check-ins. Slow, playful mindfulness on bongabonks.com.",
   keywords: [
     "Bonga Peace",
     "mindfulness",
+    "affirmations",
     "stretching",
     "breathing",
     "Tai Chi",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Bonga Peace — Mindfulness the Bonga Way",
     description:
-      "Stretch, breathe, bonk, flow. Peaceful tools from Bonk's Sister — no clinical vibes, just good bonks.",
+      "Stretch, breathe, bonk, affirm, flow. Peaceful tools from Bonk's Sister — no clinical vibes, just good bonks.",
     type: "website",
   },
 };

@@ -10,6 +10,7 @@ const NAV = [
   { href: "#bonk-break", label: "Bonk Break" },
   { href: "#stretch", label: "Stretch" },
   { href: "#tai-chi", label: "Tai Chi" },
+  { href: "#affirmations", label: "Affirmations" },
   { href: "#checkin", label: "Check-in" },
 ];
 
