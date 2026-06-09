@@ -85,6 +85,16 @@ function getLocalImagesDir(): string {
   return path.join(getLocalDataDir(), "images");
 }
 
+type BlobAccess = "public" | "private";
+
+function blobAccess(): BlobAccess {
+  const configured = process.env.BLOB_DEFAULT_ACCESS?.trim().toLowerCase();
+  if (configured === "private" || configured === "public") {
+    return configured;
+  }
+  return "public";
+}
+
 function storageConfigMessage(): string {
   return (
     "Pet Love storage is not configured on Vercel. In Dashboard → Storage → Blob, connect your store to this project (OIDC), or set BLOB_READ_WRITE_TOKEN, then redeploy Production."
@@ -121,24 +131,30 @@ function parseIndex(raw: string): PetLoveIndex {
 }
 
 async function readIndexFromBlob(): Promise<PetLoveIndex> {
-  try {
-    const { get } = await import("@vercel/blob");
-    const result = await get(INDEX_BLOB_PATH, {
-      access: "public",
-      useCache: false,
-    });
-    if (!result?.stream) return emptyIndex();
-    return parseIndex(await streamToText(result.stream));
-  } catch (error) {
-    console.error("Pet Love index blob read failed:", error);
-    return emptyIndex();
+  const { get } = await import("@vercel/blob");
+  const primary = blobAccess();
+  const fallback: BlobAccess = primary === "public" ? "private" : "public";
+
+  for (const access of [primary, fallback]) {
+    try {
+      const result = await get(INDEX_BLOB_PATH, {
+        access,
+        useCache: false,
+      });
+      if (!result?.stream) continue;
+      return parseIndex(await streamToText(result.stream));
+    } catch (error) {
+      console.error(`Pet Love index blob read failed (${access}):`, error);
+    }
   }
+
+  return emptyIndex();
 }
 
 async function writeIndexToBlob(index: PetLoveIndex): Promise<void> {
   const { put } = await import("@vercel/blob");
   await put(INDEX_BLOB_PATH, JSON.stringify(index), {
-    access: "public",
+    access: blobAccess(),
     contentType: "application/json",
     addRandomSuffix: false,
     allowOverwrite: true,
@@ -241,7 +257,7 @@ async function saveImageBlob(params: {
       `pet-love/images/${params.id}.${params.ext}`,
       params.imageBuffer,
       {
-        access: "public",
+        access: blobAccess(),
         contentType: params.contentType,
         addRandomSuffix: false,
       }

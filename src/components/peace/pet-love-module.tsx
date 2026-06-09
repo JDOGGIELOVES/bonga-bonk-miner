@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -59,6 +59,10 @@ export function PetLoveModule() {
 
   const [gallery, setGallery] = useState<PetGalleryItem[]>([]);
   const [status, setStatus] = useState<PetStatus | null>(null);
+  const [todaySubmission, setTodaySubmission] = useState<PetGalleryItem | null>(
+    null
+  );
+  const actionsRef = useRef<HTMLDivElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [verifyState, setVerifyState] = useState<
@@ -81,6 +85,7 @@ export function PetLoveModule() {
   const refreshStatus = useCallback(async (wallet: string) => {
     const next = await fetchPetStatus(wallet);
     setStatus(next);
+    return next;
   }, []);
 
   useEffect(() => {
@@ -90,10 +95,30 @@ export function PetLoveModule() {
   useEffect(() => {
     if (!connected || !publicKey) {
       setStatus(null);
+      setTodaySubmission(null);
       return;
     }
-    void refreshStatus(publicKey.toBase58());
+    void (async () => {
+      const next = await refreshStatus(publicKey.toBase58());
+      if (next.submittedToday && next.submission) {
+        setTodaySubmission(next.submission);
+      }
+    })();
   }, [connected, publicKey, refreshStatus]);
+
+  const activeSubmission = status?.submission ?? todaySubmission;
+  const hasSubmittedToday =
+    status?.submittedToday === true || todaySubmission != null;
+
+  const galleryItems = useMemo(() => {
+    const byId = new Map<string, PetGalleryItem>();
+    for (const item of gallery) byId.set(item.id, item);
+    if (todaySubmission) byId.set(todaySubmission.id, todaySubmission);
+    if (status?.submission) byId.set(status.submission.id, status.submission);
+    return Array.from(byId.values()).sort((a, b) =>
+      b.submittedAt.localeCompare(a.submittedAt)
+    );
+  }, [gallery, status?.submission, todaySubmission]);
 
   const resetSelection = () => {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -151,7 +176,7 @@ export function PetLoveModule() {
     try {
       const wallet = publicKey.toBase58();
       const imageHash = await hashImageFile(selectedFile);
-      await submitPetPhoto({
+      const result = await submitPetPhoto({
         wallet,
         date: todayKey(),
         file: selectedFile,
@@ -162,9 +187,33 @@ export function PetLoveModule() {
         signMessage,
       });
 
+      setTodaySubmission(result.submission);
+      setGallery((prev) => [
+        result.submission,
+        ...prev.filter((item) => item.id !== result.submission.id),
+      ]);
+
+      const nextStatus = await fetchPetStatus(wallet);
+      setStatus(
+        nextStatus.submittedToday
+          ? nextStatus
+          : {
+              ...nextStatus,
+              submittedToday: true,
+              submission: result.submission,
+            }
+      );
+
+      const items = await fetchPetGallery();
+      if (items.length > 0) {
+        setGallery(items);
+      }
+
       setMessage("Shared with the community! Claim your daily reward below.");
       resetSelection();
-      await Promise.all([refreshGallery(), refreshStatus(wallet)]);
+      requestAnimationFrame(() => {
+        actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {
@@ -173,7 +222,7 @@ export function PetLoveModule() {
   };
 
   const handleClaim = async () => {
-    if (!connected || !publicKey || !status?.submission) return;
+    if (!connected || !publicKey || !activeSubmission) return;
 
     setClaiming(true);
     setError("");
@@ -185,7 +234,7 @@ export function PetLoveModule() {
       const result = await claimPetReward({
         wallet,
         date: todayKey(),
-        submissionId: status.submission.id,
+        submissionId: activeSubmission.id,
         connectedWallet,
         signMessage,
       });
@@ -200,10 +249,9 @@ export function PetLoveModule() {
     }
   };
 
-  const alreadySubmitted = status?.submittedToday === true;
   const alreadyClaimed = status?.claimedToday === true;
   const canClaim =
-    alreadySubmitted && !alreadyClaimed && status?.treasuryEnabled === true;
+    hasSubmittedToday && !alreadyClaimed && status?.treasuryEnabled === true;
 
   return (
     <div className="space-y-8">
@@ -234,7 +282,7 @@ export function PetLoveModule() {
         </div>
       </div>
 
-      {gallery.length > 0 && (
+      {galleryItems.length > 0 && (
         <div>
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3 className="font-display text-base font-bold">
@@ -243,7 +291,7 @@ export function PetLoveModule() {
             <p className="text-xs text-muted-foreground">Anonymous — wallets hidden</p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-            {gallery.map((item) => (
+            {galleryItems.map((item) => (
               <motion.div
                 key={item.id}
                 layout
@@ -272,7 +320,7 @@ export function PetLoveModule() {
         </div>
       )}
 
-      <div className="bonga-card p-6">
+      <div ref={actionsRef} className="bonga-card p-6">
         {!connected ? (
           <div className="text-center">
             <div className="relative mx-auto h-20 w-20">
@@ -292,25 +340,25 @@ export function PetLoveModule() {
               Connect Wallet
             </Button>
           </div>
-        ) : alreadySubmitted ? (
+        ) : hasSubmittedToday ? (
           <div className="space-y-4 text-center">
-            {status?.submission && (
+            {activeSubmission && (
               <div className="mx-auto max-w-xs overflow-hidden rounded-2xl border border-border/50">
                 <div className="relative aspect-square bg-muted/30">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={status.submission.imagePath}
+                    src={activeSubmission.imagePath}
                     alt="Your pet love submission"
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <p className="px-3 py-2 text-xs capitalize text-muted-foreground">
-                  {petEmoji(status.submission.petLabel)} {status.submission.petLabel} · shared today
+                  {petEmoji(activeSubmission.petLabel)} {activeSubmission.petLabel} · shared today
                 </p>
               </div>
             )}
             <p className="text-sm font-medium text-bonga-teal">
-              You already shared your pet love today. One photo per wallet per UTC day.
+              Your pet photo is in the gallery. One upload per wallet per UTC day.
             </p>
             {canClaim ? (
               <Button
@@ -334,8 +382,9 @@ export function PetLoveModule() {
             ) : alreadyClaimed ? (
               <Badge variant="green">Reward claimed today</Badge>
             ) : (
-              <p className="text-xs text-muted-foreground">
-                On-chain rewards are not enabled on this deployment yet.
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Photo saved. On-chain claim is not available yet — treasury env vars
+                may need to be set in Vercel (ON_CHAIN_CLAIMS_ENABLED).
               </p>
             )}
             {status?.dailyOnChainLimit != null &&
