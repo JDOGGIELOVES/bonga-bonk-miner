@@ -242,9 +242,9 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
           className="mb-6 text-center"
         >
           <p className="bonga-section-label">Play & Mine</p>
-          <h1 className="bonga-heading mt-2 text-2xl sm:text-3xl">
+          <h2 className="bonga-heading mt-2 text-2xl sm:text-3xl">
             Raise the Frequency
-          </h1>
+          </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
             Tap to bonk. Mine $BONGA. Spread positive energy with Bonk&apos;s Sister.
           </p>
