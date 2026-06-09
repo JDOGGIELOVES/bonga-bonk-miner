@@ -87,7 +87,7 @@ export function HomeJsonLd() {
           name: "Bonga Bonk Miner",
           alternateName: ["Bonk Miner", "Bonga game"],
           description:
-            "A free tap-to-bonk mining game on Solana. Earn $BONGA, climb the leaderboard, and unlock NFT whitelist perks.",
+            "A free tap-to-bonk mining game on Solana. Earn $BONGA and climb the leaderboard.",
           genre: "Casual game",
           gamePlatform: "Web browser",
           operatingSystem: "Any",
@@ -126,7 +126,7 @@ export function NftJsonLd() {
           name: "Bonga NFT Collection",
           alternateName: ["Bonga NFTs", "Bonk Sister NFTs"],
           description:
-            `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — peaceful bonks, dreadlocks, and Solana vibes. Bonk Miner players get whitelist discounts.`,
+            `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — peaceful bonks, dreadlocks, and Solana vibes.`,
           brand: { "@id": ORG_ID },
           category: "NFT",
           image: absoluteUrl("/bonga-character.png"),

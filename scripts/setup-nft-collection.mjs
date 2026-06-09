@@ -36,8 +36,4 @@ console.log("Preview mint:", "https://bongabonks.com/nft");
 console.log("");
 console.log("Trait count: 16 (see nft-collection.ts for art prompts)");
 console.log("");
-console.log("Whitelist (Bonk Miner):");
-console.log("  - 3+ $BONGA mined → 50% off mint");
-console.log("  - 10+ $BONGA mined → free mint");
-console.log("");
 console.log("Next: deploy Candy Machine, then flip NEXT_PUBLIC_MINT_SIMULATED=false");

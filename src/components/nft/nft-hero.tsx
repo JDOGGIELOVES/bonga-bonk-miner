@@ -59,7 +59,7 @@ export function NFTHero() {
         >
           <Badge variant="default">{COLLECTION_STATS.totalSupply} Supply</Badge>
           <Badge variant="teal">16 Unique Traits</Badge>
-          <Badge variant="green">Bonk Miner Whitelist</Badge>
+          <Badge variant="green">On Solana</Badge>
         </motion.div>
 
         <motion.div

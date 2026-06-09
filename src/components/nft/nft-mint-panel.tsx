@@ -4,12 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BongaNFTArt } from "@/components/nft/bonga-nft-art";
-import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import {
   fetchMintStatus,
   getMintPrice,
@@ -21,7 +19,7 @@ import {
   type MintStatus,
 } from "@/lib/nft-mint";
 import { COLLECTION_STATS } from "@/lib/nft-collection";
-import { Sparkles, Wallet, Loader2 } from "lucide-react";
+import { Wallet, Loader2 } from "lucide-react";
 
 export function NFTMintPanel() {
   const walletAdapter = useWallet();
@@ -34,12 +32,11 @@ export function NFTMintPanel() {
   const [mintStatus, setMintStatus] = useState<MintStatus | null>(null);
 
   const wallet = publicKey?.toBase58();
-  const whitelist = getWhitelistStatus(wallet);
   const isLive = mintStatus?.live === true;
   const isPreview =
     mintStatus === null ? MINT_CONFIG.simulated : !isLive;
   const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
-  const price = getMintPrice(wallet, onChainPrice, { live: isLive });
+  const price = getMintPrice(wallet, onChainPrice);
   const walletMinimum = getMintWalletMinimumSol(onChainPrice);
   const supplyTotal =
     mintStatus?.itemsAvailable ?? COLLECTION_STATS.totalSupply;
@@ -129,58 +126,16 @@ export function NFTMintPanel() {
             <div className="mt-6 rounded-2xl bg-card/80 p-4">
               <p className="text-sm text-muted-foreground">Mint price</p>
               <p className="font-display text-3xl font-bold">
-                {price === 0 ? (
-                  <span className="text-bonga-green">FREE</span>
-                ) : (
-                  <span>
-                    {price.toFixed(3)}{" "}
-                    <span className="text-lg text-muted-foreground">SOL</span>
-                  </span>
-                )}
+                <span>
+                  {price.toFixed(isLive ? 2 : 3)}{" "}
+                  <span className="text-lg text-muted-foreground">SOL</span>
+                </span>
               </p>
-              {isLive ? (
+              {isLive && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   Keep ~{walletMinimum.toFixed(2)} SOL in your wallet (mint + network
                   fees)
                 </p>
-              ) : (
-                price > 0 &&
-                price < onChainPrice && (
-                  <p className="text-xs text-muted-foreground line-through">
-                    Standard: {onChainPrice} SOL
-                  </p>
-                )
-              )}
-            </div>
-
-            <div
-              className={`mt-4 rounded-xl p-3 ${
-                whitelist.eligible
-                  ? "border border-bonga-green/30 bg-bonga-green/10"
-                  : "bg-muted/50"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-bonga-teal" />
-                <span className="text-sm font-semibold">{whitelist.label}</span>
-              </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Total mined: {whitelist.totalBonga} $BONGA · Today:{" "}
-                {whitelist.bongaToday}
-              </p>
-              {isLive && whitelist.eligible && (
-                <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">
-                  Whitelist perks apply to preview mints only right now. Live
-                  on-chain mint is {onChainPrice} SOL for everyone.
-                </p>
-              )}
-              {!isLive && !whitelist.eligible && (
-                <Link
-                  href="/"
-                  className="mt-2 inline-block text-xs font-bold text-bonga-orange hover:underline"
-                >
-                  Play Bonk Miner to unlock whitelist
-                </Link>
               )}
             </div>
 
@@ -202,7 +157,7 @@ export function NFTMintPanel() {
                 ) : myMints.length >= COLLECTION_STATS.maxPerWallet ? (
                   "Max Mints Reached"
                 ) : isPreview ? (
-                  price === 0 ? "Preview Mint (Free)" : `Preview Mint (${price.toFixed(3)} SOL)`
+                  `Preview Mint (${price.toFixed(3)} SOL)`
                 ) : (
                   `Mint Bonga NFT (${onChainPrice.toFixed(2)} SOL)`
                 )}

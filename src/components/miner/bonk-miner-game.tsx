@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Button } from "@/components/ui/button";
 import { ClaimBonga } from "@/components/miner/claim-bonga";
-import { NFTWhitelistBanner } from "@/components/miner/nft-whitelist-banner";
+
 import { BongaBonkCharacter } from "@/components/miner/bonga-bonk-character";
 import { FloatingCoins, spawnCoins, type FloatingCoin } from "@/components/miner/floating-coins";
 import {
@@ -254,7 +254,6 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
         <div className="mt-4 space-y-4">
           <GameStats state={gameState} combo={combo} connected={connected} />
           <ClaimBonga state={gameState} onStateChange={setGameState} />
-          <NFTWhitelistBanner />
         </div>
 
         {/* Game arena */}

@@ -7,7 +7,7 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bonga Bonk Miner — Bonk's Sister, Mine $BONGA on Solana",
   description:
-    "Play Bonga Bonk Miner — Bonk's Sister tap game on Solana. Bonk meme coins, mine $BONGA, climb the leaderboard, and unlock Bonga NFT whitelist perks. Free at bongabonks.com.",
+    "Play Bonga Bonk Miner — Bonk's Sister tap game on Solana. Bonk meme coins, mine $BONGA, and climb the leaderboard. Free at bongabonks.com.",
   path: "/",
   keywords: [
     "Bonga",

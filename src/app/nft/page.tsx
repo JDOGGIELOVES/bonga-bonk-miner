@@ -6,7 +6,7 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bonga NFT Collection — Mint Bonk's Sister on Solana",
   description:
-    "Mint Bonga NFTs on Solana — 2,000 unique Bonk's Sister warriors with hippie, cosmic, and bonk vibes. Bonk Miner players get whitelist discounts. Join the Bonga fam.",
+    "Mint Bonga NFTs on Solana — 2,000 unique Bonk's Sister warriors with hippie, cosmic, and bonk vibes. Join the Bonga fam at bongabonks.com/nft.",
   path: "/nft",
   keywords: [
     "Bonga NFT",
@@ -17,7 +17,6 @@ export const metadata: Metadata = buildPageMetadata({
     "mint Bonga",
     "Solana NFT",
     "Bonga Bonk",
-    "Bonk Miner whitelist",
     "bongabonks NFT",
     "Bonga fam",
     "2,000 Bonga",

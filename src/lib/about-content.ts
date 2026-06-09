@@ -38,7 +38,7 @@ export const ECOSYSTEM_LINKS = [
     href: "/",
     title: "Bonga Bonk Miner",
     description:
-      "Tap meme coins, mine $BONGA, and climb the leaderboard. Bonk Miner players unlock NFT whitelist perks.",
+      "Tap meme coins, mine $BONGA, and climb the leaderboard. Then mint your Bonga on /nft.",
     emoji: "🔨",
     accent: "text-bonga-orange",
   },

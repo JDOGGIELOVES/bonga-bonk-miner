@@ -302,7 +302,7 @@ export const ROADMAP = [
     phase: "Phase 1",
     title: "Mint & Fam",
     status: "live" as const,
-    items: ["NFT mint launch", "Bonk Miner whitelist", "Community Discord/X"],
+    items: ["NFT mint launch", "Bonk Miner game", "Community Discord/X"],
   },
   {
     phase: "Phase 2",

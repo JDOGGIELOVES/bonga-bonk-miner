@@ -1,5 +1,4 @@
 import { BONGA_NFTS, type BongaNFT } from "@/lib/nft-collection";
-import { getWhitelistStatus } from "@/lib/bonga-whitelist";
 import { isMintSimulatedBuildHint } from "@/lib/mint-config";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 
@@ -54,24 +53,11 @@ function rollRarity(): BongaNFT {
   return BONGA_NFTS[0];
 }
 
-/**
- * Display mint price. Bonk Miner whitelist only applies to preview mints —
- * live Candy Guard always charges the on-chain solPayment (0.08 SOL).
- */
+/** Display mint price — always the configured on-chain / preview price. */
 export function getMintPrice(
-  walletAddress?: string,
-  priceSol = MINT_CONFIG.priceSol,
-  options?: { live?: boolean }
+  _walletAddress?: string,
+  priceSol = MINT_CONFIG.priceSol
 ): number {
-  if (options?.live) {
-    return priceSol;
-  }
-
-  const wl = getWhitelistStatus(walletAddress);
-  if (wl.tier === "free") return 0;
-  if (wl.tier === "discount") {
-    return priceSol * (1 - wl.discountPercent / 100);
-  }
   return priceSol;
 }
 
@@ -153,7 +139,7 @@ export async function mintBongaNFT(
   }
 
   const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
-  const price = getMintPrice(walletAddress, onChainPrice, { live: isLive });
+  const price = getMintPrice(walletAddress, onChainPrice);
 
   if (!isLive) {
     await new Promise((r) => setTimeout(r, 2000 + Math.random() * 1000));
