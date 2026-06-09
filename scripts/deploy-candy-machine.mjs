@@ -5,7 +5,7 @@
  *
  * Usage:
  *   SOLANA_RPC_URL=<helius> node scripts/deploy-candy-machine.mjs
- *   NFT_DEPLOY_SUPPLY=500  (optional, default 8888)
+ *   NFT_DEPLOY_SUPPLY=500  (optional, default 2000)
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -17,7 +17,7 @@ import { createNft, mplTokenMetadata, TokenStandard } from "@metaplex-foundation
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bongabonks.com";
-const supply = Number(process.env.NFT_DEPLOY_SUPPLY || "8888");
+const supply = Number(process.env.NFT_DEPLOY_SUPPLY || "2000");
 const priceSol = Number(process.env.NEXT_PUBLIC_MINT_PRICE_SOL || "0.08");
 const rpc =
   process.env.SOLANA_RPC_URL ||

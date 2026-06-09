@@ -31,7 +31,7 @@ console.log("Bonga NFT Collection setup");
 console.log("==========================");
 console.log("");
 console.log("Collection:", nameMatch?.[1] ?? "Bonga NFT Collection");
-console.log("Supply:", supplyMatch?.[1] ?? "8888");
+console.log("Supply:", supplyMatch?.[1] ?? "2000");
 console.log("Preview mint:", "https://bongabonks.com/nft");
 console.log("");
 console.log("Trait count: 16 (see nft-collection.ts for art prompts)");

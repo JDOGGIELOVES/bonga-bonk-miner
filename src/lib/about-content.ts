@@ -1,4 +1,5 @@
 import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
+import { COLLECTION_STATS } from "@/lib/nft-collection";
 
 export const ABOUT_FAQ = [
   {
@@ -45,7 +46,7 @@ export const ECOSYSTEM_LINKS = [
     href: "/nft",
     title: "Bonga NFT Collection",
     description:
-      "8,888 unique Bonga Bonk's Sister warriors on Solana — hippie, cosmic, beach, and bonk-powered traits.",
+      `${COLLECTION_STATS.totalSupply.toLocaleString()} unique Bonga Bonk's Sister warriors on Solana — hippie, cosmic, beach, and bonk-powered traits.`,
     emoji: "✌️",
     accent: "text-bonga-teal",
   },

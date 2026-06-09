@@ -1,6 +1,7 @@
 import { JsonLd } from "@/components/seo/json-ld";
 import { ABOUT_FAQ } from "@/lib/about-content";
 import { BONGA_TOKEN_CA, BONGA_TOKEN_SOLSCAN_URL } from "@/lib/bonga-token";
+import { COLLECTION_STATS } from "@/lib/nft-collection";
 import {
   absoluteUrl,
   SITE_NAME,
@@ -115,7 +116,7 @@ export function NftJsonLd() {
         url: absoluteUrl("/nft"),
         name: "Bonga NFT Collection — Mint Bonk's Sister on Solana",
         description:
-          "8,888 unique Bonga NFTs on Solana. Hippie, cosmic, and bonk-powered art from Bonk's Sister. Mint yours and join the Bonga fam.",
+          `${COLLECTION_STATS.totalSupply.toLocaleString()} unique Bonga NFTs on Solana. Hippie, cosmic, and bonk-powered art from Bonk's Sister. Mint yours and join the Bonga fam.`,
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",
@@ -125,7 +126,7 @@ export function NftJsonLd() {
           name: "Bonga NFT Collection",
           alternateName: ["Bonga NFTs", "Bonk Sister NFTs"],
           description:
-            "8,888 chibi Shiba warrior NFTs — peaceful bonks, dreadlocks, and Solana vibes. Bonk Miner players get whitelist discounts.",
+            `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — peaceful bonks, dreadlocks, and Solana vibes. Bonk Miner players get whitelist discounts.`,
           brand: { "@id": ORG_ID },
           category: "NFT",
           image: absoluteUrl("/bonga-character.png"),

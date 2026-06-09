@@ -45,8 +45,9 @@ export function NFTHero() {
             <span className="text-gradient">Bonga</span> NFT Collection
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            8,888 unique chibi Shiba warriors — hippie vibes, cosmic energy, and
-            bonk power. Mint yours. Join the fam.
+            {COLLECTION_STATS.totalSupply.toLocaleString()} unique chibi Shiba
+            warriors — hippie vibes, cosmic energy, and bonk power. Mint yours.
+            Join the fam.
           </p>
         </motion.div>
 

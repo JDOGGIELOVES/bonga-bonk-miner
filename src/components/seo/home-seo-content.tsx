@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
+import { COLLECTION_STATS } from "@/lib/nft-collection";
 
 /** Server-rendered crawlable content — always in the HTML for search engines. */
 export function HomeSeoContent() {
@@ -15,8 +16,9 @@ export function HomeSeoContent() {
         raise the frequency with peace, love, and good bonks.
       </p>
       <p>
-        The Bonga ecosystem includes the Bonk Miner tap game, an 8,888-piece
-        Bonga NFT collection, and Bonga Peace — guided breathing, stretching,
+        The Bonga ecosystem includes the Bonk Miner tap game, a{" "}
+        {COLLECTION_STATS.totalSupply.toLocaleString()}-piece Bonga NFT
+        collection, and Bonga Peace — guided breathing, stretching,
         Tai Chi, and daily affirmations the Bonga way.
       </p>
       <nav aria-label="Bonga site sections">
