@@ -22,6 +22,8 @@ export const SOUND_PATHS = {
   sparkle: "/sounds/sparkle.mp3",
   /** Chill hippie / lo-fi background loop */
   bgm: "/sounds/lofi-peace.mp3",
+  /** Gentle flute for Tai Chi sessions */
+  taiChiFlute: "/sounds/taichi-flute.mp3",
 } as const;
 
 /**

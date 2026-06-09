@@ -15,7 +15,11 @@ export function TaiChiModule({ compact = false }: { compact?: boolean }) {
       <AnimatePresence mode="wait">
         {active ? (
           <div key={active.id}>
-            <SessionPlayer session={active} onBack={() => setActiveId(null)} />
+            <SessionPlayer
+              session={active}
+              onBack={() => setActiveId(null)}
+              musicMode="flute"
+            />
           </div>
         ) : (
           <motion.div

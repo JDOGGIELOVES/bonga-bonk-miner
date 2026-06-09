@@ -84,8 +84,8 @@ export function PeaceLanding() {
           </p>
           <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
             Gentle movement for relaxation and focus. Each step shows start,
-            middle, and end body positions so you can follow the full move. Listen
-            to your body.
+            middle, and end body positions. Melodic flute music plays during
+            flows. Listen to your body.
           </p>
           <div className="mt-10">
             <TaiChiModule />

@@ -3,11 +3,14 @@ import {
   playPeaceBeginChime,
   playPeaceEndChime,
   playPeaceStepTick,
+  startProceduralFluteBgm,
   startProceduralPeaceBgm,
   type BgmHandle,
 } from "./procedural-sounds";
 
 export const PEACE_AUDIO_SETTINGS_KEY = "bonga-peace-audio";
+
+export type PeaceMusicMode = "ambient" | "flute";
 
 export const DEFAULT_PEACE_AUDIO_SETTINGS = {
   muted: false,
@@ -48,10 +51,12 @@ class PeaceAudioManager {
   private musicGain: GainNode | null = null;
   private settings: PeaceAudioSettings = { ...DEFAULT_PEACE_AUDIO_SETTINGS };
   private bgmBuffer: AudioBuffer | null = null;
+  private fluteBuffer: AudioBuffer | null = null;
   private bgmSource: AudioBufferSourceNode | null = null;
   private bgmElementGain: GainNode | null = null;
   private proceduralBgm: BgmHandle | null = null;
   private sessionActive = false;
+  private musicMode: PeaceMusicMode = "ambient";
   private initialized = false;
   private listeners = new Set<(s: PeaceAudioSettings) => void>();
 
@@ -82,7 +87,7 @@ class PeaceAudioManager {
     this.masterGain.connect(this.ctx.destination);
     this.applyGainValues();
     this.initialized = true;
-    void this.preloadBgm();
+    void this.preloadBuffers();
   }
 
   async resume() {
@@ -99,16 +104,25 @@ class PeaceAudioManager {
     this.musicGain.gain.value = this.settings.musicVolume;
   }
 
-  private async preloadBgm() {
-    if (!this.ctx) return;
+  private async fetchBuffer(url: string): Promise<AudioBuffer | null> {
+    if (!this.ctx) return null;
     try {
-      const res = await fetch(SOUND_PATHS.bgm);
-      if (!res.ok) return;
+      const res = await fetch(url);
+      if (!res.ok) return null;
       const arr = await res.arrayBuffer();
-      this.bgmBuffer = await this.ctx.decodeAudioData(arr);
+      return await this.ctx.decodeAudioData(arr);
     } catch {
-      this.bgmBuffer = null;
+      return null;
     }
+  }
+
+  private async preloadBuffers() {
+    const [bgm, flute] = await Promise.all([
+      this.fetchBuffer(SOUND_PATHS.bgm),
+      this.fetchBuffer(SOUND_PATHS.taiChiFlute),
+    ]);
+    this.bgmBuffer = bgm;
+    this.fluteBuffer = flute;
   }
 
   private stopMusic() {
@@ -119,6 +133,7 @@ class PeaceAudioManager {
         /* */
       }
       this.bgmSource = null;
+      this.bgmElementGain = null;
     }
     if (this.proceduralBgm) {
       this.proceduralBgm.stop();
@@ -126,11 +141,33 @@ class PeaceAudioManager {
     }
   }
 
-  private startAmbientMusic() {
+  private startSessionMusic() {
     if (!this.ctx || !this.musicGain || this.settings.muted || !this.settings.musicEnabled) {
       return;
     }
     this.stopMusic();
+
+    if (this.musicMode === "flute") {
+      if (this.fluteBuffer) {
+        const src = this.ctx.createBufferSource();
+        src.buffer = this.fluteBuffer;
+        src.loop = true;
+        const g = this.ctx.createGain();
+        g.gain.value = 0.8;
+        src.connect(g);
+        g.connect(this.musicGain);
+        src.start();
+        this.bgmSource = src;
+        this.bgmElementGain = g;
+      } else {
+        this.proceduralBgm = startProceduralFluteBgm(
+          this.ctx,
+          this.musicGain,
+          this.settings.musicVolume
+        );
+      }
+      return;
+    }
 
     if (this.bgmBuffer) {
       const src = this.ctx.createBufferSource();
@@ -158,20 +195,22 @@ class PeaceAudioManager {
       return;
     }
     if (this.bgmElementGain && this.ctx) {
+      const peak = this.musicMode === "flute" ? 0.8 : 0.85;
       this.bgmElementGain.gain.exponentialRampToValueAtTime(
-        Math.max(0.001, to * 0.85),
+        Math.max(0.001, to * peak),
         this.ctx.currentTime + 0.6
       );
     }
   }
 
-  async startSession() {
+  async startSession(mode: PeaceMusicMode = "ambient") {
     await this.resume();
     if (!this.ctx || !this.sfxGain || this.settings.muted) return;
+    this.musicMode = mode;
     this.sessionActive = true;
     playPeaceBeginChime(this.ctx, this.sfxGain, this.settings.sfxVolume);
     if (this.settings.musicEnabled) {
-      window.setTimeout(() => this.startAmbientMusic(), 400);
+      window.setTimeout(() => this.startSessionMusic(), 400);
     }
   }
 
@@ -184,7 +223,7 @@ class PeaceAudioManager {
     if (this.proceduralBgm?.fade || this.bgmSource) {
       this.fadeMusic(1);
     } else {
-      this.startAmbientMusic();
+      this.startSessionMusic();
     }
   }
 
@@ -212,7 +251,7 @@ class PeaceAudioManager {
     this.settings.muted = !this.settings.muted;
     this.applyGainValues();
     if (this.settings.muted) this.stopMusic();
-    else if (this.sessionActive && this.settings.musicEnabled) this.startAmbientMusic();
+    else if (this.sessionActive && this.settings.musicEnabled) this.startSessionMusic();
     this.notify();
   }
 
@@ -224,7 +263,7 @@ class PeaceAudioManager {
   toggleMusic() {
     this.settings.musicEnabled = !this.settings.musicEnabled;
     if (this.sessionActive) {
-      if (this.settings.musicEnabled && !this.settings.muted) this.startAmbientMusic();
+      if (this.settings.musicEnabled && !this.settings.muted) this.startSessionMusic();
       else this.stopMusic();
     }
     this.notify();
@@ -235,7 +274,7 @@ class PeaceAudioManager {
     this.applyGainValues();
     if (this.sessionActive) {
       if (this.settings.musicEnabled && !this.settings.muted) {
-        if (!this.proceduralBgm && !this.bgmSource) this.startAmbientMusic();
+        if (!this.proceduralBgm && !this.bgmSource) this.startSessionMusic();
       } else {
         this.stopMusic();
       }

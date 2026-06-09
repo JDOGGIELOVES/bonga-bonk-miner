@@ -446,3 +446,131 @@ export function startProceduralPeaceBgm(
     },
   };
 }
+
+/** Gentle melodic flute — pentatonic phrases for Tai Chi */
+export function startProceduralFluteBgm(
+  ctx: AudioContext,
+  dest: AudioNode,
+  volume: number
+): BgmHandle {
+  let stopped = false;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let noteIndex = 0;
+
+  const scale = [293.66, 329.63, 369.99, 440, 493.88, 587.33, 659.25];
+  const melody = [0, 2, 4, 3, 2, 1, 0, 2, 4, 5, 4, 2, 1, 3, 2, 0];
+
+  const masterFilter = ctx.createBiquadFilter();
+  masterFilter.type = "lowpass";
+  masterFilter.frequency.value = 3200;
+  masterFilter.Q.value = 0.6;
+  masterFilter.connect(dest);
+
+  const fluteGain = ctx.createGain();
+  fluteGain.gain.value = volume * 0.22;
+  fluteGain.connect(masterFilter);
+
+  const padGain = ctx.createGain();
+  padGain.gain.value = volume * 0.07;
+  padGain.connect(masterFilter);
+
+  const activeNodes: (OscillatorNode | AudioBufferSourceNode)[] = [];
+
+  function playFluteNote(freq: number, durationSec: number) {
+    if (stopped) return;
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, now);
+
+    const vibrato = ctx.createOscillator();
+    vibrato.type = "sine";
+    vibrato.frequency.value = 4.5;
+    const vibratoDepth = ctx.createGain();
+    vibratoDepth.gain.value = 2.5;
+    vibrato.connect(vibratoDepth);
+    vibratoDepth.connect(osc.frequency);
+    vibrato.start(now);
+    vibrato.stop(now + durationSec + 0.2);
+    activeNodes.push(vibrato);
+
+    const envelope = ctx.createGain();
+    envelope.gain.setValueAtTime(0.001, now);
+    envelope.gain.linearRampToValueAtTime(1, now + 0.25);
+    envelope.gain.setValueAtTime(0.75, now + durationSec - 0.5);
+    envelope.gain.exponentialRampToValueAtTime(0.001, now + durationSec);
+
+    osc.connect(envelope);
+    envelope.connect(fluteGain);
+    osc.start(now);
+    osc.stop(now + durationSec + 0.15);
+    activeNodes.push(osc);
+
+    const echo = ctx.createOscillator();
+    echo.type = "sine";
+    echo.frequency.value = freq;
+    const echoEnv = ctx.createGain();
+    echoEnv.gain.setValueAtTime(0.001, now + 0.35);
+    echoEnv.gain.linearRampToValueAtTime(0.35, now + 0.5);
+    echoEnv.gain.exponentialRampToValueAtTime(0.001, now + durationSec + 0.5);
+    echo.connect(echoEnv);
+    echoEnv.connect(fluteGain);
+    echo.start(now + 0.35);
+    echo.stop(now + durationSec + 0.6);
+    activeNodes.push(echo);
+
+    const pad = ctx.createOscillator();
+    pad.type = "sine";
+    pad.frequency.value = freq * 0.5;
+    const padEnv = ctx.createGain();
+    padEnv.gain.setValueAtTime(0.001, now);
+    padEnv.gain.linearRampToValueAtTime(1, now + 0.6);
+    padEnv.gain.exponentialRampToValueAtTime(0.001, now + durationSec + 0.8);
+    pad.connect(padEnv);
+    padEnv.connect(padGain);
+    pad.start(now);
+    pad.stop(now + durationSec + 1);
+    activeNodes.push(pad);
+  }
+
+  function scheduleNote() {
+    if (stopped) return;
+    const idx = melody[noteIndex % melody.length];
+    const freq = scale[idx];
+    const durationSec = 2.6 + (noteIndex % 3) * 0.4;
+    playFluteNote(freq, durationSec);
+    noteIndex++;
+    timeoutId = setTimeout(scheduleNote, durationSec * 1000 - 300);
+  }
+
+  scheduleNote();
+
+  return {
+    stop: () => {
+      stopped = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      activeNodes.forEach((n) => {
+        try {
+          n.stop();
+        } catch {
+          /* */
+        }
+      });
+      const t = ctx.currentTime;
+      fluteGain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+      padGain.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+    },
+    fade: (to: number, sec = 0.6) => {
+      const t = ctx.currentTime;
+      fluteGain.gain.exponentialRampToValueAtTime(
+        Math.max(0.001, to * volume * 0.22),
+        t + sec
+      );
+      padGain.gain.exponentialRampToValueAtTime(
+        Math.max(0.001, to * volume * 0.07),
+        t + sec
+      );
+    },
+  };
+}

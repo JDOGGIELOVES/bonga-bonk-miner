@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getTraitPose } from "@/lib/nft-trait-poses";
-import { peaceAudio } from "@/lib/audio/peace-audio";
+import { peaceAudio, type PeaceMusicMode } from "@/lib/audio/peace-audio";
 import { peaceNarration } from "@/lib/audio/peace-narration";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { TaiChiPoseDiagram } from "@/components/peace/tai-chi-pose-diagram";
@@ -44,12 +44,14 @@ export function SessionPlayer({
   completeMessage = "You showed up for peace. That's the Bonga way.",
   onComplete,
   soundEnabled = true,
+  musicMode = "ambient",
 }: {
   session: GuidedSession;
   onBack: () => void;
   completeMessage?: string;
   onComplete?: () => void;
   soundEnabled?: boolean;
+  musicMode?: PeaceMusicMode;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [remaining, setRemaining] = useState(session.steps[0]?.durationSec ?? 0);
@@ -141,7 +143,7 @@ export function SessionPlayer({
         if (!sessionStartedRef.current) {
           sessionStartedRef.current = true;
           if (soundEnabled) {
-            void peaceAudio.resume().then(() => peaceAudio.startSession());
+            void peaceAudio.resume().then(() => peaceAudio.startSession(musicMode));
             lastNarratedStepRef.current = stepIndex;
             window.setTimeout(() => narrateStep(stepIndex, true), 900);
           }
