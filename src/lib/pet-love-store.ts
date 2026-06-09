@@ -96,18 +96,11 @@ async function streamToText(
   stream: ReadableStream<Uint8Array> | NodeJS.ReadableStream
 ): Promise<string> {
   if ("getReader" in stream) {
-    const reader = stream.getReader();
-    const chunks: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) chunks.push(value);
-    }
-    return Buffer.concat(chunks).toString("utf8");
+    return new Response(stream).text();
   }
 
   const chunks: Buffer[] = [];
-  for await (const chunk of stream) {
+  for await (const chunk of stream as AsyncIterable<Buffer | Uint8Array | string>) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks).toString("utf8");
