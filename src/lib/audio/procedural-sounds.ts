@@ -158,7 +158,10 @@ export function playProceduralCoinCollect(
   ding.stop(now + 0.53);
 }
 
-export type BgmHandle = { stop: () => void };
+export type BgmHandle = {
+  stop: () => void;
+  fade?: (to: number, sec?: number) => void;
+};
 
 /** Chill lo-fi hippie loop — soft pads + gentle beat */
 export function startProceduralBgm(
@@ -268,6 +271,178 @@ export function startProceduralBgm(
       });
       padGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
       beatGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    },
+  };
+}
+
+/** Singing-bowl strike — session begin */
+export function playPeaceBeginChime(
+  ctx: AudioContext,
+  dest: AudioNode,
+  volume: number
+) {
+  const now = ctx.currentTime;
+  const v = volume * 0.45;
+  const freqs = [220, 329.63, 440, 554.37];
+
+  freqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const g = ctx.createGain();
+    const attack = 0.02 + i * 0.01;
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.linearRampToValueAtTime(v * (1 - i * 0.15), now + attack);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 2.8 + i * 0.2);
+    osc.connect(g);
+    g.connect(dest);
+    osc.start(now);
+    osc.stop(now + 3.2);
+  });
+}
+
+/** Completion bell — session end */
+export function playPeaceEndChime(
+  ctx: AudioContext,
+  dest: AudioNode,
+  volume: number
+) {
+  const now = ctx.currentTime;
+  const v = volume * 0.5;
+  const tones = [
+    { freq: 523.25, at: 0, dur: 1.4 },
+    { freq: 783.99, at: 0.35, dur: 2.2 },
+  ];
+
+  tones.forEach(({ freq, at, dur }) => {
+    const t = now + at;
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.001, t);
+    g.gain.linearRampToValueAtTime(v, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(g);
+    g.connect(dest);
+    osc.start(t);
+    osc.stop(t + dur + 0.1);
+  });
+}
+
+/** Soft tick when a timed step advances */
+export function playPeaceStepTick(
+  ctx: AudioContext,
+  dest: AudioNode,
+  volume: number
+) {
+  const now = ctx.currentTime;
+  const v = volume * 0.22;
+  const osc = ctx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(880, now);
+  osc.frequency.exponentialRampToValueAtTime(660, now + 0.12);
+  connect(ctx, osc, now, 0.15, v).connect(dest);
+  osc.start(now);
+  osc.stop(now + 0.15);
+}
+
+/** Transcendental lo-fi ambient — slow pads, no drums */
+export function startProceduralPeaceBgm(
+  ctx: AudioContext,
+  dest: AudioNode,
+  volume: number
+): BgmHandle {
+  let stopped = false;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  const barSec = 8;
+  const chords = [
+    [174.61, 220, 261.63],
+    [196, 246.94, 293.66],
+    [220, 261.63, 329.63],
+    [164.81, 207.65, 246.94],
+  ];
+
+  const masterFilter = ctx.createBiquadFilter();
+  masterFilter.type = "lowpass";
+  masterFilter.frequency.value = 900;
+  masterFilter.connect(dest);
+
+  const padGain = ctx.createGain();
+  padGain.gain.value = volume * 0.14;
+  padGain.connect(masterFilter);
+
+  const shimmerGain = ctx.createGain();
+  shimmerGain.gain.value = volume * 0.06;
+  shimmerGain.connect(masterFilter);
+
+  const activeOscs: OscillatorNode[] = [];
+
+  function scheduleBar(barIndex: number) {
+    if (stopped) return;
+    const start = ctx.currentTime + 0.05;
+    const chord = chords[barIndex % chords.length];
+
+    chord.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, start);
+      g.gain.linearRampToValueAtTime(1, start + 1.2 + i * 0.15);
+      g.gain.setValueAtTime(0.7, start + barSec - 1);
+      g.gain.linearRampToValueAtTime(0, start + barSec);
+      osc.connect(g);
+      g.connect(padGain);
+      osc.start(start);
+      osc.stop(start + barSec);
+      activeOscs.push(osc);
+    });
+
+    if (barIndex % 2 === 0) {
+      const t = start + barSec * 0.6;
+      const chime = ctx.createOscillator();
+      chime.type = "triangle";
+      chime.frequency.value = chord[2] * 2;
+      const cg = ctx.createGain();
+      cg.gain.setValueAtTime(0.001, t);
+      cg.gain.linearRampToValueAtTime(1, t + 0.05);
+      cg.gain.exponentialRampToValueAtTime(0.001, t + 1.8);
+      chime.connect(cg);
+      cg.connect(shimmerGain);
+      chime.start(t);
+      chime.stop(t + 2);
+    }
+
+    timeoutId = setTimeout(() => scheduleBar(barIndex + 1), barSec * 1000 - 80);
+  }
+
+  scheduleBar(0);
+
+  return {
+    stop: () => {
+      stopped = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      activeOscs.forEach((o) => {
+        try {
+          o.stop();
+        } catch {
+          /* */
+        }
+      });
+      padGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    },
+    fade: (to: number, sec = 0.6) => {
+      const t = ctx.currentTime;
+      padGain.gain.exponentialRampToValueAtTime(
+        Math.max(0.001, to * volume * 0.14),
+        t + sec
+      );
+      shimmerGain.gain.exponentialRampToValueAtTime(
+        Math.max(0.001, to * volume * 0.06),
+        t + sec
+      );
     },
   };
 }

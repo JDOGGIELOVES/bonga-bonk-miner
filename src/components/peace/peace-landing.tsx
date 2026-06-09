@@ -8,6 +8,7 @@ import { BreathingModule } from "@/components/peace/breathing-module";
 import { BonkBreakModule } from "@/components/peace/bonk-break-module";
 import { TaiChiModule } from "@/components/peace/tai-chi-module";
 import { StretchingModule } from "@/components/peace/stretching-module";
+import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { DailyCheckIn } from "@/components/peace/daily-checkin";
 
 export function PeaceLanding() {
@@ -57,6 +58,10 @@ export function PeaceLanding() {
           <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
             Stretch within your comfort. Not medical advice — skip anything that
             doesn&apos;t feel right.
+          </p>
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-center text-xs text-muted-foreground">
+            <span>Begin chime, step ticks, and ambient lo-fi while you stretch</span>
+            <PeaceAudioToggle />
           </p>
           <div className="mt-10">
             <StretchingModule />

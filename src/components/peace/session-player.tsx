@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getTraitPose } from "@/lib/nft-trait-poses";
+import { peaceAudio } from "@/lib/audio/peace-audio";
+import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
 
 export interface SessionStep {
@@ -36,11 +38,13 @@ export function SessionPlayer({
   onBack,
   completeMessage = "You showed up for peace. That's the Bonga way.",
   onComplete,
+  soundEnabled = true,
 }: {
   session: GuidedSession;
   onBack: () => void;
   completeMessage?: string;
   onComplete?: () => void;
+  soundEnabled?: boolean;
 }) {
   const [stepIndex, setStepIndex] = useState(0);
   const [remaining, setRemaining] = useState(session.steps[0]?.durationSec ?? 0);
@@ -58,14 +62,22 @@ export function SessionPlayer({
   const guideImage = pose?.image ?? "/bonga-character.png";
 
   const completedRef = useRef(false);
+  const sessionStartedRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      if (soundEnabled) peaceAudio.stopSession();
+    };
+  }, [soundEnabled]);
 
   useEffect(() => {
     if (finished && !completedRef.current) {
       completedRef.current = true;
+      if (soundEnabled) peaceAudio.endSession();
       onComplete?.();
     }
     if (!finished) completedRef.current = false;
-  }, [finished, onComplete]);
+  }, [finished, onComplete, soundEnabled]);
 
   const goNext = useCallback(() => {
     if (stepIndex >= session.steps.length - 1) {
@@ -73,10 +85,37 @@ export function SessionPlayer({
       setFinished(true);
       return;
     }
+    if (soundEnabled) peaceAudio.playStepChange();
     const next = stepIndex + 1;
     setStepIndex(next);
     setRemaining(session.steps[next].durationSec);
-  }, [stepIndex, session.steps]);
+  }, [stepIndex, session.steps, soundEnabled]);
+
+  const handleBack = () => {
+    if (soundEnabled) peaceAudio.stopSession();
+    onBack();
+  };
+
+  const togglePlaying = () => {
+    setPlaying((wasPlaying) => {
+      const next = !wasPlaying;
+      if (!soundEnabled) return next;
+
+      void peaceAudio.resume().then(() => {
+        if (next) {
+          if (!sessionStartedRef.current) {
+            sessionStartedRef.current = true;
+            void peaceAudio.startSession();
+          } else {
+            peaceAudio.resumeSession();
+          }
+        } else {
+          peaceAudio.pauseSession();
+        }
+      });
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!playing || finished || !step) return;
@@ -91,6 +130,8 @@ export function SessionPlayer({
   }, [playing, remaining, finished, step, goNext]);
 
   const restart = () => {
+    if (soundEnabled) peaceAudio.stopSession();
+    sessionStartedRef.current = false;
     setStepIndex(0);
     setRemaining(session.steps[0].durationSec);
     setPlaying(false);
@@ -112,7 +153,7 @@ export function SessionPlayer({
             <RotateCcw className="mr-2 h-4 w-4" />
             Again
           </Button>
-          <Button variant="outline" onClick={onBack}>
+          <Button variant="outline" onClick={handleBack}>
             All sessions
           </Button>
         </div>
@@ -140,14 +181,17 @@ export function SessionPlayer({
         </div>
 
         <div className="flex flex-col p-6">
-          <button
-            type="button"
-            onClick={onBack}
-            className="mb-3 flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ChevronLeft className="mr-1 h-3 w-3" />
-            Back to sessions
-          </button>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              <ChevronLeft className="mr-1 h-3 w-3" />
+              Back to sessions
+            </button>
+            {soundEnabled && <PeaceAudioToggle compact />}
+          </div>
 
           <p className="text-xs font-semibold uppercase tracking-wide text-bonga-teal">
             Step {stepIndex + 1} of {session.steps.length}
@@ -166,11 +210,7 @@ export function SessionPlayer({
           </div>
 
           <div className="mt-4 flex gap-2">
-            <Button
-              variant="peace"
-              className="flex-1"
-              onClick={() => setPlaying((p) => !p)}
-            >
+            <Button variant="peace" className="flex-1" onClick={togglePlaying}>
               {playing ? (
                 <>
                   <Pause className="mr-2 h-4 w-4" />
