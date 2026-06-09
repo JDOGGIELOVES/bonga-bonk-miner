@@ -10,6 +10,7 @@ import { RoadmapSection } from "@/components/nft/roadmap-section";
 import { TeamSection } from "@/components/nft/team-section";
 import { UtilitySection } from "@/components/nft/utility-section";
 import { CommunitySection } from "@/components/nft/community-section";
+import { TaiChiSection } from "@/components/nft/tai-chi-section";
 
 export function NFTLanding() {
   return (
@@ -19,6 +20,7 @@ export function NFTLanding() {
       <NFTGallery />
       <NFTMintPanel />
       <UtilitySection />
+      <TaiChiSection />
       <RoadmapSection />
       <TeamSection />
       <CommunitySection />
@@ -41,6 +43,9 @@ export function NFTLanding() {
           </Link>
           <Link href="/nft#mint" className="text-bonga-teal hover:underline">
             Mint NFT
+          </Link>
+          <Link href="/nft#peace" className="text-bonga-purple hover:underline">
+            Tai Chi
           </Link>
         </div>
       </footer>
