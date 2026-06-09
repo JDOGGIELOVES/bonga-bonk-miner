@@ -80,13 +80,13 @@ export function PeaceLanding() {
             Bonga <span className="text-gradient">Tai Chi</span>
           </h2>
           <p className="mt-2 text-center text-muted-foreground">
-            Slow flows guided by trait art — cloud hands, cosmic balance, meadow
-            wind-down
+            Slow flows with clear body guides — cloud hands, cosmic balance,
+            meadow wind-down
           </p>
           <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
-            Gentle movement for relaxation and focus. Bonga shows start, middle,
-            and top of each move. Melodic flute plays during flows. Listen to
-            your body.
+            Gentle movement for relaxation and focus. Each step shows accurate
+            start, middle, and top positions. Melodic flute plays during flows.
+            Listen to your body.
           </p>
           <div className="mt-10">
             <TaiChiModule />

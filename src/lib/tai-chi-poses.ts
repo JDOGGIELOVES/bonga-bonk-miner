@@ -62,6 +62,18 @@ export const TAI_CHI_POSES: Record<string, TaiChiBodyPose> = {
     rightFoot: { x: 58, y: 88 },
     weight: "center",
   },
+  "arms-half": {
+    id: "arms-half",
+    caption: "Lifting halfway",
+    head: { x: 50, y: 14 },
+    shoulder: { x: 50, y: 26 },
+    leftHand: { x: 30, y: 38 },
+    rightHand: { x: 70, y: 38 },
+    hip: { x: 50, y: 52 },
+    leftFoot: { x: 42, y: 88 },
+    rightFoot: { x: 58, y: 88 },
+    weight: "center",
+  },
   "arms-raised": {
     id: "arms-raised",
     caption: "Raise the sun",
