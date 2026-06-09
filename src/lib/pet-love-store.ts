@@ -39,14 +39,16 @@ function isVercelRuntime(): boolean {
 export function getPetLoveStorageStatus() {
   const blobToken = envFlag("BLOB_READ_WRITE_TOKEN");
   const blobStoreId = envFlag("BLOB_STORE_ID");
-  const oidc = envFlag("VERCEL_OIDC_TOKEN");
+  const oidcEnv = envFlag("VERCEL_OIDC_TOKEN");
   const vercel = isVercelRuntime();
-  const oidcReady = blobStoreId && oidc;
+  // On Vercel, @vercel/blob also reads x-vercel-oidc-token per request.
+  const oidcReady = blobStoreId && (oidcEnv || vercel);
   return {
     vercel,
     blobToken,
     blobStoreId,
-    oidc,
+    oidcEnv,
+    oidcHeaderFallback: vercel && blobStoreId && !oidcEnv,
     oidcReady,
     storageReady: vercel ? blobToken || oidcReady : true,
     mode: useBlobStorage() ? "blob" : "local",
@@ -55,7 +57,10 @@ export function getPetLoveStorageStatus() {
 
 function hasBlobCredentials(): boolean {
   if (envFlag("BLOB_READ_WRITE_TOKEN")) return true;
-  return envFlag("BLOB_STORE_ID") && envFlag("VERCEL_OIDC_TOKEN");
+  if (!envFlag("BLOB_STORE_ID")) return false;
+  // Vercel injects OIDC via x-vercel-oidc-token at request time.
+  if (isVercelRuntime()) return true;
+  return envFlag("VERCEL_OIDC_TOKEN");
 }
 
 function useBlobStorage(): boolean {
