@@ -17,6 +17,7 @@ import {
 import { GameStats } from "@/components/miner/game-stats";
 import { UpgradeShop } from "@/components/miner/upgrade-shop";
 import { LeaderboardPanel } from "@/components/miner/leaderboard-panel";
+import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
 import { BongaHeader } from "@/components/layout/bonga-header";
 import { BongaFooter } from "@/components/layout/bonga-footer";
 import {
@@ -214,20 +215,6 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
     </Button>
   );
 
-  if (!gameState) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-bonga-page">
-        <motion.div
-          animate={{ opacity: [0.4, 1, 0.4] }}
-          transition={{ repeat: Infinity, duration: 1.5 }}
-          className="font-display text-sm font-semibold text-muted-foreground"
-        >
-          Loading...
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-bonga-page">
       <BongaHeader
@@ -250,7 +237,21 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
           </p>
         </motion.div>
 
-        <div className="space-y-4">
+        <BongaCaBanner prominent />
+
+        {!gameState ? (
+          <div className="flex min-h-[50vh] items-center justify-center">
+            <motion.div
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+              className="font-display text-sm font-semibold text-muted-foreground"
+            >
+              Loading...
+            </motion.div>
+          </div>
+        ) : (
+          <>
+        <div className="mt-4 space-y-4">
           <GameStats state={gameState} combo={combo} connected={connected} />
           <ClaimBonga state={gameState} onStateChange={setGameState} />
           <NFTWhitelistBanner />
@@ -325,22 +326,28 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Lifetime · {gameState.totalBonga} $BONGA · {gameState.totalTaps.toLocaleString()} bonks
         </p>
+          </>
+        )}
       </main>
 
       <BongaFooter />
 
-      <UpgradeShop
-        open={shopOpen}
-        onClose={() => setShopOpen(false)}
-        totalBonga={gameState.totalBonga}
-      />
-      <LeaderboardPanel
-        open={leaderboardOpen}
-        onClose={() => setLeaderboardOpen(false)}
-        entries={gameState.leaderboard}
-        playerName={gameState.playerName}
-        onNameChange={updatePlayerName}
-      />
+      {gameState && (
+        <>
+          <UpgradeShop
+            open={shopOpen}
+            onClose={() => setShopOpen(false)}
+            totalBonga={gameState.totalBonga}
+          />
+          <LeaderboardPanel
+            open={leaderboardOpen}
+            onClose={() => setLeaderboardOpen(false)}
+            entries={gameState.leaderboard}
+            playerName={gameState.playerName}
+            onNameChange={updatePlayerName}
+          />
+        </>
+      )}
       <AudioControls />
     </div>
   );

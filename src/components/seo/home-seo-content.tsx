@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
 
 /** Server-rendered crawlable content — always in the HTML for search engines. */
 export function HomeSeoContent() {
@@ -34,6 +35,9 @@ export function HomeSeoContent() {
           </li>
         </ul>
       </nav>
+      <p>
+        Bonga Bonk&apos;s Sister CA: {BONGA_TOKEN_CA}
+      </p>
       <p>
         Keywords: Bonga Bonk&apos;s Sister, Bonga, Bonk, Bonga Bonk, Bonk&apos;s Sister, Bonga Solana,
         Bonk Miner, $BONGA token, Bonga NFT, bongabonks, Raise the Frequency.
