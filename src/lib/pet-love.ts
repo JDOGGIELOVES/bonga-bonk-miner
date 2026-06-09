@@ -18,20 +18,39 @@ export const PET_ANIMAL_LABELS = new Set([
   "giraffe",
 ]);
 
-/** Passed to COCO-SSD detect() — default SDK min is 0.5 which rejects most phone photos. */
-export const PET_DETECT_MIN_SCORE = 0.08;
+export const PET_TYPE_OPTIONS = [
+  "dog",
+  "cat",
+  "bird",
+  "horse",
+  "sheep",
+  "cow",
+  "bear",
+  "elephant",
+  "zebra",
+  "giraffe",
+] as const;
 
-/** Minimum model score to count as a pet (kept lenient for close-up phone photos). */
-export const PET_VERIFY_MIN_CONFIDENCE = 0.12;
+/** Passed to COCO-SSD detect() — default SDK min is 0.5 which rejects most phone photos. */
+export const PET_DETECT_MIN_SCORE = 0.05;
+
+/** Minimum model score to count as a confident pet. */
+export const PET_VERIFY_MIN_CONFIDENCE = 0.1;
+
+/** Weak hint from the model — used with hand/fur fallbacks. */
+export const PET_WEAK_DETECTION_MIN = 0.04;
+
+/** Confidence stored when the user confirms a close-up the model missed. */
+export const PET_ASSISTED_CONFIDENCE = 0.12;
 
 /** Strong pet detection — skin check optional above this score. */
-export const PET_VERIFY_HIGH_CONFIDENCE = 0.38;
+export const PET_VERIFY_HIGH_CONFIDENCE = 0.32;
 
 /** Minimum skin pixels near the pet bbox. */
-export const PET_SKIN_PIXEL_MIN = 24;
+export const PET_SKIN_PIXEL_MIN = 16;
 
 /** Fallback: skin pixels anywhere in the frame. */
-export const PET_SKIN_FULL_IMAGE_MIN = 36;
+export const PET_SKIN_FULL_IMAGE_MIN = 20;
 
 export const PET_MAX_IMAGE_BYTES = 6 * 1024 * 1024;
 

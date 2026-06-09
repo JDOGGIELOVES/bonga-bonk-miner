@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PET_LOVE_REWARD } from "@/lib/pet-love";
+import { PET_LOVE_REWARD, PET_TYPE_OPTIONS } from "@/lib/pet-love";
 import {
   claimPetReward,
   fetchPetGallery,
@@ -62,7 +62,7 @@ export function PetLoveModule() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [verifyState, setVerifyState] = useState<
-    "idle" | "checking" | "passed" | "failed"
+    "idle" | "checking" | "passed" | "assist" | "failed"
   >("idle");
   const [verifyReason, setVerifyReason] = useState("");
   const [petLabel, setPetLabel] = useState("");
@@ -121,7 +121,12 @@ export function PetLoveModule() {
       setVerifyState("passed");
       setPetLabel(result.petLabel);
       setConfidence(result.confidence);
-      setVerifyReason(`Detected ${result.petLabel} with your hand nearby.`);
+      setVerifyReason(`Looks good — ${result.petLabel} and hand petting detected.`);
+    } else if ("assist" in result && result.assist) {
+      setVerifyState("assist");
+      setPetLabel(result.defaultPet);
+      setConfidence(result.assistedConfidence);
+      setVerifyReason(result.reason);
     } else {
       setVerifyState("failed");
       setVerifyReason(result.reason);
@@ -129,7 +134,15 @@ export function PetLoveModule() {
   };
 
   const handleSubmit = async () => {
-    if (!connected || !publicKey || !selectedFile || verifyState !== "passed") return;
+    if (
+      !connected ||
+      !publicKey ||
+      !selectedFile ||
+      (verifyState !== "passed" && verifyState !== "assist") ||
+      !petLabel
+    ) {
+      return;
+    }
 
     setSubmitting(true);
     setError("");
@@ -395,6 +408,38 @@ export function PetLoveModule() {
                   {verifyReason}
                 </motion.p>
               )}
+              {verifyState === "assist" && (
+                <motion.div
+                  key="assist"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-3 rounded-xl border border-amber-300/40 bg-amber-50/60 p-4 dark:bg-amber-950/20"
+                >
+                  <p className="text-center text-sm text-amber-800 dark:text-amber-200">
+                    {verifyReason}
+                  </p>
+                  <p className="text-center text-xs text-muted-foreground">
+                    What pet are you petting?
+                  </p>
+                  <div className="flex flex-wrap justify-center gap-2">
+                    {PET_TYPE_OPTIONS.map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setPetLabel(type)}
+                        className={`rounded-full px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
+                          petLabel === type
+                            ? "bg-bonga-orange text-white"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        }`}
+                      >
+                        {petEmoji(type)} {type}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
               {verifyState === "failed" && (
                 <motion.p
                   key="failed"
@@ -414,6 +459,26 @@ export function PetLoveModule() {
                   Choose another
                 </Button>
               )}
+              {verifyState === "assist" ? (
+                <Button
+                  variant="peace"
+                  className="flex-1"
+                  disabled={!petLabel || submitting}
+                  onClick={() => void handleSubmit()}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing & sharing...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Confirm & share
+                    </>
+                  )}
+                </Button>
+              ) : (
               <Button
                 variant="peace"
                 className="flex-1"
@@ -432,6 +497,7 @@ export function PetLoveModule() {
                   </>
                 )}
               </Button>
+              )}
             </div>
           </div>
         )}
