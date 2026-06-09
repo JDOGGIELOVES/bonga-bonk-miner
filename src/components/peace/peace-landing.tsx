@@ -11,6 +11,7 @@ import { StretchingModule } from "@/components/peace/stretching-module";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { DailyCheckIn } from "@/components/peace/daily-checkin";
 import { DailyAffirmations } from "@/components/peace/daily-affirmations";
+import { TranscendentalMeditationModule } from "@/components/peace/transcendental-meditation-module";
 
 export function PeaceLanding() {
   return (
@@ -36,7 +37,31 @@ export function PeaceLanding() {
         </div>
       </section>
 
-      <section id="bonk-break" className="section-anchor bg-muted/20 py-16">
+      <section id="meditate" className="section-anchor bg-muted/20 py-16">
+        <div className="mx-auto max-w-4xl px-4">
+          <h2 className="text-center font-display text-3xl font-bold">
+            Transcendental <span className="text-gradient">Meditation</span>
+          </h2>
+          <p className="mt-2 text-center text-muted-foreground">
+            Effortless mantra sits — sit, soften, repeat a gentle sound, return
+            when the mind wanders
+          </p>
+          <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
+            Inspired by transcendental meditation practice, adapted the Bonga way.
+            Not a substitute for certified TM instruction — just peaceful tools
+            for relaxation.
+          </p>
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-center text-xs text-muted-foreground">
+            <span>Voice guide and ambient lo-fi during sessions</span>
+            <PeaceAudioToggle />
+          </p>
+          <div className="mt-10">
+            <TranscendentalMeditationModule />
+          </div>
+        </div>
+      </section>
+
+      <section id="bonk-break" className="section-anchor py-16">
         <div className="mx-auto max-w-2xl px-4">
           <h2 className="text-center font-display text-3xl font-bold">
             Bonk <span className="text-gradient">Break</span>
