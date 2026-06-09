@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 const LINKS = [
+  { label: "About Bonga", href: "/about" },
   { label: "Bonga Peace", href: "/peace" },
   { label: "NFTs", href: "/nft" },
   { label: "bonga.uno", href: "https://bonga.uno" },

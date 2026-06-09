@@ -7,9 +7,9 @@ export function HomeSeoContent() {
       aria-label="About Bonga and Bonk"
       className="sr-only"
     >
-      <h1>Bonga Bonk Miner — Bonk&apos;s Sister on Solana</h1>
+      <h1>Bonga Bonk Miner — Bonga Bonk&apos;s Sister on Solana</h1>
       <p>
-        Bonga is Bonk&apos;s Sister. Play the free Bonga Bonk Miner game at
+        Bonga Bonk&apos;s Sister is Bonk&apos;s Sister. Play the free Bonga Bonk Miner game at
         bongabonks.com — tap to bonk meme coins, mine $BONGA on Solana, and
         raise the frequency with peace, love, and good bonks.
       </p>
@@ -29,10 +29,13 @@ export function HomeSeoContent() {
           <li>
             <Link href="/peace">Bonga Peace — mindfulness and bonk breaks</Link>
           </li>
+          <li>
+            <Link href="/about">About Bonga Bonk&apos;s Sister — official story</Link>
+          </li>
         </ul>
       </nav>
       <p>
-        Keywords: Bonga, Bonk, Bonga Bonk, Bonk&apos;s Sister, Bonga Solana,
+        Keywords: Bonga Bonk&apos;s Sister, Bonga, Bonk, Bonga Bonk, Bonk&apos;s Sister, Bonga Solana,
         Bonk Miner, $BONGA token, Bonga NFT, bongabonks, Raise the Frequency.
       </p>
     </section>

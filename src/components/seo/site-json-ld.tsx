@@ -1,4 +1,5 @@
 import { JsonLd } from "@/components/seo/json-ld";
+import { ABOUT_FAQ } from "@/lib/about-content";
 import {
   absoluteUrl,
   SITE_NAME,
@@ -19,7 +20,12 @@ export function GlobalJsonLd() {
           "@type": "Organization",
           "@id": ORG_ID,
           name: "Bonga",
-          alternateName: ["Bonga Bonk", "Bonk's Sister", "BONGA"],
+          alternateName: [
+            "Bonga Bonk's Sister",
+            "Bonga Bonk",
+            "Bonk's Sister",
+            "BONGA",
+          ],
           url: SITE_URL,
           logo: absoluteUrl("/bonga-character.png"),
           description:
@@ -35,7 +41,12 @@ export function GlobalJsonLd() {
           "@type": "WebSite",
           "@id": WEBSITE_ID,
           name: SITE_NAME,
-          alternateName: ["Bonga", "Bonga Bonk", "bongabonks"],
+          alternateName: [
+            "Bonga Bonk's Sister",
+            "Bonga",
+            "Bonga Bonk",
+            "bongabonks",
+          ],
           url: SITE_URL,
           description: SITE_TAGLINE,
           publisher: { "@id": ORG_ID },
@@ -127,6 +138,41 @@ export function NftJsonLd() {
           },
         },
       }}
+    />
+  );
+}
+
+export function AboutJsonLd() {
+  return (
+    <JsonLd
+      data={[
+        {
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          "@id": `${absoluteUrl("/about")}#webpage`,
+          url: absoluteUrl("/about"),
+          name: "About Bonga Bonk's Sister — Who Is Bonga on Solana?",
+          description:
+            "The official story of Bonga Bonk's Sister — Bonk's Sister on Solana. Bonga, Bonk, $BONGA, NFTs, Bonk Miner, and Bonga Peace.",
+          isPartOf: { "@id": WEBSITE_ID },
+          about: { "@id": ORG_ID },
+          inLanguage: "en-US",
+          primaryImageOfPage: absoluteUrl("/bonga-character.png"),
+          mainEntity: { "@id": ORG_ID },
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: ABOUT_FAQ.map((item) => ({
+            "@type": "Question",
+            name: item.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: item.answer,
+            },
+          })),
+        },
+      ]}
     />
   );
 }

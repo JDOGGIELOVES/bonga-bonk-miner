@@ -8,7 +8,7 @@ export const SITE_NAME = "Bonga Bonk Miner";
 export const SITE_TAGLINE = "Raise the Frequency";
 
 export const DEFAULT_DESCRIPTION =
-  "Bonga is Bonk's Sister — tap to bonk, mine $BONGA on Solana, mint Bonga NFTs, and unwind with Bonga Peace. The official Bonga & Bonk experience at bongabonks.com.";
+  "Bonga Bonk's Sister is Bonk's Sister on Solana — tap to bonk, mine $BONGA, mint Bonga NFTs, and unwind with Bonga Peace. The official Bonga & Bonk experience at bongabonks.com.";
 
 export const DEFAULT_OG_IMAGE = "/bonga-character.png";
 
@@ -18,6 +18,7 @@ export const PRIMARY_KEYWORDS = [
   "Bonga",
   "Bonk",
   "Bonga Bonk",
+  "Bonga Bonk's Sister",
   "Bonk's Sister",
   "Bonga Solana",
   "Bonk Miner",
@@ -42,6 +43,7 @@ export const SOCIAL_LINKS = {
 
 export const PUBLIC_ROUTES = [
   { path: "/", changeFrequency: "daily" as const, priority: 1 },
+  { path: "/about", changeFrequency: "monthly" as const, priority: 0.85 },
   { path: "/nft", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/peace", changeFrequency: "weekly" as const, priority: 0.9 },
 ];

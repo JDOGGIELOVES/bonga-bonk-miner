@@ -154,6 +154,9 @@ export function PeaceLanding() {
           Bonga Peace · Raise the Frequency
         </p>
         <div className="mt-3 flex justify-center gap-4 text-xs">
+          <Link href="/about" className="text-bonga-purple hover:underline">
+            About Bonga
+          </Link>
           <Link href="/" className="text-bonga-orange hover:underline">
             Bonk Miner
           </Link>

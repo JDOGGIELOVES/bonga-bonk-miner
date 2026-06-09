@@ -46,6 +46,12 @@ export function NFTHeader() {
             )
           )}
           <Link
+            href="/about"
+            className="text-sm font-medium text-bonga-purple hover:underline"
+          >
+            About
+          </Link>
+          <Link
             href="/"
             className="text-sm font-medium text-bonga-orange hover:underline"
           >
