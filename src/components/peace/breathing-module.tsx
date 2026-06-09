@@ -41,7 +41,7 @@ function BreathingPlayer({
       if (!phase) return;
       if (withIntro) {
         peaceNarration.speak(
-          `Let's breathe with ${pattern.title}. ${phase.label}.`,
+          `Hey. Let's breathe together with ${pattern.title}. ${phase.label.replace(/✌️/g, "peace")}.`,
           { delayMs: 0 }
         );
       } else {

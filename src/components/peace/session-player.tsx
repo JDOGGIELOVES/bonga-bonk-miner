@@ -17,6 +17,7 @@ export interface SessionStep {
   instruction: string;
   durationSec: number;
   poseStart?: string;
+  poseMiddle?: string;
   poseEnd?: string;
 }
 
@@ -75,7 +76,7 @@ export function SessionPlayer({
       const s = session.steps[index];
       if (!s) return;
       const intro = withIntro
-        ? `Welcome to ${session.title}. Let's move gently.`
+        ? `Hey there. Welcome to ${session.title}. Move slowly and gently with me.`
         : undefined;
       peaceNarration.speakStep(s.title, s.instruction, { intro });
       lastNarratedStepRef.current = index;
@@ -247,9 +248,10 @@ export function SessionPlayer({
             {step?.instruction}
           </p>
 
-          {step?.poseStart && step?.poseEnd && (
+          {step?.poseStart && step?.poseMiddle && step?.poseEnd && (
             <TaiChiPoseDiagram
               poseStart={step.poseStart}
+              poseMiddle={step.poseMiddle}
               poseEnd={step.poseEnd}
             />
           )}

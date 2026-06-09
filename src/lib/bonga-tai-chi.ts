@@ -5,9 +5,8 @@ export interface TaiChiStep {
   instruction: string;
   /** Seconds to hold or move through this step */
   durationSec: number;
-  /** Start body position diagram id */
   poseStart: string;
-  /** End body position diagram id */
+  poseMiddle: string;
   poseEnd: string;
 }
 
@@ -38,6 +37,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Stand tall, feet shoulder-width, knees soft. Inhale through the nose, exhale with a quiet ✌️. Let the shoulders drop.",
         durationSec: 45,
         poseStart: "stand-neutral",
+        poseMiddle: "shoulders-drop-mid",
         poseEnd: "stand-relaxed",
       },
       {
@@ -46,6 +46,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Slowly lift both arms like you're raising the morning sun. Palms turn down as arms lower. Repeat three times — smooth, no rush.",
         durationSec: 60,
         poseStart: "arms-down",
+        poseMiddle: "arms-raised",
         poseEnd: "palms-down",
       },
       {
@@ -54,6 +55,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Shift weight left, arms float right. Shift right, arms float left. Imagine moving through warm clouds. Stay relaxed in the hips.",
         durationSec: 90,
         poseStart: "cloud-left",
+        poseMiddle: "cloud-center",
         poseEnd: "cloud-right",
       },
       {
@@ -62,6 +64,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Gentle waist turns. Let one hand drift back, one forward — like brushing stress behind you. Smile optional, recommended.",
         durationSec: 60,
         poseStart: "brush-left",
+        poseMiddle: "brush-center",
         poseEnd: "brush-right",
       },
       {
@@ -70,6 +73,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Hands rest at the lower belly. Three slow breaths. Whisper: \"Peace, love, good bonks.\" Carry that into your day.",
         durationSec: 45,
         poseStart: "stand-relaxed",
+        poseMiddle: "hands-rise",
         poseEnd: "hands-belly",
       },
     ],
@@ -89,6 +93,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Feel all four corners of your feet. Soften the jaw. You're not fixing anything — just arriving.",
         durationSec: 30,
         poseStart: "stand-neutral",
+        poseMiddle: "soft-knees",
         poseEnd: "ground-feet",
       },
       {
@@ -97,6 +102,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Arms ripple like water — up the body, out to the sides, down. Match your breath. Slow is the speed limit.",
         durationSec: 50,
         poseStart: "wave-low",
+        poseMiddle: "wave-mid",
         poseEnd: "wave-high",
       },
       {
@@ -105,7 +111,8 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Cup an imaginary glowing orb at chest height. Shift weight side to side. The orb stays centered — you stay calm.",
         durationSec: 50,
         poseStart: "hold-ball",
-        poseEnd: "shift-left-ball",
+        poseMiddle: "shift-left-ball",
+        poseEnd: "shift-right-ball",
       },
       {
         title: "Release",
@@ -113,6 +120,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Press palms down toward the earth, letting tension drain. One deep exhale. Done. Go bonk something nice.",
         durationSec: 40,
         poseStart: "hold-ball",
+        poseMiddle: "press-mid",
         poseEnd: "press-down",
       },
     ],
@@ -132,6 +140,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Stand easy. Imagine grass under your feet. Breathe in golden sunset light, breathe out the day's noise.",
         durationSec: 50,
         poseStart: "stand-neutral",
+        poseMiddle: "breathe-open",
         poseEnd: "meadow-root",
       },
       {
@@ -140,7 +149,8 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "One foot steps out, arms open wide like welcoming a friend. Return to center. Other side. Flow, don't force.",
         durationSec: 70,
         poseStart: "gate-center",
-        poseEnd: "gate-open-left",
+        poseMiddle: "gate-open-left",
+        poseEnd: "gate-open-right",
       },
       {
         title: "Repulse the monkey",
@@ -148,6 +158,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Soft circular push with one hand, other hand rests at the side. Shift weight into the back leg. Switch sides slowly.",
         durationSec: 80,
         poseStart: "repulse-left",
+        poseMiddle: "repulse-center",
         poseEnd: "repulse-right",
       },
       {
@@ -156,6 +167,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Both hands gather inward, then expand outward — sharing peace with the room. Repeat until it feels silly-good.",
         durationSec: 80,
         poseStart: "gather-in",
+        poseMiddle: "gather-mid",
         poseEnd: "gather-out",
       },
       {
@@ -164,6 +176,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Hands fold at heart. Bow to yourself for showing up. The meadow is always here when you need it.",
         durationSec: 60,
         poseStart: "stand-relaxed",
+        poseMiddle: "hands-rise-heart",
         poseEnd: "hands-heart",
       },
     ],
@@ -183,6 +196,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Micro-bend the knees. Imagine low gravity. Shoulders melt down. You're on a cosmic surfboard — just balance.",
         durationSec: 40,
         poseStart: "stand-neutral",
+        poseMiddle: "knees-soft-mid",
         poseEnd: "float-stance",
       },
       {
@@ -191,6 +205,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "One knee lifts softly, arms frame the body. Hold only as long as comfortable. Lower with control. Other leg.",
         durationSec: 70,
         poseStart: "rooster-left",
+        poseMiddle: "rooster-center",
         poseEnd: "rooster-right",
       },
       {
@@ -199,6 +214,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Weight shifts like riding a slow nebula wave. Arms follow the tide. No perfect form — only smooth intention.",
         durationSec: 70,
         poseStart: "wave-rider-left",
+        poseMiddle: "wave-rider-center",
         poseEnd: "wave-rider-right",
       },
       {
@@ -207,6 +223,7 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
           "Feet settle. Palms up at sides, then down to rest. You are the still point. The universe can wait.",
         durationSec: 50,
         poseStart: "palms-up",
+        poseMiddle: "palms-mid",
         poseEnd: "palms-rest",
       },
     ],
