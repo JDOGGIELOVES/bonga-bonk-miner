@@ -25,6 +25,10 @@ export function PeaceLanding() {
           <p className="mt-2 text-center text-muted-foreground">
             Box breath, 4-7-8 calm, or a quick bonk-and-breathe reset
           </p>
+          <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-center text-xs text-muted-foreground">
+            <span>Voice cues guide each breath phase</span>
+            <PeaceAudioToggle showMusic={false} />
+          </p>
           <div className="mt-10">
             <BreathingModule />
           </div>
@@ -60,7 +64,7 @@ export function PeaceLanding() {
             doesn&apos;t feel right.
           </p>
           <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-center text-xs text-muted-foreground">
-            <span>Begin chime, step ticks, and ambient lo-fi while you stretch</span>
+            <span>Voice guide, begin chime, step ticks, and ambient lo-fi</span>
             <PeaceAudioToggle />
           </p>
           <div className="mt-10">

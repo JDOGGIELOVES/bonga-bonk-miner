@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,8 @@ import {
   type BreathingPattern,
   type BreathPhaseStep,
 } from "@/lib/bonga-breathing";
+import { peaceNarration } from "@/lib/audio/peace-narration";
+import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { ChevronLeft, Pause, Play } from "lucide-react";
 
 function BreathingPlayer({
@@ -27,20 +29,69 @@ function BreathingPlayer({
     pattern.cycle[0].durationSec
   );
   const [finished, setFinished] = useState(false);
+  const lastNarratedPhaseRef = useRef(-1);
+  const sessionStartedRef = useRef(false);
 
   const step: BreathPhaseStep = pattern.cycle[cycleIndex];
   const cycleSec = getCycleDurationSec(pattern);
 
+  const narratePhase = useCallback(
+    (index: number, withIntro = false) => {
+      const phase = pattern.cycle[index];
+      if (!phase) return;
+      if (withIntro) {
+        peaceNarration.speak(
+          `Let's breathe with ${pattern.title}. ${phase.label}.`,
+          { delayMs: 0 }
+        );
+      } else {
+        peaceNarration.speakBreathCue(phase.label);
+      }
+      lastNarratedPhaseRef.current = index;
+    },
+    [pattern]
+  );
+
+  useEffect(() => {
+    return () => peaceNarration.cancel();
+  }, []);
+
+  useEffect(() => {
+    if (!playing || finished) return;
+    if (lastNarratedPhaseRef.current === cycleIndex) return;
+
+    const timer = window.setTimeout(() => {
+      narratePhase(cycleIndex);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [cycleIndex, playing, finished, narratePhase]);
+
+  useEffect(() => {
+    if (finished) {
+      peaceNarration.speakComplete(
+        "Breath complete. The timeline can wait."
+      );
+    }
+  }, [finished]);
+
   const advancePhase = useCallback(() => {
+    peaceNarration.cancel();
     if (cycleIndex >= pattern.cycle.length - 1) {
       setCycleIndex(0);
       setPhaseRemaining(pattern.cycle[0].durationSec);
+      lastNarratedPhaseRef.current = -1;
       return;
     }
     const next = cycleIndex + 1;
     setCycleIndex(next);
     setPhaseRemaining(pattern.cycle[next].durationSec);
   }, [cycleIndex, pattern.cycle]);
+
+  const handleBack = () => {
+    peaceNarration.cancel();
+    onBack();
+  };
 
   useEffect(() => {
     if (!playing || finished) return;
@@ -92,14 +143,17 @@ function BreathingPlayer({
       animate={{ opacity: 1 }}
       className="bonga-card p-6"
     >
-      <button
-        type="button"
-        onClick={onBack}
-        className="mb-4 flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
-      >
-        <ChevronLeft className="mr-1 h-3 w-3" />
-        Back to patterns
-      </button>
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="flex items-center text-xs font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="mr-1 h-3 w-3" />
+          Back to patterns
+        </button>
+        <PeaceAudioToggle compact showMusic={false} />
+      </div>
 
       <div className="flex flex-col items-center py-6">
         <div
@@ -127,7 +181,25 @@ function BreathingPlayer({
       <Button
         variant="peace"
         className="w-full"
-        onClick={() => setPlaying((p) => !p)}
+        onClick={() =>
+          setPlaying((wasPlaying) => {
+            const next = !wasPlaying;
+            if (next) {
+              if (!sessionStartedRef.current) {
+                sessionStartedRef.current = true;
+                lastNarratedPhaseRef.current = cycleIndex;
+                window.setTimeout(() => narratePhase(cycleIndex, true), 400);
+              } else if (peaceNarration.isPaused()) {
+                peaceNarration.resume();
+              } else if (!peaceNarration.isSpeaking()) {
+                narratePhase(cycleIndex);
+              }
+            } else {
+              peaceNarration.pause();
+            }
+            return next;
+          })
+        }
       >
         {playing ? (
           <>

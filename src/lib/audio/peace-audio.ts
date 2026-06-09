@@ -12,6 +12,7 @@ export const PEACE_AUDIO_SETTINGS_KEY = "bonga-peace-audio";
 export const DEFAULT_PEACE_AUDIO_SETTINGS = {
   muted: false,
   musicEnabled: true,
+  voiceEnabled: true,
   sfxVolume: 0.75,
   musicVolume: 0.3,
 } as const;
@@ -19,6 +20,7 @@ export const DEFAULT_PEACE_AUDIO_SETTINGS = {
 export type PeaceAudioSettings = {
   muted: boolean;
   musicEnabled: boolean;
+  voiceEnabled: boolean;
   sfxVolume: number;
   musicVolume: number;
 };
@@ -211,6 +213,11 @@ class PeaceAudioManager {
     this.applyGainValues();
     if (this.settings.muted) this.stopMusic();
     else if (this.sessionActive && this.settings.musicEnabled) this.startAmbientMusic();
+    this.notify();
+  }
+
+  toggleVoice() {
+    this.settings.voiceEnabled = !this.settings.voiceEnabled;
     this.notify();
   }
 

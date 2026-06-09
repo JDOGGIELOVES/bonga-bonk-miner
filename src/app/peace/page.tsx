@@ -4,7 +4,7 @@ import { PeaceShell } from "@/components/peace/peace-shell";
 export const metadata: Metadata = {
   title: "Bonga Peace | Mindfulness the Bonga Way",
   description:
-    "Daily stretching, guided breathing, Bonk Break stress release, Tai Chi flows, and peace check-ins. Slow, playful mindfulness on bongabonks.com.",
+    "Voice-guided stretching and exercises, breathing, Bonk Break, Tai Chi flows, and peace check-ins. Slow, playful mindfulness on bongabonks.com.",
   keywords: [
     "Bonga Peace",
     "mindfulness",

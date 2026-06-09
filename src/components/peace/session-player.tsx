@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { getTraitPose } from "@/lib/nft-trait-poses";
 import { peaceAudio } from "@/lib/audio/peace-audio";
+import { peaceNarration } from "@/lib/audio/peace-narration";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
 import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
 
@@ -63,21 +64,51 @@ export function SessionPlayer({
 
   const completedRef = useRef(false);
   const sessionStartedRef = useRef(false);
+  const lastNarratedStepRef = useRef(-1);
+
+  const narrateStep = useCallback(
+    (index: number, withIntro = false) => {
+      if (!soundEnabled) return;
+      const s = session.steps[index];
+      if (!s) return;
+      const intro = withIntro
+        ? `Welcome to ${session.title}. Let's move gently.`
+        : undefined;
+      peaceNarration.speakStep(s.title, s.instruction, { intro });
+      lastNarratedStepRef.current = index;
+    },
+    [soundEnabled, session]
+  );
 
   useEffect(() => {
     return () => {
       if (soundEnabled) peaceAudio.stopSession();
+      peaceNarration.cancel();
     };
   }, [soundEnabled]);
 
   useEffect(() => {
     if (finished && !completedRef.current) {
       completedRef.current = true;
-      if (soundEnabled) peaceAudio.endSession();
+      if (soundEnabled) {
+        peaceAudio.endSession();
+        peaceNarration.speakComplete(completeMessage);
+      }
       onComplete?.();
     }
     if (!finished) completedRef.current = false;
-  }, [finished, onComplete, soundEnabled]);
+  }, [finished, onComplete, soundEnabled, completeMessage]);
+
+  useEffect(() => {
+    if (!playing || finished || !soundEnabled || !sessionStartedRef.current) return;
+    if (lastNarratedStepRef.current === stepIndex) return;
+
+    const timer = window.setTimeout(() => {
+      narrateStep(stepIndex);
+    }, 450);
+
+    return () => window.clearTimeout(timer);
+  }, [stepIndex, playing, finished, soundEnabled, narrateStep]);
 
   const goNext = useCallback(() => {
     if (stepIndex >= session.steps.length - 1) {
@@ -85,6 +116,7 @@ export function SessionPlayer({
       setFinished(true);
       return;
     }
+    peaceNarration.cancel();
     if (soundEnabled) peaceAudio.playStepChange();
     const next = stepIndex + 1;
     setStepIndex(next);
@@ -93,26 +125,35 @@ export function SessionPlayer({
 
   const handleBack = () => {
     if (soundEnabled) peaceAudio.stopSession();
+    peaceNarration.cancel();
     onBack();
   };
 
   const togglePlaying = () => {
     setPlaying((wasPlaying) => {
       const next = !wasPlaying;
-      if (!soundEnabled) return next;
 
-      void peaceAudio.resume().then(() => {
-        if (next) {
-          if (!sessionStartedRef.current) {
-            sessionStartedRef.current = true;
-            void peaceAudio.startSession();
-          } else {
-            peaceAudio.resumeSession();
+      if (next) {
+        if (!sessionStartedRef.current) {
+          sessionStartedRef.current = true;
+          if (soundEnabled) {
+            void peaceAudio.resume().then(() => peaceAudio.startSession());
+            lastNarratedStepRef.current = stepIndex;
+            window.setTimeout(() => narrateStep(stepIndex, true), 900);
           }
-        } else {
-          peaceAudio.pauseSession();
+        } else if (soundEnabled) {
+          void peaceAudio.resume().then(() => peaceAudio.resumeSession());
+          if (peaceNarration.isPaused()) {
+            peaceNarration.resume();
+          } else if (!peaceNarration.isSpeaking()) {
+            narrateStep(stepIndex);
+          }
         }
-      });
+      } else {
+        if (soundEnabled) peaceAudio.pauseSession();
+        peaceNarration.pause();
+      }
+
       return next;
     });
   };
@@ -131,7 +172,9 @@ export function SessionPlayer({
 
   const restart = () => {
     if (soundEnabled) peaceAudio.stopSession();
+    peaceNarration.cancel();
     sessionStartedRef.current = false;
+    lastNarratedStepRef.current = -1;
     setStepIndex(0);
     setRemaining(session.steps[0].durationSec);
     setPlaying(false);
