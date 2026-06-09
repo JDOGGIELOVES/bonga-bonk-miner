@@ -356,7 +356,8 @@ export const UTILITY = [
 ];
 
 export const COMMUNITY_LINKS = [
-  { label: "Website", href: "https://bongabonks.com", icon: "🌐" },
+  { label: "Website", href: "https://bonga.uno", icon: "🌐" },
   { label: "Bonk Miner", href: "https://bongabonks.com", icon: "🔨" },
-  { label: "X / Twitter", href: "https://x.com", icon: "𝕏" },
+  { label: "X / Twitter", href: "https://x.com/bongasolana", icon: "𝕏" },
+  { label: "Telegram", href: "https://t.me/bonga_sol_community", icon: "✈️" },
 ];
