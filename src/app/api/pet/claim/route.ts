@@ -4,6 +4,7 @@ import bs58 from "bs58";
 import { PET_LOVE_REWARD, todayKey } from "@/lib/pet-love";
 import { verifyPetSignature } from "@/lib/pet-love-messages";
 import {
+  getSubmissionById,
   getSubmissionForWalletToday,
   hasClaimedPetRewardToday,
   recordPetClaim,
@@ -68,8 +69,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
     }
 
-    const submission = await getSubmissionForWalletToday(wallet, date);
-    if (!submission || submission.id !== submissionId) {
+    let submission = await getSubmissionForWalletToday(wallet, date);
+    if (!submission) {
+      submission = await getSubmissionById(submissionId);
+    }
+
+    if (
+      !submission ||
+      submission.id !== submissionId ||
+      submission.date !== date ||
+      submission.wallet.toLowerCase() !== wallet.toLowerCase()
+    ) {
       return NextResponse.json(
         { error: "Submit a verified pet photo today before claiming." },
         { status: 400 }

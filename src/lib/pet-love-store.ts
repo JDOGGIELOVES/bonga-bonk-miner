@@ -130,25 +130,47 @@ function parseIndex(raw: string): PetLoveIndex {
   };
 }
 
-async function readIndexFromBlob(): Promise<PetLoveIndex> {
-  const { get } = await import("@vercel/blob");
+async function readBlobText(pathname: string): Promise<string | null> {
+  const { get, head } = await import("@vercel/blob");
   const primary = blobAccess();
   const fallback: BlobAccess = primary === "public" ? "private" : "public";
 
   for (const access of [primary, fallback]) {
     try {
-      const result = await get(INDEX_BLOB_PATH, {
+      const result = await get(pathname, {
         access,
         useCache: false,
       });
-      if (!result?.stream) continue;
-      return parseIndex(await streamToText(result.stream));
+      if (result?.stream) {
+        return streamToText(result.stream);
+      }
     } catch (error) {
-      console.error(`Pet Love index blob read failed (${access}):`, error);
+      console.error(`Pet Love blob get failed (${pathname}, ${access}):`, error);
+    }
+
+    try {
+      const meta = await head(pathname);
+      const response = await fetch(meta.url, { cache: "no-store" });
+      if (response.ok) {
+        return response.text();
+      }
+    } catch (error) {
+      console.error(`Pet Love blob head failed (${pathname}, ${access}):`, error);
     }
   }
 
-  return emptyIndex();
+  return null;
+}
+
+async function readIndexFromBlob(): Promise<PetLoveIndex> {
+  const raw = await readBlobText(INDEX_BLOB_PATH);
+  if (!raw) return emptyIndex();
+  try {
+    return parseIndex(raw);
+  } catch (error) {
+    console.error("Pet Love index blob parse failed:", error);
+    return emptyIndex();
+  }
 }
 
 async function writeIndexToBlob(index: PetLoveIndex): Promise<void> {
@@ -200,6 +222,85 @@ async function writeIndex(index: PetLoveIndex) {
   await writeIndexToDisk(index);
 }
 
+function submissionRecordPath(id: string): string {
+  return `pet-love/submissions/${id}.json`;
+}
+
+function walletDayRecordPath(wallet: string, date: string): string {
+  return `pet-love/by-wallet/${wallet.toLowerCase()}/${date}.json`;
+}
+
+function claimRecordPath(wallet: string, date: string): string {
+  return `pet-love/claims/${wallet.toLowerCase()}/${date}.json`;
+}
+
+function localRecordPath(relative: string): string {
+  return path.join(getLocalDataDir(), relative);
+}
+
+async function writeRecord(pathname: string, body: string): Promise<void> {
+  if (useBlobStorage()) {
+    const { put } = await import("@vercel/blob");
+    await put(pathname, body, {
+      access: blobAccess(),
+      contentType: "application/json",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+    return;
+  }
+
+  const filePath = localRecordPath(pathname);
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, body, "utf8");
+}
+
+async function readRecord(pathname: string): Promise<string | null> {
+  if (useBlobStorage()) {
+    return readBlobText(pathname);
+  }
+
+  try {
+    return await readFile(localRecordPath(pathname), "utf8");
+  } catch {
+    return null;
+  }
+}
+
+async function persistSubmissionRecord(submission: PetLoveSubmission): Promise<void> {
+  await writeRecord(submissionRecordPath(submission.id), JSON.stringify(submission));
+  await writeRecord(
+    walletDayRecordPath(submission.wallet, submission.date),
+    JSON.stringify({ submissionId: submission.id })
+  );
+}
+
+async function readSubmissionRecord(id: string): Promise<PetLoveSubmission | null> {
+  const raw = await readRecord(submissionRecordPath(id));
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw) as PetLoveSubmission;
+  } catch {
+    return null;
+  }
+}
+
+async function readWalletDaySubmissionId(
+  wallet: string,
+  date: string
+): Promise<string | null> {
+  const raw = await readRecord(walletDayRecordPath(wallet, date));
+  if (!raw) return null;
+
+  try {
+    const data = JSON.parse(raw) as { submissionId?: string };
+    return data.submissionId ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function newSubmissionId(): string {
   return `pet_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -224,6 +325,18 @@ export async function getSubmissionForWalletToday(
   wallet: string,
   date = todayKey()
 ): Promise<PetLoveSubmission | null> {
+  const sidecarId = await readWalletDaySubmissionId(wallet, date);
+  if (sidecarId) {
+    const record = await readSubmissionRecord(sidecarId);
+    if (
+      record &&
+      walletsMatch(record.wallet, wallet) &&
+      record.date === date
+    ) {
+      return record;
+    }
+  }
+
   const index = await readIndex();
   return (
     index.submissions.find(
@@ -236,6 +349,10 @@ export async function hasClaimedPetRewardToday(
   wallet: string,
   date = todayKey()
 ): Promise<boolean> {
+  if (await readRecord(claimRecordPath(wallet, date))) {
+    return true;
+  }
+
   const index = await readIndex();
   return index.petClaims[walletDayKey(wallet, date)] != null;
 }
@@ -331,6 +448,8 @@ export async function savePetSubmission(params: {
   if (index.imageHashes.length > 1000) {
     index.imageHashes = index.imageHashes.slice(-1000);
   }
+
+  await persistSubmissionRecord(submission);
   await writeIndex(index);
 
   return submission;
@@ -341,19 +460,64 @@ export async function recordPetClaim(
   date: string,
   submissionId: string
 ) {
-  const index = await readIndex();
-  index.petClaims[walletDayKey(wallet, date)] = submissionId;
-  await writeIndex(index);
+  await writeRecord(
+    claimRecordPath(wallet, date),
+    JSON.stringify({
+      submissionId,
+      claimedAt: new Date().toISOString(),
+    })
+  );
+
+  try {
+    const index = await readIndex();
+    index.petClaims[walletDayKey(wallet, date)] = submissionId;
+    await writeIndex(index);
+  } catch (error) {
+    console.error("Pet Love claim index update failed:", error);
+  }
 }
 
 export async function getSubmissionById(id: string): Promise<PetLoveSubmission | null> {
+  const record = await readSubmissionRecord(id);
+  if (record) return record;
+
   const index = await readIndex();
   return index.submissions.find((s) => s.id === id) ?? null;
 }
 
 export async function listGallery(limit = 48): Promise<PetLoveSubmission[]> {
   const index = await readIndex();
-  return index.submissions.slice(0, limit);
+  if (index.submissions.length > 0) {
+    return index.submissions.slice(0, limit);
+  }
+
+  if (!useBlobStorage()) {
+    return [];
+  }
+
+  try {
+    const { list } = await import("@vercel/blob");
+    const { blobs } = await list({
+      prefix: "pet-love/submissions/",
+      limit,
+    });
+
+    const submissions: PetLoveSubmission[] = [];
+    for (const blob of blobs) {
+      const id = blob.pathname
+        .replace("pet-love/submissions/", "")
+        .replace(/\.json$/, "");
+      const record = await readSubmissionRecord(id);
+      if (record) submissions.push(record);
+    }
+
+    return submissions
+      .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+      .slice(0, limit);
+  } catch (error) {
+    console.error("Pet Love gallery list fallback failed:", error);
+    return [];
+  }
 }
 
 export async function readSubmissionImage(id: string): Promise<{
