@@ -83,7 +83,8 @@ export function PeaceLanding() {
             wind-down
           </p>
           <p className="mx-auto mt-2 max-w-xl text-center text-xs text-muted-foreground">
-            Gentle movement for relaxation and focus. Listen to your body.
+            Gentle movement for relaxation and focus. Each step shows start and
+            end body positions. Listen to your body.
           </p>
           <div className="mt-10">
             <TaiChiModule />

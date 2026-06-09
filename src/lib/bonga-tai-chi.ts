@@ -5,6 +5,10 @@ export interface TaiChiStep {
   instruction: string;
   /** Seconds to hold or move through this step */
   durationSec: number;
+  /** Start body position diagram id */
+  poseStart: string;
+  /** End body position diagram id */
+  poseEnd: string;
 }
 
 export interface TaiChiSession {
@@ -33,30 +37,40 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         instruction:
           "Stand tall, feet shoulder-width, knees soft. Inhale through the nose, exhale with a quiet ✌️. Let the shoulders drop.",
         durationSec: 45,
+        poseStart: "stand-neutral",
+        poseEnd: "stand-relaxed",
       },
       {
         title: "Raise the sun",
         instruction:
           "Slowly lift both arms like you're raising the morning sun. Palms turn down as arms lower. Repeat three times — smooth, no rush.",
         durationSec: 60,
+        poseStart: "arms-down",
+        poseEnd: "palms-down",
       },
       {
         title: "Cloud hands",
         instruction:
           "Shift weight left, arms float right. Shift right, arms float left. Imagine moving through warm clouds. Stay relaxed in the hips.",
         durationSec: 90,
+        poseStart: "cloud-left",
+        poseEnd: "cloud-right",
       },
       {
         title: "Bonk the stress away",
         instruction:
           "Gentle waist turns. Let one hand drift back, one forward — like brushing stress behind you. Smile optional, recommended.",
         durationSec: 60,
+        poseStart: "brush-left",
+        poseEnd: "brush-right",
       },
       {
         title: "Close with peace",
         instruction:
           "Hands rest at the lower belly. Three slow breaths. Whisper: \"Peace, love, good bonks.\" Carry that into your day.",
         durationSec: 45,
+        poseStart: "stand-relaxed",
+        poseEnd: "hands-belly",
       },
     ],
   },
@@ -74,24 +88,32 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         instruction:
           "Feel all four corners of your feet. Soften the jaw. You're not fixing anything — just arriving.",
         durationSec: 30,
+        poseStart: "stand-neutral",
+        poseEnd: "ground-feet",
       },
       {
         title: "Wave arms",
         instruction:
           "Arms ripple like water — up the body, out to the sides, down. Match your breath. Slow is the speed limit.",
         durationSec: 50,
+        poseStart: "wave-low",
+        poseEnd: "wave-high",
       },
       {
         title: "Hold the ball",
         instruction:
           "Cup an imaginary glowing orb at chest height. Shift weight side to side. The orb stays centered — you stay calm.",
         durationSec: 50,
+        poseStart: "hold-ball",
+        poseEnd: "shift-left-ball",
       },
       {
         title: "Release",
         instruction:
           "Press palms down toward the earth, letting tension drain. One deep exhale. Done. Go bonk something nice.",
         durationSec: 40,
+        poseStart: "hold-ball",
+        poseEnd: "press-down",
       },
     ],
   },
@@ -109,30 +131,40 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         instruction:
           "Stand easy. Imagine grass under your feet. Breathe in golden sunset light, breathe out the day's noise.",
         durationSec: 50,
+        poseStart: "stand-neutral",
+        poseEnd: "meadow-root",
       },
       {
         title: "Open the gate",
         instruction:
           "One foot steps out, arms open wide like welcoming a friend. Return to center. Other side. Flow, don't force.",
         durationSec: 70,
+        poseStart: "gate-center",
+        poseEnd: "gate-open-left",
       },
       {
         title: "Repulse the monkey",
         instruction:
           "Soft circular push with one hand, other hand rests at the side. Shift weight into the back leg. Switch sides slowly.",
         durationSec: 80,
+        poseStart: "repulse-left",
+        poseEnd: "repulse-right",
       },
       {
         title: "Gather qi",
         instruction:
           "Both hands gather inward, then expand outward — sharing peace with the room. Repeat until it feels silly-good.",
         durationSec: 80,
+        poseStart: "gather-in",
+        poseEnd: "gather-out",
       },
       {
         title: "Garden close",
         instruction:
           "Hands fold at heart. Bow to yourself for showing up. The meadow is always here when you need it.",
         durationSec: 60,
+        poseStart: "stand-relaxed",
+        poseEnd: "hands-heart",
       },
     ],
   },
@@ -150,24 +182,32 @@ export const TAI_CHI_SESSIONS: TaiChiSession[] = [
         instruction:
           "Micro-bend the knees. Imagine low gravity. Shoulders melt down. You're on a cosmic surfboard — just balance.",
         durationSec: 40,
+        poseStart: "stand-neutral",
+        poseEnd: "float-stance",
       },
       {
         title: "Golden rooster",
         instruction:
           "One knee lifts softly, arms frame the body. Hold only as long as comfortable. Lower with control. Other leg.",
         durationSec: 70,
+        poseStart: "rooster-left",
+        poseEnd: "rooster-right",
       },
       {
         title: "Wave rider",
         instruction:
           "Weight shifts like riding a slow nebula wave. Arms follow the tide. No perfect form — only smooth intention.",
         durationSec: 70,
+        poseStart: "wave-rider-left",
+        poseEnd: "wave-rider-right",
       },
       {
         title: "Star close",
         instruction:
           "Feet settle. Palms up at sides, then down to rest. You are the still point. The universe can wait.",
         durationSec: 50,
+        poseStart: "palms-up",
+        poseEnd: "palms-rest",
       },
     ],
   },

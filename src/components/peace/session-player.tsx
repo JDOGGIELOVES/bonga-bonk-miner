@@ -9,12 +9,15 @@ import { getTraitPose } from "@/lib/nft-trait-poses";
 import { peaceAudio } from "@/lib/audio/peace-audio";
 import { peaceNarration } from "@/lib/audio/peace-narration";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
+import { TaiChiPoseDiagram } from "@/components/peace/tai-chi-pose-diagram";
 import { ChevronLeft, Pause, Play, RotateCcw } from "lucide-react";
 
 export interface SessionStep {
   title: string;
   instruction: string;
   durationSec: number;
+  poseStart?: string;
+  poseEnd?: string;
 }
 
 export interface GuidedSession {
@@ -240,11 +243,18 @@ export function SessionPlayer({
             Step {stepIndex + 1} of {session.steps.length}
           </p>
           <h3 className="mt-1 font-display text-xl font-bold">{step?.title}</h3>
-          <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             {step?.instruction}
           </p>
 
-          <div className="mt-6">
+          {step?.poseStart && step?.poseEnd && (
+            <TaiChiPoseDiagram
+              poseStart={step.poseStart}
+              poseEnd={step.poseEnd}
+            />
+          )}
+
+          <div className="mt-6 flex-1">
             <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
               <span>{formatTime(remaining)} left</span>
               <span>{session.title}</span>
