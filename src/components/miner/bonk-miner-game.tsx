@@ -41,9 +41,11 @@ interface BonkMinerGameProps {
   onWalletConnect?: () => void;
   /** When true, renders only game content (no page chrome — used inside GameHub). */
   embedded?: boolean;
+  tallyRefreshKey?: number;
+  onTallyRefresh?: () => void;
 }
 
-export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGameProps) {
+export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshKey: externalTallyRefreshKey, onTallyRefresh }: BonkMinerGameProps) {
   const { connected, publicKey } = useWallet();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [coins, setCoins] = useState<FloatingCoin[]>([]);
@@ -56,7 +58,8 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [muted, setMuted] = useState(false);
   const [shareMsg, setShareMsg] = useState("");
-  const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
+  const [internalTallyRefreshKey, setInternalTallyRefreshKey] = useState(0);
+  const tallyRefreshKey = externalTallyRefreshKey ?? internalTallyRefreshKey;
   const [onChainClaims, setOnChainClaims] = useState(false);
   const [serverEarnRefreshKey, setServerEarnRefreshKey] = useState(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
@@ -209,6 +212,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
           if ("ok" in tapResult && tapResult.ok) {
             serverTapsRef.current = tapResult.taps;
             setServerEarnRefreshKey((key) => key + 1);
+            onTallyRefresh?.();
             return;
           }
           if (tapResult.taps != null) {
@@ -289,7 +293,8 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
               state={gameState}
               onStateChange={setGameState}
               onClaimSuccess={() => {
-                setTallyRefreshKey((key) => key + 1);
+                setInternalTallyRefreshKey((key) => key + 1);
+                onTallyRefresh?.();
                 setServerEarnRefreshKey((key) => key + 1);
               }}
               onChainEnabled={onChainClaims}

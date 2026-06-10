@@ -8,7 +8,7 @@ import { GardenVisual } from "@/components/garden/garden-visual";
 import { GardenShop } from "@/components/garden/garden-shop";
 import { GardenQuests } from "@/components/garden/garden-quests";
 import { GardenClaimBonga } from "@/components/garden/garden-claim-bonga";
-import { buildBootstrapAction, syncGardenActions } from "@/lib/garden-sync-client";
+import { buildBootstrapAction, syncGardenActions, fetchGardenEarnStatus, type GardenEarnStatus } from "@/lib/garden-sync-client";
 import type { GardenSyncAction } from "@/lib/garden-sync-server";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
 import {
@@ -31,8 +31,9 @@ import { getTodaysAffirmation } from "@/lib/bonga-affirmations";
 import { gameAudio } from "@/lib/audio/audio-manager";
 import { Info, ShoppingBag, Sparkles, Wallet } from "lucide-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import Link from "next/link";
 
-export function VibesGardenGame() {
+export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => void } = {}) {
   const { connected, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
   const { isHolder, checking } = useBongaNftHolder();
@@ -49,6 +50,7 @@ export function VibesGardenGame() {
   const syncInFlightRef = useRef(false);
   const pendingActionsRef = useRef<GardenSyncAction[]>([]);
   const [syncRefreshKey, setSyncRefreshKey] = useState(0);
+  const [gardenStatus, setGardenStatus] = useState<GardenEarnStatus | null>(null);
 
   useEffect(() => {
     isHolderRef.current = isHolder;
@@ -144,6 +146,20 @@ export function VibesGardenGame() {
     }, 10000);
     return () => clearInterval(tick);
   }, [state, queueGardenSync]);
+
+  useEffect(() => {
+    if (!connected || !publicKey) {
+      setGardenStatus(null);
+      return;
+    }
+    let cancelled = false;
+    void fetchGardenEarnStatus(publicKey.toBase58()).then((status) => {
+      if (!cancelled) setGardenStatus(status);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [connected, publicKey, syncRefreshKey]);
 
   const showFloat = useCallback((text: string) => {
     const id = ++floatId.current;
@@ -279,12 +295,20 @@ export function VibesGardenGame() {
         </div>
       </div>
 
+      {gardenStatus && (
+        <p className="text-center text-[10px] text-muted-foreground -mt-1 mb-1">
+          Verified today: {gardenStatus.farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} (claimable from server)
+        </p>
+      )}
+
       {capReached && (
         <p className="rounded-bonga-lg border border-amber-300/40 bg-amber-50/60 px-4 py-2 text-center text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
           Daily farm cap reached ({GARDEN_DAILY_EARN_CAP} garden $BONGA). Resets at midnight UTC.
           You can still explore zones — taps and idle pause until tomorrow.
         </p>
       )}
+
+      <GardenClaimBonga refreshKey={syncRefreshKey} onClaimSuccess={onClaimSuccess} />
 
       <div className="bonga-card border-bonga-teal/20 bg-gradient-to-br from-bonga-teal/5 to-bonga-purple/5 p-4">
         <div className="flex items-start gap-2">
@@ -331,9 +355,9 @@ export function VibesGardenGame() {
       {connected && !checking && !isHolder && (
         <p className="text-center text-xs text-muted-foreground">
           Hold a Bonga NFT for 2× garden earnings, Bonga Kush & exclusive plants.{" "}
-          <a href="/nft" className="font-semibold text-bonga-teal hover:underline">
+          <Link href="/nft" className="font-semibold text-bonga-teal hover:underline">
             Mint one
-          </a>
+          </Link>
         </p>
       )}
 
@@ -389,7 +413,7 @@ export function VibesGardenGame() {
         </Button>
       </div>
 
-      <GardenClaimBonga refreshKey={syncRefreshKey} />
+
 
       <GardenQuests
         state={state}

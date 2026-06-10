@@ -35,6 +35,8 @@ interface GameHubProps {
 export function GameHub({ onWalletConnect }: GameHubProps) {
   const [mode, setMode] = useState<GameMode>("miner");
   const [muted, setMuted] = useState(false);
+  const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
+  const bumpTally = () => setTallyRefreshKey((k) => k + 1);
 
   useEffect(() => {
     setMuted(gameAudio.getSettings().muted);
@@ -94,9 +96,14 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
             className="mt-4"
           >
             {mode === "miner" ? (
-              <BonkMinerGame embedded onWalletConnect={onWalletConnect} />
+              <BonkMinerGame
+                embedded
+                onWalletConnect={onWalletConnect}
+                tallyRefreshKey={tallyRefreshKey}
+                onTallyRefresh={bumpTally}
+              />
             ) : (
-              <VibesGardenGame />
+              <VibesGardenGame onClaimSuccess={bumpTally} />
             )}
           </motion.div>
         </AnimatePresence>

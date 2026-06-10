@@ -55,9 +55,6 @@ export function PeaceHero() {
           <Button variant="outline" size="lg" asChild>
             <a href="#breathe">Breathe</a>
           </Button>
-          <Button variant="ghost" size="lg" asChild>
-            <Link href="/nft#mint">Mint a Bonga NFT</Link>
-          </Button>
         </motion.div>
 
         <p className="mt-6 text-xs text-muted-foreground">

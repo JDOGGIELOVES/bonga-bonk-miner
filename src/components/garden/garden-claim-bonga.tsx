@@ -19,9 +19,10 @@ import { ExternalLink, Wallet } from "lucide-react";
 
 interface GardenClaimBongaProps {
   refreshKey?: number;
+  onClaimSuccess?: () => void;
 }
 
-export function GardenClaimBonga({ refreshKey = 0 }: GardenClaimBongaProps) {
+export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaimBongaProps) {
   const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
   const { setVisible } = useWalletModal();
   const [claimStatus, setClaimStatus] = useState<ClaimStatus | null>(null);
@@ -100,6 +101,7 @@ export function GardenClaimBonga({ refreshKey = 0 }: GardenClaimBongaProps) {
             }
           : prev
       );
+      onClaimSuccess?.();
     } catch (err) {
       setErrorMsg(formatErrorMessage(err, "Garden claim failed."));
     } finally {

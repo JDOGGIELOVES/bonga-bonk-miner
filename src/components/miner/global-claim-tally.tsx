@@ -46,7 +46,7 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
             <span className="text-gradient">$BONGA</span>
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            Running total paid out from the treasury — miner taps &amp; Pet Love
+            Running total paid out from the treasury — miner taps, garden &amp; Pet Love
           </p>
         </div>
 
