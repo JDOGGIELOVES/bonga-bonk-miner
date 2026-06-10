@@ -268,9 +268,9 @@ export function getNftMultiplier(isHolder: boolean): {
     return { tap: 1, idle: 1, label: "" };
   }
   return {
-    tap: 1.25,
-    idle: 1.35,
-    label: "NFT holder · +25% tap · +35% idle · Bonga Kush unlocked",
+    tap: 2,
+    idle: 2,
+    label: "NFT holder · 2× tap · 2× idle · Bonga Kush unlocked",
   };
 }
 

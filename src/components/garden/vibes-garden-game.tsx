@@ -252,7 +252,7 @@ export function VibesGardenGame() {
 
       {connected && !checking && !isHolder && (
         <p className="text-center text-xs text-muted-foreground">
-          Hold a Bonga NFT to unlock Bonga Kush, rare plants & vibe multipliers.{" "}
+          Hold a Bonga NFT for 2× garden earnings, Bonga Kush & exclusive plants.{" "}
           <a href="/nft" className="font-semibold text-bonga-teal hover:underline">
             Mint one
           </a>
@@ -267,7 +267,7 @@ export function VibesGardenGame() {
           onClick={() => setVisible(true)}
         >
           <Wallet className="h-4 w-4" />
-          Connect wallet for Bonga Kush & NFT perks
+          Connect wallet for 2× earnings & Bonga Kush
         </Button>
       )}
 
