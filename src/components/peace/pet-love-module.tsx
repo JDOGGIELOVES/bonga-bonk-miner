@@ -9,6 +9,7 @@ import {
   Camera,
   ExternalLink,
   Heart,
+  History,
   Loader2,
   PawPrint,
   Shield,
@@ -20,14 +21,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { PET_LOVE_REWARD, PET_TYPE_OPTIONS } from "@/lib/pet-love";
 import {
+  checkPetImageDuplicate,
   claimPetReward,
   fetchPetGallery,
+  fetchPetPastUploads,
   fetchPetStatus,
   submitPetPhoto,
   type PetGalleryItem,
   type PetStatus,
 } from "@/lib/pet-claim-client";
 import {
+  computePerceptualHashFromFile,
   hashImageFile,
   verifyPetPhotoOnDevice,
 } from "@/lib/pet-verify-client";
@@ -58,6 +62,7 @@ export function PetLoveModule() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [gallery, setGallery] = useState<PetGalleryItem[]>([]);
+  const [pastUploads, setPastUploads] = useState<PetGalleryItem[]>([]);
   const [status, setStatus] = useState<PetStatus | null>(null);
   const [todaySubmission, setTodaySubmission] = useState<PetGalleryItem | null>(
     null
@@ -92,19 +97,27 @@ export function PetLoveModule() {
     void refreshGallery();
   }, [refreshGallery]);
 
+  const refreshPastUploads = useCallback(async (wallet: string) => {
+    const items = await fetchPetPastUploads(wallet);
+    setPastUploads(items);
+  }, []);
+
   useEffect(() => {
     if (!connected || !publicKey) {
       setStatus(null);
       setTodaySubmission(null);
+      setPastUploads([]);
       return;
     }
+    const wallet = publicKey.toBase58();
     void (async () => {
-      const next = await refreshStatus(publicKey.toBase58());
+      const next = await refreshStatus(wallet);
       if (next.submittedToday && next.submission) {
         setTodaySubmission(next.submission);
       }
+      await refreshPastUploads(wallet);
     })();
-  }, [connected, publicKey, refreshStatus]);
+  }, [connected, publicKey, refreshPastUploads, refreshStatus]);
 
   const activeSubmission = status?.submission ?? todaySubmission;
   const hasSubmittedToday =
@@ -143,18 +156,61 @@ export function PetLoveModule() {
 
     const result = await verifyPetPhotoOnDevice(file);
     if (result.ok) {
-      setVerifyState("passed");
       setPetLabel(result.petLabel);
       setConfidence(result.confidence);
       setVerifyReason(`Looks good — ${result.petLabel} and hand petting detected.`);
+      await finishDuplicateCheck(file, "passed");
     } else if ("assist" in result && result.assist) {
-      setVerifyState("assist");
       setPetLabel(result.defaultPet);
       setConfidence(result.assistedConfidence);
       setVerifyReason(result.reason);
+      await finishDuplicateCheck(file, "assist");
     } else {
       setVerifyState("failed");
       setVerifyReason(result.reason);
+    }
+  };
+
+  const finishDuplicateCheck = async (
+    file: File,
+    nextState: "passed" | "assist"
+  ) => {
+    try {
+      const [imageHash, perceptualHash] = await Promise.all([
+        hashImageFile(file),
+        computePerceptualHashFromFile(file),
+      ]);
+
+      if (!perceptualHash) {
+        setVerifyState("failed");
+        setVerifyReason(
+          "Could not verify this photo is unique. Try another original hand-and-pet shot."
+        );
+        return;
+      }
+
+      const duplicateCheck = await checkPetImageDuplicate({
+        imageHash,
+        perceptualHash,
+      });
+
+      if (duplicateCheck.duplicate) {
+        setVerifyState("failed");
+        setVerifyReason(
+          duplicateCheck.reason ??
+            "This photo was already shared. Please upload your own original hand-and-pet photo."
+        );
+        return;
+      }
+
+      setVerifyState(nextState);
+    } catch (err) {
+      setVerifyState("failed");
+      setVerifyReason(
+        err instanceof Error
+          ? err.message
+          : "Could not check for duplicate photos. Try again."
+      );
     }
   };
 
@@ -208,6 +264,7 @@ export function PetLoveModule() {
       if (items.length > 0) {
         setGallery(items);
       }
+      await refreshPastUploads(wallet);
 
       setMessage("Shared with the community! Claim your daily reward below.");
       resetSelection();
@@ -251,9 +308,15 @@ export function PetLoveModule() {
 
   const alreadyClaimed = status?.claimedToday === true;
   const claimsPaused = status?.claimsPaused === true;
+  const ipClaimCapReached = status?.ipLimits?.claimCapReached === true;
+  const ipSubmissionCapReached =
+    status?.ipLimits?.submissionCapReached === true;
+  const globalClaimCapReached = status?.globalClaimCap?.capReached === true;
   const canClaim =
     hasSubmittedToday &&
     !alreadyClaimed &&
+    !ipClaimCapReached &&
+    !globalClaimCapReached &&
     status?.treasuryEnabled === true &&
     !claimsPaused;
 
@@ -281,6 +344,9 @@ export function PetLoveModule() {
               <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
                 <Heart className="h-3 w-3" /> One upload per wallet per day
               </span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
+                <Shield className="h-3 w-3" /> One share & one claim per IP / day
+              </span>
             </div>
           </div>
         </div>
@@ -292,7 +358,9 @@ export function PetLoveModule() {
             <h3 className="font-display text-base font-bold">
               Community Pet Gallery
             </h3>
-            <p className="text-xs text-muted-foreground">Anonymous — wallets hidden</p>
+            <p className="text-xs text-muted-foreground">
+              Recent community shares — wallets hidden
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {galleryItems.map((item) => (
@@ -321,6 +389,60 @@ export function PetLoveModule() {
               </motion.div>
             ))}
           </div>
+        </div>
+      )}
+
+      {connected && (
+        <div>
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-bonga-teal" />
+              <h3 className="font-display text-base font-bold">Past Uploads</h3>
+            </div>
+            <p className="text-xs text-muted-foreground">Your wallet history</p>
+          </div>
+          {pastUploads.length > 0 ? (
+            <>
+              <p className="mb-3 text-xs text-muted-foreground">
+                Every Pet Love photo you share is saved here — one upload per UTC
+                day, kept in the gallery archive.
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {pastUploads.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    layout
+                    className="group overflow-hidden rounded-2xl border border-bonga-teal/20 bg-card"
+                  >
+                    <div className="relative aspect-square bg-muted/30">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.imagePath}
+                        alt={`Your pet love — ${item.petLabel}`}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-xs font-medium capitalize">
+                        {petEmoji(item.petLabel)} {item.petLabel}
+                      </span>
+                      <span className="text-[10px] font-medium text-bonga-teal">
+                        {item.date}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 px-4 py-8 text-center">
+              <p className="text-sm text-muted-foreground">
+                No past uploads yet. Share your first hand-and-pet photo below —
+                it will stay here in your history.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -383,8 +505,18 @@ export function PetLoveModule() {
                   </>
                 )}
               </Button>
-            ) : alreadyClaimed ? (
-              <Badge variant="green">Reward claimed today</Badge>
+            ) : globalClaimCapReached ? (
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Pet Love hit today&apos;s site-wide payout cap (
+                {status?.globalClaimCap?.maxClaims} claims). Your photo is saved —
+                try claiming again tomorrow (UTC).
+              </p>
+            ) : alreadyClaimed || ipClaimCapReached ? (
+              <Badge variant="green">
+                {ipClaimCapReached && !alreadyClaimed
+                  ? "Reward already claimed from this connection today"
+                  : "Reward claimed today"}
+              </Badge>
             ) : claimsPaused ? (
               <p className="text-xs text-amber-700 dark:text-amber-300">
                 Pet Love payouts are temporarily paused. Your photo is saved — check
@@ -404,6 +536,16 @@ export function PetLoveModule() {
                 payouts.
               </p>
             )}
+          </div>
+        ) : ipSubmissionCapReached ? (
+          <div className="space-y-3 text-center">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              This connection already shared a Pet Love photo today.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Pet Love allows one upload and one claim per IP address per UTC day
+              to stop scripted drains. Try again tomorrow or from your home network.
+            </p>
           </div>
         ) : (
           <div className="space-y-5">
@@ -452,7 +594,7 @@ export function PetLoveModule() {
                   className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
                 >
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Checking on your device (nothing leaves until you submit)...
+                  Checking photo on your device, then scanning for duplicates...
                 </motion.p>
               )}
               {verifyState === "passed" && (

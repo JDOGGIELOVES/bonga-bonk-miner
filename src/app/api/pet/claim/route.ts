@@ -4,10 +4,12 @@ import bs58 from "bs58";
 import { isPetLoveClaimsPaused, PET_LOVE_REWARD, todayKey } from "@/lib/pet-love";
 import { verifyPetSignature } from "@/lib/pet-love-messages";
 import {
+  assertPetDailyClaimCapacity,
   getSubmissionById,
   getSubmissionForWalletToday,
   hasClaimedPetRewardToday,
   recordPetClaim,
+  recordPetDailyGlobalClaim,
 } from "@/lib/pet-love-store";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
@@ -17,12 +19,8 @@ import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import { buildPetClaimMessage } from "@/lib/pet-love-messages";
-import {
-  assertIpCanClaim,
-  ipStorageKey,
-  recordIpClaim,
-} from "@/lib/claim-ip-store";
-import { getClientIp } from "@/lib/request-ip";
+import { assertIpCanClaim, recordIpClaim } from "@/lib/claim-ip-store";
+import { requirePetClientIpKey } from "@/lib/request-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -136,22 +134,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
-    const clientIp = getClientIp(request);
-    const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
+    const ipResult = requirePetClientIpKey(request);
+    if (!ipResult.ok) {
+      return NextResponse.json({ error: ipResult.reason }, { status: 403 });
+    }
+    const ipKey = ipResult.ipKey;
+
+    if (submission.ipKey && submission.ipKey !== ipKey) {
+      return NextResponse.json(
+        {
+          error:
+            "This reward must be claimed from the same connection used to share the photo.",
+        },
+        { status: 403 }
+      );
+    }
 
     try {
       const result = await withWalletClaimLock(wallet, date, async () => {
-        if (ipKey) {
-          const ipCheck = await assertIpCanClaim({
-            ipKey,
-            wallet,
-            amount,
-            date,
-            kind: "pet",
-          });
-          if (!ipCheck.ok) {
-            throw new Error(ipCheck.reason);
-          }
+        const ipCheck = await assertIpCanClaim({
+          ipKey,
+          wallet,
+          amount,
+          date,
+          kind: "pet",
+        });
+        if (!ipCheck.ok) {
+          throw new Error(ipCheck.reason);
+        }
+
+        const globalCap = await assertPetDailyClaimCapacity(date);
+        if (!globalCap.ok) {
+          throw new Error(globalCap.reason);
         }
 
         const alreadyClaimed = await getTodayClaimedFromTreasury({
@@ -175,9 +189,8 @@ export async function POST(request: Request) {
 
         await recordGlobalClaim(amount);
         await recordPetClaim(wallet, date, submissionId);
-        if (ipKey) {
-          await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
-        }
+        await recordPetDailyGlobalClaim(date);
+        await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
 
         return {
           ok: true as const,

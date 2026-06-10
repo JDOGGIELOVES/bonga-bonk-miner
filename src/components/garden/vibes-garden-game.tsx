@@ -9,20 +9,24 @@ import { GardenShop } from "@/components/garden/garden-shop";
 import { GardenQuests } from "@/components/garden/garden-quests";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
 import {
+  GARDEN_DAILY_EARN_CAP,
   applyIdleEarnings,
   buyPlant,
   completeQuest,
   formatGardenBonga,
   gardenBeautyLevel,
+  getGardenIdleRate,
   getNftMultiplier,
+  isDailyEarnCapReached,
   loadGardenState,
   saveGardenState,
   waterPlant,
   type GardenState,
+  type GardenZone,
 } from "@/lib/vibes-garden";
 import { getTodaysAffirmation } from "@/lib/bonga-affirmations";
 import { gameAudio } from "@/lib/audio/audio-manager";
-import { ShoppingBag, Sparkles, Wallet } from "lucide-react";
+import { Info, ShoppingBag, Sparkles, Wallet } from "lucide-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export function VibesGardenGame() {
@@ -38,7 +42,6 @@ export function VibesGardenGame() {
   const isHolderRef = useRef(isHolder);
   const catchupDoneRef = useRef(false);
 
-  // Keep latest isHolder for interval without thrashing the effect
   useEffect(() => {
     isHolderRef.current = isHolder;
   }, [isHolder]);
@@ -53,7 +56,6 @@ export function VibesGardenGame() {
     saveGardenState(state);
   }, [state]);
 
-  // One-time offline catch-up using the final holder status (after hook finishes check/cache)
   useEffect(() => {
     if (!state || catchupDoneRef.current || checking) return;
     catchupDoneRef.current = true;
@@ -63,17 +65,14 @@ export function VibesGardenGame() {
   useEffect(() => {
     if (!state) return;
     const tick = setInterval(() => {
-      // Pause when tab is hidden to reduce background CPU (prevents high load / potential instability)
       if (typeof document !== "undefined" && document.hidden) return;
       setState((prev) =>
         prev ? applyIdleEarnings(prev, isHolderRef.current) : prev
       );
-    }, 5000); // Throttled from 1s → 5s for much lower main-thread churn while still feeling live
+    }, 5000);
     return () => clearInterval(tick);
   }, [state]);
 
-  // When holder status changes while playing (e.g. connect mid-session), apply forward at new rate.
-  // Guard with catchupDone so we don't poison lastTick with wrong mult during initial holder check.
   useEffect(() => {
     if (!state || !catchupDoneRef.current) return;
     setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
@@ -82,34 +81,36 @@ export function VibesGardenGame() {
   const showFloat = useCallback((text: string) => {
     const id = ++floatId.current;
     setFloatText({ id, text });
-    setTimeout(() => setFloatText((f) => (f?.id === id ? null : f)), 900);
+    setTimeout(() => setFloatText((f) => (f?.id === id ? null : f)), 1200);
   }, []);
 
   const handleWater = useCallback(
     (instanceId: string) => {
       if (!state) return;
       void gameAudio.resume();
-      const { state: next, earned } = waterPlant(state, instanceId, isHolder);
+      const { state: next, earned, capped } = waterPlant(state, instanceId, isHolder);
       setState(next);
       if (earned > 0) {
         showFloat(`+${earned.toFixed(2)} $BONGA`);
         gameAudio.playCoinCollect();
+      } else if (capped) {
+        showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
       }
     },
     [state, isHolder, showFloat]
   );
 
   const handleBuy = useCallback(
-    (plantTypeId: string) => {
+    (plantTypeId: string, zone: GardenZone) => {
       if (!state) return;
-      const result = buyPlant(state, plantTypeId, isHolder);
+      const result = buyPlant(state, plantTypeId, zone, isHolder);
       if (!result.ok) {
         setShopMsg(result.reason ?? "Could not plant.");
         setTimeout(() => setShopMsg(""), 3000);
         return;
       }
       setState(result.state);
-      setShopMsg("Planted! Water it to spread vibes. 🌼");
+      setShopMsg(`Planted in ${zone}! Stacks with your other plants. 🌼`);
       setTimeout(() => setShopMsg(""), 3000);
       gameAudio.playCoinCollect();
     },
@@ -120,9 +121,11 @@ export function VibesGardenGame() {
     (questId: string) => {
       if (!state) return;
       const result = completeQuest(state, questId);
-      if (result.ok) {
+      if (result.ok && result.reward > 0) {
         setState(result.state);
         showFloat(`Quest +${result.reward} $BONGA`);
+      } else if (result.capped) {
+        showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
       }
     },
     [state, showFloat]
@@ -164,15 +167,24 @@ export function VibesGardenGame() {
 
   const beauty = gardenBeautyLevel(state.plants.length);
   const nftBonus = getNftMultiplier(isHolder);
+  const idlePerSec = getGardenIdleRate(state, isHolder);
+  const capReached = isDailyEarnCapReached(state);
 
   return (
     <div className="space-y-4">
-      <div className="bonga-card grid grid-cols-2 gap-3 p-4 sm:grid-cols-4">
+      <div className="bonga-card grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-6">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Garden $BONGA</p>
           <p className="font-display text-xl font-bold text-bonga-orange">
             {formatGardenBonga(state.gardenBonga)}
           </p>
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Farmed today</p>
+          <p className={`font-display text-xl font-bold ${capReached ? "text-amber-600" : "text-foreground"}`}>
+            {formatGardenBonga(state.bongaFarmedToday)}
+          </p>
+          <p className="text-[10px] text-muted-foreground">/ {GARDEN_DAILY_EARN_CAP} cap</p>
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Plants</p>
@@ -186,6 +198,48 @@ export function VibesGardenGame() {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Beauty</p>
           <p className="font-display text-xl font-bold text-bonga-purple">Lv {beauty}</p>
         </div>
+        <div className="col-span-2 sm:col-span-1">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Idle earn</p>
+          <p className="font-display text-xl font-bold text-bonga-teal">
+            {capReached ? "0" : formatGardenBonga(idlePerSec)}/s
+          </p>
+        </div>
+      </div>
+
+      {capReached && (
+        <p className="rounded-bonga-lg border border-amber-300/40 bg-amber-50/60 px-4 py-2 text-center text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+          Daily farm cap reached ({GARDEN_DAILY_EARN_CAP} garden $BONGA). Resets at midnight UTC.
+          You can still explore zones — taps and idle pause until tomorrow.
+        </p>
+      )}
+
+      <div className="bonga-card border-bonga-teal/20 bg-gradient-to-br from-bonga-teal/5 to-bonga-purple/5 p-4">
+        <div className="flex items-start gap-2">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-bonga-teal" />
+          <div className="min-w-0 text-sm">
+            <p className="font-display font-bold text-foreground">How the garden works</p>
+            <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+              <li>
+                <span className="font-semibold text-foreground">Three zones</span> — Meadow 🌾,
+                Greenhouse 🪴, and Farm 🚜. Plant in any zone from the shop; switch tabs to water
+                each area.
+              </li>
+              <li>
+                <span className="font-semibold text-foreground">Slower progression</span> — earn
+                rates are gentler. Max {GARDEN_DAILY_EARN_CAP} garden $BONGA farmed per UTC day
+                (idle + taps + quests).
+              </li>
+              <li>
+                <span className="font-semibold text-foreground">Duplicates stack</span> — another
+                of the same plant adds full idle + tap again.
+              </li>
+              <li>
+                <span className="font-semibold text-foreground">Bonga Kush 🌿</span> — NFT holders
+                only. Connect wallet & hold a Bonga NFT to plant it in the Greenhouse.
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {connected && isHolder && (
@@ -197,7 +251,7 @@ export function VibesGardenGame() {
 
       {connected && !checking && !isHolder && (
         <p className="text-center text-xs text-muted-foreground">
-          Hold a Bonga NFT for rare plants & vibe multipliers.{" "}
+          Hold a Bonga NFT to unlock Bonga Kush, rare plants & vibe multipliers.{" "}
           <a href="/nft" className="font-semibold text-bonga-teal hover:underline">
             Mint one
           </a>
@@ -207,12 +261,12 @@ export function VibesGardenGame() {
       {!connected && (
         <Button
           variant="outline"
-          size="sm"
-          className="mx-auto flex gap-2 rounded-full"
+          size="lg"
+          className="mx-auto flex min-h-[48px] w-full max-w-sm gap-2 rounded-full sm:w-auto"
           onClick={() => setVisible(true)}
         >
           <Wallet className="h-4 w-4" />
-          Connect wallet for NFT garden perks
+          Connect wallet for Bonga Kush & NFT perks
         </Button>
       )}
 
@@ -229,14 +283,14 @@ export function VibesGardenGame() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: -24 }}
               exit={{ opacity: 0 }}
-              className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 font-display text-lg font-bold text-bonga-orange"
+              className="pointer-events-none absolute left-1/2 top-1/3 z-10 max-w-[90%] -translate-x-1/2 text-center font-display text-base font-bold text-bonga-orange sm:text-lg"
             >
               {floatText.text}
             </motion.p>
           )}
         </AnimatePresence>
         {meditating && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-bonga-lg bg-card/60 backdrop-blur-sm">
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-bonga-lg bg-card/60 backdrop-blur-sm">
             <p className="font-display text-sm font-semibold text-bonga-teal">
               Breathe... peace, love, good bonks...
             </p>
@@ -244,14 +298,14 @@ export function VibesGardenGame() {
         )}
       </div>
 
-      <div className="flex justify-center gap-3">
+      <div className="flex justify-center px-2">
         <Button
           variant="secondary"
-          size="sm"
-          className="gap-2 rounded-full px-5"
+          size="lg"
+          className="h-12 w-full max-w-md gap-2 rounded-full text-base sm:w-auto sm:px-8"
           onClick={() => setShopOpen(true)}
         >
-          <ShoppingBag className="h-4 w-4" />
+          <ShoppingBag className="h-5 w-5" />
           Plant Shop
         </Button>
       </div>
@@ -265,7 +319,8 @@ export function VibesGardenGame() {
       />
 
       <p className="text-center text-xs text-muted-foreground">
-        Garden $BONGA is saved locally · idle up to 8h offline · {state.lifetimeWaters} lifetime waters
+        Garden $BONGA saved locally · {GARDEN_DAILY_EARN_CAP}/day cap · idle up to 8h offline ·{" "}
+        {state.lifetimeWaters} lifetime waters
       </p>
 
       <GardenShop

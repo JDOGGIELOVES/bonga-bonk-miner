@@ -12,6 +12,7 @@ export interface IpDailyRecord {
   tapCount: number;
   minerClaims: number;
   petClaims: number;
+  petSubmissions: number;
   bongaTotal: number;
   lastClaimAt: number;
   updatedAt: string;
@@ -37,6 +38,19 @@ export function maxBongaPerIpPerDay(): number {
 
 export function maxPetClaimsPerIpPerDay(): number {
   return envInt("CLAIM_MAX_PET_CLAIMS_PER_IP_DAY", 1);
+}
+
+export function maxPetSubmissionsPerIpPerDay(): number {
+  return envInt("PET_MAX_SUBMISSIONS_PER_IP_DAY", 1);
+}
+
+/** Pet Love: one wallet per connection per day (stops scripted multi-wallet drains). */
+export function maxPetWalletsPerIpPerDay(): number {
+  return envInt("PET_MAX_WALLETS_PER_IP_DAY", 1);
+}
+
+export function isPetClientIpRequired(): boolean {
+  return process.env.PET_REQUIRE_CLIENT_IP !== "false";
 }
 
 export function maxMinerClaimsPerIpPerDay(): number {
@@ -127,10 +141,15 @@ function emptyRecord(ipKey: string, date: string): IpDailyRecord {
     tapCount: 0,
     minerClaims: 0,
     petClaims: 0,
+    petSubmissions: 0,
     bongaTotal: 0,
     lastClaimAt: 0,
     updatedAt: new Date().toISOString(),
   };
+}
+
+function maxWalletsForKind(kind: "miner" | "pet"): number {
+  return kind === "pet" ? maxPetWalletsPerIpPerDay() : maxWalletsPerIpPerDay();
 }
 
 export async function getIpDailyRecord(
@@ -257,17 +276,22 @@ export async function assertIpCanClaim(params: {
     return { ok: false, reason: "Please wait before claiming again." };
   }
 
-  if (!walletTracked(record, wallet) && record.wallets.length >= maxWalletsPerIpPerDay()) {
+  const walletCap = maxWalletsForKind(params.kind);
+  if (!walletTracked(record, wallet) && record.wallets.length >= walletCap) {
     return {
       ok: false,
-      reason: `Daily wallet limit reached for this connection (${maxWalletsPerIpPerDay()} wallets/day).`,
+      reason:
+        params.kind === "pet"
+          ? "Pet Love allows one wallet per connection per day."
+          : `Daily wallet limit reached for this connection (${walletCap} wallets/day).`,
     };
   }
 
   if (params.kind === "pet" && record.petClaims >= maxPetClaimsPerIpPerDay()) {
     return {
       ok: false,
-      reason: "Pet Love claim already used from this connection today.",
+      reason:
+        "Pet Love reward already claimed from this connection today (one claim per IP per day).",
     };
   }
 
@@ -289,6 +313,68 @@ export async function assertIpCanClaim(params: {
   }
 
   return { ok: true };
+}
+
+export async function assertIpCanSubmitPet(params: {
+  ipKey: string;
+  wallet: string;
+  date: string;
+}): Promise<{ ok: true } | { ok: false; reason: string }> {
+  if (!isIpClaimLimitsEnabled()) return { ok: true };
+
+  const record = await getIpDailyRecord(params.ipKey, params.date);
+  const wallet = params.wallet.toLowerCase();
+
+  if (record.petSubmissions >= maxPetSubmissionsPerIpPerDay()) {
+    return {
+      ok: false,
+      reason:
+        "Pet Love allows one photo per connection per day. Scripted multi-wallet uploads are blocked.",
+    };
+  }
+
+  if (
+    !walletTracked(record, wallet) &&
+    record.wallets.length >= maxPetWalletsPerIpPerDay()
+  ) {
+    return {
+      ok: false,
+      reason: "Pet Love allows one wallet per connection per day.",
+    };
+  }
+
+  return { ok: true };
+}
+
+export async function recordIpPetSubmission(params: {
+  ipKey: string;
+  wallet: string;
+  date: string;
+}): Promise<void> {
+  if (!isIpClaimLimitsEnabled()) return;
+
+  const record = await getIpDailyRecord(params.ipKey, params.date);
+  trackWallet(record, params.wallet);
+  record.petSubmissions += 1;
+  await saveIpDailyRecord(record);
+}
+
+export async function getIpPetStatus(
+  ipKey: string,
+  date: string
+): Promise<{
+  submissionsToday: number;
+  claimsToday: number;
+  maxSubmissions: number;
+  maxClaims: number;
+}> {
+  const record = await getIpDailyRecord(ipKey, date);
+  return {
+    submissionsToday: record.petSubmissions,
+    claimsToday: record.petClaims,
+    maxSubmissions: maxPetSubmissionsPerIpPerDay(),
+    maxClaims: maxPetClaimsPerIpPerDay(),
+  };
 }
 
 export async function recordIpClaim(params: {

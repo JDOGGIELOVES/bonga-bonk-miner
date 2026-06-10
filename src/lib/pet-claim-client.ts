@@ -15,6 +15,21 @@ export interface PetGalleryItem {
   submittedAt: string;
 }
 
+export interface PetGlobalClaimCap {
+  claimsToday: number;
+  maxClaims: number | null;
+  capReached: boolean;
+}
+
+export interface PetIpLimits {
+  submissionsToday: number;
+  claimsToday: number;
+  maxSubmissions: number;
+  maxClaims: number;
+  submissionCapReached: boolean;
+  claimCapReached: boolean;
+}
+
 export interface PetStatus {
   submittedToday: boolean;
   claimedToday: boolean;
@@ -23,11 +38,22 @@ export interface PetStatus {
   treasuryEnabled: boolean;
   claimsPaused?: boolean;
   dailyOnChainLimit?: number;
+  ipLimits?: PetIpLimits | null;
+  globalClaimCap?: PetGlobalClaimCap | null;
 }
 
 export interface PetSubmitSuccess {
   ok: true;
   submission: PetGalleryItem;
+}
+
+export interface PetImageCheckResult {
+  ok: boolean;
+  duplicate: boolean;
+  exact?: boolean;
+  similar?: boolean;
+  distance?: number;
+  reason?: string;
 }
 
 export interface PetClaimSuccess {
@@ -42,6 +68,37 @@ export async function fetchPetGallery(): Promise<PetGalleryItem[]> {
   if (!response.ok) return [];
   const data = (await response.json()) as { items?: PetGalleryItem[] };
   return data.items ?? [];
+}
+
+export async function fetchPetPastUploads(wallet: string): Promise<PetGalleryItem[]> {
+  const response = await fetch(
+    `/api/pet/history?wallet=${encodeURIComponent(wallet)}`,
+    { cache: "no-store" }
+  );
+  if (!response.ok) return [];
+  const data = (await response.json()) as { items?: PetGalleryItem[] };
+  return data.items ?? [];
+}
+
+export async function checkPetImageDuplicate(params: {
+  imageHash: string;
+  perceptualHash: string;
+}): Promise<PetImageCheckResult> {
+  const form = new FormData();
+  form.append("imageHash", params.imageHash);
+  form.append("perceptualHash", params.perceptualHash);
+
+  const response = await fetch("/api/pet/check-image", {
+    method: "POST",
+    body: form,
+  });
+
+  const data = (await response.json()) as PetImageCheckResult & { error?: string };
+  if (!response.ok) {
+    throw new Error(data.error ?? "Could not check image for duplicates.");
+  }
+
+  return data;
 }
 
 export async function fetchPetStatus(wallet: string): Promise<PetStatus> {

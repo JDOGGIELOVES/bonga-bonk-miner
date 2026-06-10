@@ -3,6 +3,12 @@ import { mkdir, readFile, writeFile, readdir } from "fs/promises";
 import os from "os";
 import path from "path";
 import {
+  findClosestPhash,
+  getPetPhashMaxDistance,
+  isPetDuplicateCheckEnabled,
+} from "@/lib/pet-image-hash";
+import {
+  getPetMaxDailyClaimsTotal,
   type PetLoveSubmission,
   todayKey,
   walletDayKey,
@@ -13,11 +19,12 @@ const INDEX_BLOB_PATH = "pet-love/index.json";
 interface PetLoveIndex {
   submissions: PetLoveSubmission[];
   imageHashes: string[];
+  imagePhashes: string[];
   petClaims: Record<string, string>;
 }
 
 function emptyIndex(): PetLoveIndex {
-  return { submissions: [], imageHashes: [], petClaims: {} };
+  return { submissions: [], imageHashes: [], imagePhashes: [], petClaims: {} };
 }
 
 function normalizeWallet(wallet: string): string {
@@ -123,9 +130,17 @@ async function streamToText(
 
 function parseIndex(raw: string): PetLoveIndex {
   const data = JSON.parse(raw) as PetLoveIndex;
+  const submissions = data.submissions ?? [];
+  const imageHashes = data.imageHashes ?? [];
+  const imagePhashes =
+    data.imagePhashes ??
+    submissions
+      .map((submission) => submission.perceptualHash)
+      .filter((hash): hash is string => Boolean(hash));
   return {
-    submissions: data.submissions ?? [],
-    imageHashes: data.imageHashes ?? [],
+    submissions,
+    imageHashes,
+    imagePhashes,
     petClaims: data.petClaims ?? {},
   };
 }
@@ -362,6 +377,58 @@ export async function isImageHashUsed(hash: string): Promise<boolean> {
   return index.imageHashes.includes(hash);
 }
 
+export interface PetImageDuplicateResult {
+  duplicate: boolean;
+  exact: boolean;
+  similar: boolean;
+  distance?: number;
+  reason?: string;
+}
+
+export async function checkImageDuplicate(params: {
+  imageHash?: string;
+  perceptualHash?: string;
+}): Promise<PetImageDuplicateResult> {
+  const index = await readIndex();
+
+  if (params.imageHash && index.imageHashes.includes(params.imageHash)) {
+    return {
+      duplicate: true,
+      exact: true,
+      similar: false,
+      reason:
+        "This exact photo was already submitted. Please share a new hand-and-pet moment.",
+    };
+  }
+
+  if (
+    !isPetDuplicateCheckEnabled() ||
+    !params.perceptualHash ||
+    index.imagePhashes.length === 0
+  ) {
+    return { duplicate: false, exact: false, similar: false };
+  }
+
+  const closest = findClosestPhash(
+    params.perceptualHash,
+    index.imagePhashes,
+    getPetPhashMaxDistance()
+  );
+
+  if (!closest) {
+    return { duplicate: false, exact: false, similar: false };
+  }
+
+  return {
+    duplicate: true,
+    exact: false,
+    similar: true,
+    distance: closest.distance,
+    reason:
+      "This photo looks too similar to one already shared (stock or duplicate image). Please upload your own original hand-and-pet photo.",
+  };
+}
+
 async function saveImageBlob(params: {
   id: string;
   ext: string;
@@ -392,6 +459,8 @@ export async function savePetSubmission(params: {
   petLabel: string;
   confidence: number;
   imageHash: string;
+  perceptualHash?: string;
+  ipKey?: string;
   imageBuffer: Buffer;
   contentType: string;
 }): Promise<PetLoveSubmission> {
@@ -403,8 +472,15 @@ export async function savePetSubmission(params: {
     throw new Error("This wallet already shared a pet photo today.");
   }
 
-  if (await isImageHashUsed(params.imageHash)) {
-    throw new Error("This image was already submitted. One unique photo per day.");
+  const duplicateCheck = await checkImageDuplicate({
+    imageHash: params.imageHash,
+    perceptualHash: params.perceptualHash,
+  });
+  if (duplicateCheck.duplicate) {
+    throw new Error(
+      duplicateCheck.reason ??
+        "This image was already submitted. One unique photo per day."
+    );
   }
 
   const id = newSubmissionId();
@@ -435,6 +511,8 @@ export async function savePetSubmission(params: {
     petLabel: params.petLabel,
     confidence: params.confidence,
     imageHash: params.imageHash,
+    perceptualHash: params.perceptualHash,
+    ipKey: params.ipKey,
     submittedAt: new Date().toISOString(),
     imagePath,
   };
@@ -442,11 +520,17 @@ export async function savePetSubmission(params: {
   const index = await readIndex();
   index.submissions.unshift(submission);
   index.imageHashes.push(params.imageHash);
-  if (index.submissions.length > 500) {
-    index.submissions = index.submissions.slice(0, 500);
+  if (params.perceptualHash) {
+    index.imagePhashes.push(params.perceptualHash);
+  }
+  if (index.submissions.length > 2000) {
+    index.submissions = index.submissions.slice(0, 2000);
   }
   if (index.imageHashes.length > 1000) {
     index.imageHashes = index.imageHashes.slice(-1000);
+  }
+  if (index.imagePhashes.length > 1000) {
+    index.imagePhashes = index.imagePhashes.slice(-1000);
   }
 
   await persistSubmissionRecord(submission);
@@ -485,39 +569,191 @@ export async function getSubmissionById(id: string): Promise<PetLoveSubmission |
   return index.submissions.find((s) => s.id === id) ?? null;
 }
 
-export async function listGallery(limit = 48): Promise<PetLoveSubmission[]> {
-  const index = await readIndex();
-  if (index.submissions.length > 0) {
-    return index.submissions.slice(0, limit);
+function mergeSubmissionRecords(
+  target: Map<string, PetLoveSubmission>,
+  records: PetLoveSubmission[]
+): void {
+  for (const record of records) {
+    target.set(record.id, record);
   }
+}
 
-  if (!useBlobStorage()) {
-    return [];
-  }
+async function listSubmissionsFromBlobPrefix(
+  prefix: string,
+  maxRecords: number
+): Promise<PetLoveSubmission[]> {
+  if (!useBlobStorage()) return [];
 
   try {
     const { list } = await import("@vercel/blob");
-    const { blobs } = await list({
-      prefix: "pet-love/submissions/",
-      limit,
-    });
-
+    const { blobs } = await list({ prefix, limit: maxRecords });
     const submissions: PetLoveSubmission[] = [];
+
     for (const blob of blobs) {
       const id = blob.pathname
-        .replace("pet-love/submissions/", "")
+        .replace(prefix, "")
         .replace(/\.json$/, "");
       const record = await readSubmissionRecord(id);
       if (record) submissions.push(record);
     }
 
-    return submissions
-      .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
-      .slice(0, limit);
+    return submissions;
   } catch (error) {
-    console.error("Pet Love gallery list fallback failed:", error);
+    console.error(`Pet Love blob list failed (${prefix}):`, error);
     return [];
   }
+}
+
+async function listWalletSubmissionIds(wallet: string): Promise<string[]> {
+  const walletKey = wallet.toLowerCase();
+  const prefix = `pet-love/by-wallet/${walletKey}/`;
+  const ids: string[] = [];
+
+  if (useBlobStorage()) {
+    try {
+      const { list } = await import("@vercel/blob");
+      const { blobs } = await list({ prefix, limit: 500 });
+      for (const blob of blobs) {
+        const raw = await readRecord(blob.pathname);
+        if (!raw) continue;
+        try {
+          const data = JSON.parse(raw) as { submissionId?: string };
+          if (data.submissionId) ids.push(data.submissionId);
+        } catch {
+          // skip malformed sidecar
+        }
+      }
+    } catch (error) {
+      console.error("Pet Love wallet history list failed:", error);
+    }
+    return ids;
+  }
+
+  const dir = localRecordPath(`pet-love/by-wallet/${walletKey}`);
+  const files = await readdir(dir).catch(() => [] as string[]);
+  for (const file of files) {
+    if (!file.endsWith(".json")) continue;
+    try {
+      const raw = await readFile(path.join(dir, file), "utf8");
+      const data = JSON.parse(raw) as { submissionId?: string };
+      if (data.submissionId) ids.push(data.submissionId);
+    } catch {
+      // skip
+    }
+  }
+
+  return ids;
+}
+
+export async function listGallery(limit = 96): Promise<PetLoveSubmission[]> {
+  const byId = new Map<string, PetLoveSubmission>();
+  mergeSubmissionRecords(byId, (await readIndex()).submissions);
+
+  if (byId.size < limit) {
+    const fromBlob = await listSubmissionsFromBlobPrefix(
+      "pet-love/submissions/",
+      Math.max(limit * 3, 120)
+    );
+    mergeSubmissionRecords(byId, fromBlob);
+  }
+
+  return Array.from(byId.values())
+    .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+    .slice(0, limit);
+}
+
+/** All photos shared by a wallet (one per UTC day), newest first. */
+export async function listWalletPastUploads(
+  wallet: string,
+  limit = 90
+): Promise<PetLoveSubmission[]> {
+  const normalized = normalizeWallet(wallet);
+  const byId = new Map<string, PetLoveSubmission>();
+
+  for (const submission of (await readIndex()).submissions) {
+    if (walletsMatch(submission.wallet, normalized)) {
+      byId.set(submission.id, submission);
+    }
+  }
+
+  const sidecarIds = await listWalletSubmissionIds(normalized);
+  for (const id of sidecarIds) {
+    if (byId.has(id)) continue;
+    const record = await readSubmissionRecord(id);
+    if (record && walletsMatch(record.wallet, normalized)) {
+      byId.set(record.id, record);
+    }
+  }
+
+  return Array.from(byId.values())
+    .sort(
+      (a, b) =>
+        b.date.localeCompare(a.date) || b.submittedAt.localeCompare(a.submittedAt)
+    )
+    .slice(0, limit);
+}
+
+function dailyClaimCountPath(date: string): string {
+  return `pet-love/daily-claim-count/${date}.json`;
+}
+
+export async function getPetDailyClaimCount(date: string): Promise<number> {
+  const raw = await readRecord(dailyClaimCountPath(date));
+  if (!raw) return 0;
+
+  try {
+    const data = JSON.parse(raw) as { count?: number };
+    return Math.max(0, Number(data.count) || 0);
+  } catch {
+    return 0;
+  }
+}
+
+export async function assertPetDailyClaimCapacity(
+  date: string
+): Promise<{ ok: true } | { ok: false; reason: string }> {
+  const max = getPetMaxDailyClaimsTotal();
+  if (max == null) return { ok: true };
+
+  const count = await getPetDailyClaimCount(date);
+  if (count >= max) {
+    return {
+      ok: false,
+      reason: `Pet Love daily payout cap reached (${max} claims/day site-wide). Try again tomorrow (UTC).`,
+    };
+  }
+
+  return { ok: true };
+}
+
+export async function recordPetDailyGlobalClaim(date: string): Promise<number> {
+  const count = await getPetDailyClaimCount(date);
+  const next = count + 1;
+  await writeRecord(
+    dailyClaimCountPath(date),
+    JSON.stringify({
+      date,
+      count: next,
+      updatedAt: new Date().toISOString(),
+    })
+  );
+  return next;
+}
+
+export async function getPetDailyClaimCapStatus(date: string): Promise<{
+  enabled: boolean;
+  claimsToday: number;
+  maxClaims: number | null;
+  capReached: boolean;
+}> {
+  const maxClaims = getPetMaxDailyClaimsTotal();
+  const claimsToday = await getPetDailyClaimCount(date);
+  return {
+    enabled: maxClaims != null,
+    claimsToday,
+    maxClaims,
+    capReached: maxClaims != null && claimsToday >= maxClaims,
+  };
 }
 
 export async function readSubmissionImage(id: string): Promise<{

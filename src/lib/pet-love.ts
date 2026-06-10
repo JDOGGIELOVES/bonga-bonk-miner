@@ -61,6 +61,10 @@ export interface PetLoveSubmission {
   petLabel: string;
   confidence: number;
   imageHash: string;
+  /** 64-bit dHash hex — catches near-duplicate / stock photo reuse */
+  perceptualHash?: string;
+  /** Hashed client IP — one submit + one claim per connection per day */
+  ipKey?: string;
   submittedAt: string;
   /** Relative API path or blob URL for gallery */
   imagePath: string;
@@ -78,4 +82,13 @@ export function walletDayKey(wallet: string, date = todayKey()): string {
 export function isPetLoveClaimsPaused(): boolean {
   if (process.env.CLAIMS_PAUSED === "true") return true;
   return process.env.PET_LOVE_CLAIMS_PAUSED !== "false";
+}
+
+/** Site-wide Pet Love claim count cap per UTC day (unset or 0 = no cap). */
+export function getPetMaxDailyClaimsTotal(): number | null {
+  const raw = process.env.PET_MAX_DAILY_CLAIMS_TOTAL?.trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return Math.floor(value);
 }

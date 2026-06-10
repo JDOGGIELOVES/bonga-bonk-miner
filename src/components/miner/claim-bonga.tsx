@@ -17,7 +17,8 @@ import {
   requestOnChainClaim,
   type ClaimStatus,
 } from "@/lib/claim-client";
-import { fetchMinerEarned } from "@/lib/miner-tap-client";
+import { fetchMinerEarned, type MinerEarnedStatus } from "@/lib/miner-tap-client";
+import { TAPS_PER_BONGA } from "@/lib/miner-game";
 import { Wallet, ExternalLink } from "lucide-react";
 
 interface ClaimBongaProps {
@@ -46,11 +47,14 @@ export function ClaimBonga({
   const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [claimStatus, setClaimStatus] = useState<ClaimStatus | null>(null);
-  const [serverClaimable, setServerClaimable] = useState<number | null>(null);
+  const [serverEarned, setServerEarned] = useState<MinerEarnedStatus | null>(null);
+  const [serverEarnedLoading, setServerEarnedLoading] = useState(false);
 
   const onChainEnabled =
     onChainEnabledProp ?? claimStatus?.enabled === true;
   const localClaimable = getClaimableBonga(state);
+  const serverClaimable =
+    onChainEnabled && connected ? (serverEarned?.claimable ?? null) : null;
   const claimable =
     onChainEnabled && serverClaimable !== null ? serverClaimable : localClaimable;
 
@@ -68,14 +72,17 @@ export function ClaimBonga({
 
   useEffect(() => {
     if (!onChainEnabled || !publicKey) {
-      setServerClaimable(null);
+      setServerEarned(null);
+      setServerEarnedLoading(false);
       return;
     }
 
     let cancelled = false;
+    setServerEarnedLoading(true);
     void fetchMinerEarned(publicKey.toBase58()).then((earned) => {
       if (!cancelled) {
-        setServerClaimable(earned?.claimable ?? 0);
+        setServerEarned(earned);
+        setServerEarnedLoading(false);
       }
     });
 
@@ -105,7 +112,15 @@ export function ClaimBonga({
 
         const next = processClaim(state, wallet, claimable);
         onStateChange(next);
-        setServerClaimable(0);
+        setServerEarned((prev) =>
+          prev
+            ? {
+                ...prev,
+                claimed: prev.claimed + claimable,
+                claimable: 0,
+              }
+            : prev
+        );
         gameAudio.playCoinCollect();
         setSuccessMsg(
           `Sent ${claimable} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
@@ -134,9 +149,36 @@ export function ClaimBonga({
   };
 
   const waitingForServer =
-    onChainEnabled && connected && serverClaimable === null && !successMsg && !errorMsg;
+    onChainEnabled &&
+    connected &&
+    (serverEarnedLoading || serverEarned === null) &&
+    !successMsg &&
+    !errorMsg;
 
-  if (claimable <= 0 && !successMsg && !errorMsg && !waitingForServer) return null;
+  const showOnChainStatus =
+    onChainEnabled &&
+    connected &&
+    !waitingForServer &&
+    claimable <= 0 &&
+    !successMsg &&
+    !errorMsg;
+
+  const tapsToNextBonga =
+    serverEarned && serverEarned.taps % TAPS_PER_BONGA !== 0
+      ? TAPS_PER_BONGA - (serverEarned.taps % TAPS_PER_BONGA)
+      : serverEarned && serverEarned.earned < serverEarned.claimed + 1
+        ? TAPS_PER_BONGA
+        : 0;
+
+  const hideClaimCard =
+    !successMsg &&
+    !errorMsg &&
+    !waitingForServer &&
+    !showOnChainStatus &&
+    claimable <= 0 &&
+    !(onChainEnabled && !connected && localClaimable > 0);
+
+  if (hideClaimCard) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -169,6 +211,36 @@ export function ClaimBonga({
           className="bonga-card border-red-300/40 bg-red-50/50 p-5 text-center dark:bg-red-950/20"
         >
           <p className="text-sm font-medium text-red-600 dark:text-red-400">{errorMsg}</p>
+        </motion.div>
+      ) : showOnChainStatus ? (
+        <motion.div
+          key="onchain-status"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bonga-card border-amber-300/40 bg-amber-50/50 p-5 dark:bg-amber-950/20"
+        >
+          <Badge variant="default" className="mb-3">
+            On-chain claims live
+          </Badge>
+          <p className="font-display text-lg font-bold tracking-tight">
+            {serverEarned && serverEarned.claimed > 0
+              ? "Today\u2019s on-chain reward claimed"
+              : "Keep bonking to unlock claim"}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {serverEarned && serverEarned.claimed > 0
+              ? "You already received today\u2019s verified $BONGA from the treasury. Come back tomorrow UTC."
+              : localClaimable > 0
+                ? "Local progress doesn\u2019t count for payouts anymore. With your wallet connected, keep tapping — 100 verified bonks = 1 $BONGA on-chain."
+                : "With your wallet connected, tap coins in the game. 100 verified bonks = 1 $BONGA on-chain (up to 10/day)."}
+          </p>
+          {serverEarned && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Verified today: {serverEarned.taps} bonks
+              {serverEarned.earned > 0 ? ` · ${serverEarned.earned} $BONGA earned` : ""}
+              {tapsToNextBonga > 0 ? ` · ${tapsToNextBonga} bonks until next $BONGA` : ""}
+            </p>
+          )}
         </motion.div>
       ) : (
         <motion.div
@@ -204,7 +276,12 @@ export function ClaimBonga({
               variant="peace"
               className="mt-4 w-full"
               onClick={() => void handleClaim()}
-              disabled={claiming || claimStatus === null || waitingForServer}
+              disabled={
+                claiming ||
+                claimStatus === null ||
+                waitingForServer ||
+                claimable <= 0
+              }
             >
               {claiming
                 ? onChainEnabled

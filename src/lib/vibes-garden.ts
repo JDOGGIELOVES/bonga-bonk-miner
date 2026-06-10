@@ -2,8 +2,10 @@
 
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
+export const GARDEN_DAILY_EARN_CAP = 500;
 
 export type PlantRarity = "common" | "rare" | "legendary" | "nft";
+export type GardenZone = "meadow" | "greenhouse" | "farm";
 
 export interface PlantType {
   id: string;
@@ -16,7 +18,20 @@ export interface PlantType {
   rarity: PlantRarity;
   nftOnly?: boolean;
   glow: string;
+  /** Suggested zone shown in shop */
+  defaultZone: GardenZone;
 }
+
+export const GARDEN_ZONES: {
+  id: GardenZone;
+  label: string;
+  emoji: string;
+  description: string;
+}[] = [
+  { id: "meadow", label: "Meadow", emoji: "🌾", description: "Open peaceful fields" },
+  { id: "greenhouse", label: "Greenhouse", emoji: "🪴", description: "Warm glass sanctuary" },
+  { id: "farm", label: "Farm", emoji: "🚜", description: "Cosmic crop rows" },
+];
 
 export const PLANT_CATALOG: PlantType[] = [
   {
@@ -25,67 +40,86 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🪷",
     description: "Soft petals, softer vibes.",
     cost: 0,
-    tapBonga: 0.15,
-    idleBongaPerSec: 0.03,
+    tapBonga: 0.06,
+    idleBongaPerSec: 0.012,
     rarity: "common",
     glow: "#2DB8A8",
+    defaultZone: "meadow",
   },
   {
     id: "love-lotus",
     name: "Love Lotus",
     emoji: "💗",
     description: "Opens hearts on every water.",
-    cost: 25,
-    tapBonga: 0.25,
-    idleBongaPerSec: 0.05,
+    cost: 65,
+    tapBonga: 0.1,
+    idleBongaPerSec: 0.02,
     rarity: "common",
     glow: "#FF6200",
+    defaultZone: "meadow",
   },
   {
     id: "frequency-crystal",
     name: "Frequency Crystal",
     emoji: "🔮",
     description: "Amplifies meadow energy.",
-    cost: 75,
-    tapBonga: 0.4,
-    idleBongaPerSec: 0.08,
+    cost: 180,
+    tapBonga: 0.16,
+    idleBongaPerSec: 0.032,
     rarity: "rare",
     glow: "#8B5CF6",
+    defaultZone: "greenhouse",
   },
   {
     id: "affirmation-tree",
     name: "Affirmation Tree",
     emoji: "🌳",
     description: "Leaves whisper good bonks.",
-    cost: 150,
-    tapBonga: 0.6,
-    idleBongaPerSec: 0.12,
+    cost: 380,
+    tapBonga: 0.24,
+    idleBongaPerSec: 0.048,
     rarity: "rare",
     glow: "#4ADE80",
+    defaultZone: "farm",
+  },
+  {
+    id: "bonga-kush",
+    name: "Bonga Kush",
+    emoji: "🌿",
+    description: "Sacred herb for NFT fam — greenhouse royalty.",
+    cost: 420,
+    tapBonga: 0.32,
+    idleBongaPerSec: 0.058,
+    rarity: "nft",
+    nftOnly: true,
+    glow: "#22C55E",
+    defaultZone: "greenhouse",
   },
   {
     id: "cosmic-sunflower",
     name: "Cosmic Sunflower",
     emoji: "🌻",
     description: "NFT fam exclusive bloom.",
-    cost: 200,
-    tapBonga: 0.9,
-    idleBongaPerSec: 0.18,
+    cost: 520,
+    tapBonga: 0.38,
+    idleBongaPerSec: 0.072,
     rarity: "nft",
     nftOnly: true,
     glow: "#FF8533",
+    defaultZone: "farm",
   },
   {
     id: "bonk-bloom",
     name: "Bonk Bloom",
     emoji: "✨",
     description: "Legendary holder decoration.",
-    cost: 350,
-    tapBonga: 1.2,
-    idleBongaPerSec: 0.25,
+    cost: 880,
+    tapBonga: 0.48,
+    idleBongaPerSec: 0.1,
     rarity: "legendary",
     nftOnly: true,
     glow: "#9B5DE5",
+    defaultZone: "meadow",
   },
 ];
 
@@ -93,6 +127,7 @@ export interface PlantedCrop {
   instanceId: string;
   plantTypeId: string;
   plantedAt: number;
+  zone: GardenZone;
 }
 
 export interface DailyQuest {
@@ -109,28 +144,28 @@ export const DAILY_QUESTS: DailyQuest[] = [
     title: "Morning mist",
     description: "Water plants 5 times",
     emoji: "💧",
-    reward: 3,
+    reward: 1,
   },
   {
     id: "affirm",
     title: "Speak peace",
     description: "Claim a daily affirmation vibe",
     emoji: "🌼",
-    reward: 2,
+    reward: 1,
   },
   {
     id: "meditate",
     title: "Breathe & bonk",
     description: "Take a 10-second peace pause",
     emoji: "🧘",
-    reward: 2,
+    reward: 1,
   },
   {
     id: "good-deed",
     title: "Spread love",
     description: "Send good vibes to the fam",
     emoji: "🫶",
-    reward: 4,
+    reward: 2,
   },
 ];
 
@@ -138,6 +173,7 @@ export interface GardenState {
   date: string;
   gardenBonga: number;
   totalEarned: number;
+  bongaFarmedToday: number;
   lifetimeWaters: number;
   waterCountToday: number;
   plants: PlantedCrop[];
@@ -154,12 +190,18 @@ export function getPlantType(id: string): PlantType | undefined {
   return PLANT_CATALOG.find((p) => p.id === id);
 }
 
+function normalizeCropZone(zone?: GardenZone): GardenZone {
+  if (zone === "greenhouse" || zone === "farm") return zone;
+  return "meadow";
+}
+
 export function defaultGardenState(): GardenState {
   const now = Date.now();
   return {
     date: todayKey(),
     gardenBonga: 0,
     totalEarned: 0,
+    bongaFarmedToday: 0,
     lifetimeWaters: 0,
     waterCountToday: 0,
     plants: [
@@ -167,6 +209,7 @@ export function defaultGardenState(): GardenState {
         instanceId: "starter-peace-lily",
         plantTypeId: "peace-lily",
         plantedAt: now,
+        zone: "meadow",
       },
     ],
     unlockedPlantIds: ["peace-lily", "love-lotus", "frequency-crystal", "affirmation-tree"],
@@ -182,6 +225,19 @@ function rolloverDaily(state: GardenState): GardenState {
     date: todayKey(),
     waterCountToday: 0,
     questsDone: [],
+    bongaFarmedToday: 0,
+  };
+}
+
+function migrateGardenState(parsed: Partial<GardenState>): GardenState {
+  const base = { ...defaultGardenState(), ...parsed };
+  return {
+    ...base,
+    bongaFarmedToday: Math.max(0, Number(base.bongaFarmedToday) || 0),
+    plants: (base.plants ?? []).map((crop) => ({
+      ...crop,
+      zone: normalizeCropZone(crop.zone),
+    })),
   };
 }
 
@@ -190,8 +246,8 @@ export function loadGardenState(): GardenState {
   try {
     const raw = localStorage.getItem(GARDEN_STORAGE_KEY);
     if (!raw) return defaultGardenState();
-    const parsed = JSON.parse(raw) as GardenState;
-    return rolloverDaily({ ...defaultGardenState(), ...parsed });
+    const parsed = JSON.parse(raw) as Partial<GardenState>;
+    return rolloverDaily(migrateGardenState(parsed));
   } catch {
     return defaultGardenState();
   }
@@ -211,9 +267,47 @@ export function getNftMultiplier(isHolder: boolean): {
     return { tap: 1, idle: 1, label: "" };
   }
   return {
-    tap: 1.35,
-    idle: 1.5,
-    label: "NFT holder · +35% vibes · +50% idle",
+    tap: 1.25,
+    idle: 1.35,
+    label: "NFT holder · +25% tap · +35% idle · Bonga Kush unlocked",
+  };
+}
+
+export function getDailyEarnRemaining(state: GardenState): number {
+  return Math.max(0, GARDEN_DAILY_EARN_CAP - state.bongaFarmedToday);
+}
+
+export function isDailyEarnCapReached(state: GardenState): boolean {
+  return state.bongaFarmedToday >= GARDEN_DAILY_EARN_CAP;
+}
+
+function applyCappedEarnings(
+  state: GardenState,
+  rawEarned: number,
+  extra: Partial<GardenState> = {}
+): { state: GardenState; earned: number; capped: boolean } {
+  const room = getDailyEarnRemaining(state);
+  const earned = Math.min(Math.max(0, rawEarned), room);
+
+  if (earned <= 0) {
+    return {
+      state: { ...state, ...extra, lastTickAt: extra.lastTickAt ?? state.lastTickAt },
+      earned: 0,
+      capped: room <= 0,
+    };
+  }
+
+  return {
+    earned,
+    capped: earned < rawEarned,
+    state: {
+      ...state,
+      ...extra,
+      gardenBonga: state.gardenBonga + earned,
+      totalEarned: state.totalEarned + earned,
+      bongaFarmedToday: state.bongaFarmedToday + earned,
+      lastTickAt: extra.lastTickAt ?? Date.now(),
+    },
   };
 }
 
@@ -229,59 +323,63 @@ export function applyIdleEarnings(
   isNftHolder: boolean,
   now = Date.now()
 ): GardenState {
+  if (isDailyEarnCapReached(state)) {
+    return { ...state, lastTickAt: now };
+  }
+
   const elapsedSec = Math.max(0, (now - state.lastTickAt) / 1000);
   const cappedSec = Math.min(elapsedSec, MAX_OFFLINE_HOURS * 3600);
   const mult = getNftMultiplier(isNftHolder).idle;
-  const earned = idleRate(state, mult) * cappedSec;
-  if (earned <= 0) {
-    return { ...state, lastTickAt: now };
-  }
-  return {
-    ...state,
-    gardenBonga: state.gardenBonga + earned,
-    totalEarned: state.totalEarned + earned,
-    lastTickAt: now,
-  };
+  const rawEarned = idleRate(state, mult) * cappedSec;
+
+  return applyCappedEarnings(state, rawEarned, { lastTickAt: now }).state;
 }
 
 export function waterPlant(
   state: GardenState,
   instanceId: string,
   isNftHolder: boolean
-): { state: GardenState; earned: number } {
+): { state: GardenState; earned: number; capped: boolean } {
   const crop = state.plants.find((p) => p.instanceId === instanceId);
-  if (!crop) return { state, earned: 0 };
+  if (!crop) return { state, earned: 0, capped: false };
 
   const type = getPlantType(crop.plantTypeId);
-  if (!type) return { state, earned: 0 };
+  if (!type) return { state, earned: 0, capped: false };
 
   const mult = getNftMultiplier(isNftHolder).tap;
-  const earned = type.tapBonga * mult;
+  const rawEarned = type.tapBonga * mult;
 
-  return {
-    earned,
-    state: {
-      ...state,
-      gardenBonga: state.gardenBonga + earned,
-      totalEarned: state.totalEarned + earned,
-      lifetimeWaters: state.lifetimeWaters + 1,
-      waterCountToday: state.waterCountToday + 1,
-      lastTickAt: Date.now(),
-    },
-  };
+  const result = applyCappedEarnings(state, rawEarned, {
+    lifetimeWaters: state.lifetimeWaters + 1,
+    waterCountToday: state.waterCountToday + 1,
+  });
+
+  return result;
+}
+
+export function isPlantAvailableInShop(
+  state: GardenState,
+  plantTypeId: string,
+  isNftHolder: boolean
+): boolean {
+  const type = getPlantType(plantTypeId);
+  if (!type) return false;
+  if (type.nftOnly) return isNftHolder;
+  return state.unlockedPlantIds.includes(plantTypeId);
 }
 
 export function buyPlant(
   state: GardenState,
   plantTypeId: string,
+  zone: GardenZone,
   isNftHolder: boolean
 ): { state: GardenState; ok: boolean; reason?: string } {
   const type = getPlantType(plantTypeId);
   if (!type) return { state, ok: false, reason: "Unknown plant." };
   if (type.nftOnly && !isNftHolder) {
-    return { state, ok: false, reason: "Connect wallet & hold a Bonga NFT." };
+    return { state, ok: false, reason: "Hold a Bonga NFT to unlock this plant." };
   }
-  if (!state.unlockedPlantIds.includes(plantTypeId)) {
+  if (!isPlantAvailableInShop(state, plantTypeId, isNftHolder)) {
     return { state, ok: false, reason: "Not in shop yet." };
   }
   if (state.gardenBonga < type.cost) {
@@ -296,7 +394,12 @@ export function buyPlant(
       gardenBonga: state.gardenBonga - type.cost,
       plants: [
         ...state.plants,
-        { instanceId, plantTypeId, plantedAt: Date.now() },
+        {
+          instanceId,
+          plantTypeId,
+          plantedAt: Date.now(),
+          zone,
+        },
       ],
       lastTickAt: Date.now(),
     },
@@ -306,27 +409,42 @@ export function buyPlant(
 export function completeQuest(
   state: GardenState,
   questId: string
-): { state: GardenState; ok: boolean; reward: number } {
+): { state: GardenState; ok: boolean; reward: number; capped: boolean } {
   const quest = DAILY_QUESTS.find((q) => q.id === questId);
   if (!quest || state.questsDone.includes(questId)) {
-    return { state, ok: false, reward: 0 };
+    return { state, ok: false, reward: 0, capped: false };
   }
 
   if (questId === "water-5" && state.waterCountToday < 5) {
-    return { state, ok: false, reward: 0 };
+    return { state, ok: false, reward: 0, capped: false };
   }
 
+  const result = applyCappedEarnings(state, quest.reward, {
+    questsDone: [...state.questsDone, questId],
+  });
+
   return {
-    ok: true,
-    reward: quest.reward,
-    state: {
-      ...state,
-      gardenBonga: state.gardenBonga + quest.reward,
-      totalEarned: state.totalEarned + quest.reward,
-      questsDone: [...state.questsDone, questId],
-      lastTickAt: Date.now(),
-    },
+    ok: result.earned > 0 || !result.capped,
+    reward: result.earned,
+    capped: result.capped,
+    state: result.state,
   };
+}
+
+export function countOwnedPlants(state: GardenState, plantTypeId: string): number {
+  return state.plants.filter((crop) => crop.plantTypeId === plantTypeId).length;
+}
+
+export function getPlantsInZone(
+  plants: PlantedCrop[],
+  zone: GardenZone
+): PlantedCrop[] {
+  return plants.filter((crop) => crop.zone === zone);
+}
+
+export function getGardenIdleRate(state: GardenState, isNftHolder: boolean): number {
+  const mult = getNftMultiplier(isNftHolder).idle;
+  return idleRate(state, mult);
 }
 
 export function gardenBeautyLevel(plantCount: number): number {

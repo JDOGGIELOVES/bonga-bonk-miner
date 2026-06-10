@@ -10,7 +10,18 @@ import {
   buildPetSubmissionMessage,
   verifyPetSignature,
 } from "@/lib/pet-love-messages";
-import { hashImageBuffer, savePetSubmission } from "@/lib/pet-love-store";
+import { computePerceptualHashFromBuffer } from "@/lib/pet-image-hash-server";
+import { isPetDuplicateCheckEnabled } from "@/lib/pet-image-hash";
+import {
+  checkImageDuplicate,
+  hashImageBuffer,
+  savePetSubmission,
+} from "@/lib/pet-love-store";
+import {
+  assertIpCanSubmitPet,
+  recordIpPetSubmission,
+} from "@/lib/claim-ip-store";
+import { requirePetClientIpKey } from "@/lib/request-ip";
 import { PET_ANIMAL_LABELS } from "@/lib/pet-love";
 
 export const runtime = "nodejs";
@@ -71,6 +82,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Image hash mismatch." }, { status: 400 });
     }
 
+    let perceptualHash: string | undefined;
+    if (isPetDuplicateCheckEnabled()) {
+      perceptualHash =
+        (await computePerceptualHashFromBuffer(imageBuffer)) ?? undefined;
+      if (!perceptualHash) {
+        return NextResponse.json(
+          { error: "Could not verify image uniqueness. Try another photo." },
+          { status: 400 }
+        );
+      }
+
+      const duplicateCheck = await checkImageDuplicate({
+        imageHash: serverHash,
+        perceptualHash,
+      });
+      if (duplicateCheck.duplicate) {
+        return NextResponse.json(
+          {
+            error:
+              duplicateCheck.reason ??
+              "This image was already submitted. One unique photo per day.",
+          },
+          { status: 429 }
+        );
+      }
+    }
+
     const message = buildPetSubmissionMessage({
       wallet,
       date,
@@ -99,14 +137,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
+    const ipResult = requirePetClientIpKey(request);
+    if (!ipResult.ok) {
+      return NextResponse.json({ error: ipResult.reason }, { status: 403 });
+    }
+
+    const ipCheck = await assertIpCanSubmitPet({
+      ipKey: ipResult.ipKey,
+      wallet,
+      date,
+    });
+    if (!ipCheck.ok) {
+      return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
+    }
+
     const submission = await savePetSubmission({
       wallet,
       date,
       petLabel,
       confidence,
       imageHash,
+      perceptualHash,
+      ipKey: ipResult.ipKey,
       imageBuffer,
       contentType: image.type || "image/jpeg",
+    });
+
+    await recordIpPetSubmission({
+      ipKey: ipResult.ipKey,
+      wallet,
+      date,
     });
 
     return NextResponse.json({

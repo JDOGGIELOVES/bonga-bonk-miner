@@ -1,3 +1,4 @@
+import { computeDHashFromRgba } from "@/lib/pet-image-hash";
 import {
   PET_ANIMAL_LABELS,
   PET_ASSISTED_CONFIDENCE,
@@ -293,6 +294,27 @@ export async function hashImageFile(file: File): Promise<string> {
   return Array.from(new Uint8Array(hashBuffer))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("");
+}
+
+export async function computePerceptualHashFromFile(
+  file: File
+): Promise<string | null> {
+  let image: HTMLImageElement;
+  try {
+    image = await fileToImage(file);
+  } catch {
+    return null;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 9;
+  canvas.height = 8;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.drawImage(image, 0, 0, 9, 8);
+  const { data } = ctx.getImageData(0, 0, 9, 8);
+  return computeDHashFromRgba(9, 8, data, 4);
 }
 
 export async function verifyPetPhotoOnDevice(file: File): Promise<PetVerifyOutcome> {
