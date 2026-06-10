@@ -221,118 +221,118 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
 
   const gameContent = (
     <>
-        {!gameState ? (
-          <div className="flex min-h-[50vh] items-center justify-center">
-            <motion.div
-              animate={{ opacity: [0.4, 1, 0.4] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="font-display text-sm font-semibold text-muted-foreground"
-            >
-              Loading...
-            </motion.div>
+      {!gameState ? (
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <motion.div
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+            className="font-display text-sm font-semibold text-muted-foreground"
+          >
+            Loading...
+          </motion.div>
+        </div>
+      ) : (
+        <>
+          <div className="mt-4 space-y-4">
+            <GlobalClaimTally refreshKey={tallyRefreshKey} />
+            <GameStats state={gameState} combo={combo} connected={connected} />
+            <ClaimBonga
+              state={gameState}
+              onStateChange={setGameState}
+              onClaimSuccess={() => setTallyRefreshKey((key) => key + 1)}
+            />
           </div>
-        ) : (
-          <>
-        <div className="mt-4 space-y-4">
-          <GlobalClaimTally refreshKey={tallyRefreshKey} />
-          <GameStats state={gameState} combo={combo} connected={connected} />
-          <ClaimBonga
-            state={gameState}
-            onStateChange={setGameState}
-            onClaimSuccess={() => setTallyRefreshKey((key) => key + 1)}
-          />
-        </div>
 
-        {/* Game arena */}
-        <div
-          ref={gameAreaRef}
-          className="bonga-card relative mt-6 flex min-h-[58vh] cursor-pointer select-none flex-col items-center justify-center overflow-hidden touch-manipulation active:ring-2 active:ring-bonga-orange/20 sm:min-h-[60vh]"
-          onPointerDown={handlePointerDown}
-          role="button"
-          tabIndex={0}
-          aria-label="Tap to bonk meme coins"
-          onKeyDown={(e) => {
-            if (e.key === " " || e.key === "Enter") {
-              const rect = gameAreaRef.current?.getBoundingClientRect();
-              if (rect) {
-                handleTap(rect.left + rect.width / 2, rect.top + rect.height / 2);
+          {/* Game arena */}
+          <div
+            ref={gameAreaRef}
+            className="bonga-card relative mt-6 flex min-h-[58vh] cursor-pointer select-none flex-col items-center justify-center overflow-hidden touch-manipulation active:ring-2 active:ring-bonga-orange/20 sm:min-h-[60vh]"
+            onPointerDown={handlePointerDown}
+            role="button"
+            tabIndex={0}
+            aria-label="Tap to bonk meme coins"
+            onKeyDown={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                const rect = gameAreaRef.current?.getBoundingClientRect();
+                if (rect) {
+                  handleTap(rect.left + rect.width / 2, rect.top + rect.height / 2);
+                }
               }
-            }
-          }}
-        >
-          <div className="pointer-events-none absolute inset-0 bg-bonga-subtle opacity-60" />
-          <FloatingCoins coins={coins} />
-          <Particles particles={particles} />
-          <BonkEffects effects={effects} />
+            }}
+          >
+            <div className="pointer-events-none absolute inset-0 bg-bonga-subtle opacity-60" />
+            <FloatingCoins coins={coins} />
+            <Particles particles={particles} />
+            <BonkEffects effects={effects} />
 
-          <p className="absolute top-5 text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
-            Tap anywhere
+            <p className="absolute top-5 text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground">
+              Tap anywhere
+            </p>
+
+            <BongaBonkCharacter isBonking={isBonking} bonkAngle={bonkAngle} />
+
+            <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
+              {connected && getClaimableBonga(gameState) > 0
+                ? "Claim your mined $BONGA above"
+                : "100 bonks = 1 $BONGA · 10 max per day"}
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-6 flex justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-full px-5"
+              onClick={() => setShopOpen(true)}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Shop
+            </Button>
+            <Button
+              variant="peace"
+              size="sm"
+              className="gap-2 rounded-full px-5"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4" />
+              {shareMsg || "Share"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 rounded-full px-5"
+              onClick={() => setLeaderboardOpen(true)}
+            >
+              <Trophy className="h-4 w-4" />
+              Ranks
+            </Button>
+          </div>
+
+          <p className="mt-6 text-center text-xs text-muted-foreground">
+            Lifetime · {gameState.totalBonga} $BONGA · {gameState.totalTaps.toLocaleString()} bonks
           </p>
 
-          <BongaBonkCharacter isBonking={isBonking} bonkAngle={bonkAngle} />
-
-          <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
-            {connected && getClaimableBonga(gameState) > 0
-              ? "Claim your mined $BONGA above"
-              : "100 bonks = 1 $BONGA · 10 max per day"}
-          </p>
-        </div>
-
-        {/* Actions */}
-        <div className="mt-6 flex justify-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-5"
-            onClick={() => setShopOpen(true)}
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Shop
-          </Button>
-          <Button
-            variant="peace"
-            size="sm"
-            className="gap-2 rounded-full px-5"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4" />
-            {shareMsg || "Share"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2 rounded-full px-5"
-            onClick={() => setLeaderboardOpen(true)}
-          >
-            <Trophy className="h-4 w-4" />
-            Ranks
-          </Button>
-        </div>
-
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Lifetime · {gameState.totalBonga} $BONGA · {gameState.totalTaps.toLocaleString()} bonks
-        </p>
-
-        {gameState && (
-          <>
-            <UpgradeShop
-              open={shopOpen}
-              onClose={() => setShopOpen(false)}
-              totalBonga={gameState.totalBonga}
-            />
-            <LeaderboardPanel
-              open={leaderboardOpen}
-              onClose={() => setLeaderboardOpen(false)}
-              entries={gameState.leaderboard}
-              playerName={gameState.playerName}
-              onNameChange={updatePlayerName}
-            />
-          </>
-        )}
-      </> 
-    )}
-  </>
-);
+          {gameState && (
+            <>
+              <UpgradeShop
+                open={shopOpen}
+                onClose={() => setShopOpen(false)}
+                totalBonga={gameState.totalBonga}
+              />
+              <LeaderboardPanel
+                open={leaderboardOpen}
+                onClose={() => setLeaderboardOpen(false)}
+                entries={gameState.leaderboard}
+                playerName={gameState.playerName}
+                onNameChange={updatePlayerName}
+              />
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
 
   if (embedded) {
     return <div>{gameContent}</div>;
