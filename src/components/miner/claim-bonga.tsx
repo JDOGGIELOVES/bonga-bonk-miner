@@ -17,19 +17,28 @@ import {
   requestOnChainClaim,
   type ClaimStatus,
 } from "@/lib/claim-client";
+import { fetchMinerEarned } from "@/lib/miner-tap-client";
 import { Wallet, ExternalLink } from "lucide-react";
 
 interface ClaimBongaProps {
   state: GameState;
   onStateChange: (state: GameState) => void;
   onClaimSuccess?: () => void;
+  onChainEnabled?: boolean;
+  serverEarnRefreshKey?: number;
 }
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaProps) {
+export function ClaimBonga({
+  state,
+  onStateChange,
+  onClaimSuccess,
+  onChainEnabled: onChainEnabledProp,
+  serverEarnRefreshKey = 0,
+}: ClaimBongaProps) {
   const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
   const { setVisible } = useWalletModal();
   const [claiming, setClaiming] = useState(false);
@@ -37,9 +46,13 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
   const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [claimStatus, setClaimStatus] = useState<ClaimStatus | null>(null);
+  const [serverClaimable, setServerClaimable] = useState<number | null>(null);
 
-  const claimable = getClaimableBonga(state);
-  const onChainEnabled = claimStatus?.enabled === true;
+  const onChainEnabled =
+    onChainEnabledProp ?? claimStatus?.enabled === true;
+  const localClaimable = getClaimableBonga(state);
+  const claimable =
+    onChainEnabled && serverClaimable !== null ? serverClaimable : localClaimable;
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +65,24 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!onChainEnabled || !publicKey) {
+      setServerClaimable(null);
+      return;
+    }
+
+    let cancelled = false;
+    void fetchMinerEarned(publicKey.toBase58()).then((earned) => {
+      if (!cancelled) {
+        setServerClaimable(earned?.claimable ?? 0);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onChainEnabled, publicKey, serverEarnRefreshKey]);
 
   const handleClaim = async () => {
     if (!connected || !publicKey || claimable <= 0) return;
@@ -72,8 +103,9 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
           signMessage,
         });
 
-        const next = processClaim(state, wallet);
+        const next = processClaim(state, wallet, claimable);
         onStateChange(next);
+        setServerClaimable(0);
         gameAudio.playCoinCollect();
         setSuccessMsg(
           `Sent ${claimable} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
@@ -101,7 +133,10 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
     }
   };
 
-  if (claimable <= 0 && !successMsg && !errorMsg) return null;
+  const waitingForServer =
+    onChainEnabled && connected && serverClaimable === null && !successMsg && !errorMsg;
+
+  if (claimable <= 0 && !successMsg && !errorMsg && !waitingForServer) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -143,14 +178,14 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
           className="bonga-card p-5"
         >
           <Badge variant="default" className="mb-3">
-            {claimStatus === null
+            {claimStatus === null || waitingForServer
               ? "Checking treasury..."
               : onChainEnabled
                 ? "On-chain claim ready"
                 : "Ready to claim"}
           </Badge>
           <p className="font-display text-xl font-bold tracking-tight">
-            {claimable} $BONGA
+            {waitingForServer ? "…" : `${claimable} $BONGA`}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {connected
@@ -169,7 +204,7 @@ export function ClaimBonga({ state, onStateChange, onClaimSuccess }: ClaimBongaP
               variant="peace"
               className="mt-4 w-full"
               onClick={() => void handleClaim()}
-              disabled={claiming || claimStatus === null}
+              disabled={claiming || claimStatus === null || waitingForServer}
             >
               {claiming
                 ? onChainEnabled

@@ -33,6 +33,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (process.env.CLAIMS_PAUSED === "true") {
+      return NextResponse.json(
+        { error: "Claims are temporarily paused. Try again shortly." },
+        { status: 503 }
+      );
+    }
+
     const body = (await request.json()) as {
       wallet?: string;
       amount?: number;

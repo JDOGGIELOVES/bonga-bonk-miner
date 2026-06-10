@@ -7,6 +7,12 @@ import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
 import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
+import {
+  claimableFromRecord,
+  getMinerEarnRecord,
+  isMinerEarnStorageReady,
+  recordMinerClaim,
+} from "@/lib/miner-earn-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +37,23 @@ export async function POST(request: Request) {
     if (!config) {
       return NextResponse.json(
         { error: "On-chain claims are not enabled on this deployment." },
+        { status: 503 }
+      );
+    }
+
+    if (process.env.CLAIMS_PAUSED === "true") {
+      return NextResponse.json(
+        { error: "Claims are temporarily paused. Try again shortly." },
+        { status: 503 }
+      );
+    }
+
+    if (!isMinerEarnStorageReady()) {
+      return NextResponse.json(
+        {
+          error:
+            "Miner earn tracking is not configured. Connect Vercel Blob before enabling on-chain claims.",
+        },
         { status: 503 }
       );
     }
@@ -91,6 +114,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
+    const earnRecord = await getMinerEarnRecord(wallet, date);
+    const serverClaimable = claimableFromRecord(earnRecord);
+    if (amount > serverClaimable) {
+      return NextResponse.json(
+        {
+          error: `You can only claim ${serverClaimable} $BONGA based on verified taps today.`,
+          claimable: serverClaimable,
+          taps: earnRecord.taps,
+        },
+        { status: 400 }
+      );
+    }
+
     const alreadyClaimed = await getTodayClaimedFromTreasury({
       treasury: config.treasuryPublicKey,
       recipientWallet: recipient,
@@ -115,6 +151,7 @@ export async function POST(request: Request) {
     });
 
     await recordGlobalClaim(amount);
+    await recordMinerClaim(wallet, date, amount);
 
     return NextResponse.json({
       ok: true,

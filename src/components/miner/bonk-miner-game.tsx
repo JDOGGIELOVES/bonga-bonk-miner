@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { fetchClaimStatus } from "@/lib/claim-client";
+import { fetchMinerEarned, registerMinerTap } from "@/lib/miner-tap-client";
 import { Button } from "@/components/ui/button";
 import { ClaimBonga } from "@/components/miner/claim-bonga";
 
@@ -42,7 +44,7 @@ interface BonkMinerGameProps {
 }
 
 export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGameProps) {
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [coins, setCoins] = useState<FloatingCoin[]>([]);
   const [effects, setEffects] = useState<BonkEffect[]>([]);
@@ -55,9 +57,12 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
   const [muted, setMuted] = useState(false);
   const [shareMsg, setShareMsg] = useState("");
   const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
+  const [onChainClaims, setOnChainClaims] = useState(false);
+  const [serverEarnRefreshKey, setServerEarnRefreshKey] = useState(0);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const comboTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const effectIdRef = useRef(0);
+  const serverTapsRef = useRef(0);
 
   useEffect(() => {
     const state = loadGameState();
@@ -70,6 +75,35 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
   useEffect(() => {
     if (gameState) saveGameState(gameState);
   }, [gameState]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetchClaimStatus().then((status) => {
+      if (!cancelled) setOnChainClaims(status.enabled === true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!onChainClaims || !publicKey) {
+      serverTapsRef.current = 0;
+      return;
+    }
+
+    let cancelled = false;
+    void fetchMinerEarned(publicKey.toBase58()).then((earned) => {
+      if (!cancelled && earned) {
+        serverTapsRef.current = earned.taps;
+        setServerEarnRefreshKey((key) => key + 1);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [onChainClaims, publicKey]);
 
   const respawnCoin = useCallback((hitId: string) => {
     setTimeout(() => {
@@ -167,8 +201,23 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
         addEffect(x, y - 80, "bonga");
         gameAudio.playCoinCollect();
       }
+
+      if (onChainClaims && publicKey) {
+        const wallet = publicKey.toBase58();
+        const tapIndex = serverTapsRef.current + 1;
+        void registerMinerTap({ wallet, tapIndex }).then((tapResult) => {
+          if ("ok" in tapResult && tapResult.ok) {
+            serverTapsRef.current = tapResult.taps;
+            setServerEarnRefreshKey((key) => key + 1);
+            return;
+          }
+          if (tapResult.taps != null) {
+            serverTapsRef.current = tapResult.taps;
+          }
+        });
+      }
     },
-    [gameState, coins, combo, respawnCoin, addEffect, addParticles]
+    [gameState, coins, combo, respawnCoin, addEffect, addParticles, onChainClaims, publicKey]
   );
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -239,7 +288,12 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
             <ClaimBonga
               state={gameState}
               onStateChange={setGameState}
-              onClaimSuccess={() => setTallyRefreshKey((key) => key + 1)}
+              onClaimSuccess={() => {
+                setTallyRefreshKey((key) => key + 1);
+                setServerEarnRefreshKey((key) => key + 1);
+              }}
+              onChainEnabled={onChainClaims}
+              serverEarnRefreshKey={serverEarnRefreshKey}
             />
           </div>
 

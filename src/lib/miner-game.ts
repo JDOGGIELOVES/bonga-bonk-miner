@@ -177,13 +177,17 @@ export function getClaimableBonga(state: GameState) {
   return Math.max(0, state.bongaToday - (state.claimedToday ?? 0));
 }
 
-export function processClaim(state: GameState, walletAddress: string): GameState {
-  const claimable = getClaimableBonga(state);
-  if (claimable <= 0) return state;
+export function processClaim(
+  state: GameState,
+  walletAddress: string,
+  amount?: number
+): GameState {
+  const toClaim = amount ?? getClaimableBonga(state);
+  if (toClaim <= 0) return state;
 
   return {
     ...state,
-    claimedToday: state.claimedToday + claimable,
+    claimedToday: state.claimedToday + toClaim,
     lastClaimWallet: walletAddress,
   };
 }
