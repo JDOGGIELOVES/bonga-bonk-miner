@@ -2,7 +2,8 @@
 
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
-export const GARDEN_DAILY_EARN_CAP = 500;
+/** Max garden $BONGA credited per UTC day (idle + taps + quests). */
+export const GARDEN_DAILY_EARN_CAP = 250;
 
 export type PlantRarity = "common" | "rare" | "legendary" | "nft";
 export type GardenZone = "meadow" | "greenhouse" | "farm";
@@ -40,8 +41,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🪷",
     description: "Soft petals, softer vibes.",
     cost: 0,
-    tapBonga: 0.06,
-    idleBongaPerSec: 0.012,
+    tapBonga: 0.03,
+    idleBongaPerSec: 0.006,
     rarity: "common",
     glow: "#2DB8A8",
     defaultZone: "meadow",
@@ -52,8 +53,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "💗",
     description: "Opens hearts on every water.",
     cost: 65,
-    tapBonga: 0.1,
-    idleBongaPerSec: 0.02,
+    tapBonga: 0.05,
+    idleBongaPerSec: 0.01,
     rarity: "common",
     glow: "#FF6200",
     defaultZone: "meadow",
@@ -64,8 +65,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🔮",
     description: "Amplifies meadow energy.",
     cost: 180,
-    tapBonga: 0.16,
-    idleBongaPerSec: 0.032,
+    tapBonga: 0.08,
+    idleBongaPerSec: 0.016,
     rarity: "rare",
     glow: "#8B5CF6",
     defaultZone: "greenhouse",
@@ -76,8 +77,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🌳",
     description: "Leaves whisper good bonks.",
     cost: 380,
-    tapBonga: 0.24,
-    idleBongaPerSec: 0.048,
+    tapBonga: 0.12,
+    idleBongaPerSec: 0.024,
     rarity: "rare",
     glow: "#4ADE80",
     defaultZone: "farm",
@@ -88,8 +89,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🌿",
     description: "Sacred herb for NFT fam — greenhouse royalty.",
     cost: 420,
-    tapBonga: 0.32,
-    idleBongaPerSec: 0.058,
+    tapBonga: 0.16,
+    idleBongaPerSec: 0.029,
     rarity: "nft",
     nftOnly: true,
     glow: "#22C55E",
@@ -101,8 +102,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🌻",
     description: "NFT fam exclusive bloom.",
     cost: 520,
-    tapBonga: 0.38,
-    idleBongaPerSec: 0.072,
+    tapBonga: 0.19,
+    idleBongaPerSec: 0.036,
     rarity: "nft",
     nftOnly: true,
     glow: "#FF8533",
@@ -114,8 +115,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "✨",
     description: "Legendary holder decoration.",
     cost: 880,
-    tapBonga: 0.48,
-    idleBongaPerSec: 0.1,
+    tapBonga: 0.24,
+    idleBongaPerSec: 0.05,
     rarity: "legendary",
     nftOnly: true,
     glow: "#9B5DE5",
@@ -165,7 +166,7 @@ export const DAILY_QUESTS: DailyQuest[] = [
     title: "Spread love",
     description: "Send good vibes to the fam",
     emoji: "🫶",
-    reward: 2,
+    reward: 1,
   },
 ];
 

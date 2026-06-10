@@ -69,7 +69,7 @@ export function VibesGardenGame() {
       setState((prev) =>
         prev ? applyIdleEarnings(prev, isHolderRef.current) : prev
       );
-    }, 5000);
+    }, 10000);
     return () => clearInterval(tick);
   }, [state]);
 
@@ -225,9 +225,10 @@ export function VibesGardenGame() {
                 each area.
               </li>
               <li>
-                <span className="font-semibold text-foreground">Slower progression</span> — earn
-                rates are gentler. Max {GARDEN_DAILY_EARN_CAP} garden $BONGA farmed per UTC day
-                (idle + taps + quests).
+                <span className="font-semibold text-foreground">Idle pacing</span> — plants grow
+                slowly in the background. Check back through the day; most gardens need several
+                hours to reach the {GARDEN_DAILY_EARN_CAP} garden $BONGA daily cap (idle + taps +
+                quests).
               </li>
               <li>
                 <span className="font-semibold text-foreground">Duplicates stack</span> — another
@@ -319,7 +320,7 @@ export function VibesGardenGame() {
       />
 
       <p className="text-center text-xs text-muted-foreground">
-        Garden $BONGA saved locally · {GARDEN_DAILY_EARN_CAP}/day cap · idle up to 8h offline ·{" "}
+        Garden $BONGA saved locally · {GARDEN_DAILY_EARN_CAP}/day cap · check back for idle gains ·{" "}
         {state.lifetimeWaters} lifetime waters
       </p>
 
