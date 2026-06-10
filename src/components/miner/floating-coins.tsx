@@ -112,63 +112,101 @@ function getCustomCoinFace(coinId: string, isHit: boolean) {
 
   switch (coinId) {
     case "doge":
+      // Classic Doge - Shiba Inu dog face, big eyes, pointy ears, small snout, "wow" meme look
       return (
         <svg {...baseProps} className="drop-shadow">
-          <circle cx="26" cy="26" r="23" fill="#F4D03F" stroke="#B7950B" strokeWidth="2.5" />
-          {/* Ears */}
-          <path d="M12 14 Q8 6 16 8" fill="none" stroke="#B7950B" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M40 14 Q44 6 36 8" fill="none" stroke="#B7950B" strokeWidth="3.5" strokeLinecap="round" />
-          {/* Face */}
-          <circle cx="19" cy="22" r="4.5" fill="#2C3E50" />
-          <circle cx="33" cy="22" r="4.5" fill="#2C3E50" />
-          <circle cx="19.5" cy="21" r="1.8" fill="#F5B7B1" />
-          <circle cx="33.5" cy="21" r="1.8" fill="#F5B7B1" />
-          {/* Snout */}
-          <ellipse cx="26" cy="32" rx="8" ry="5.5" fill="#FDFEFE" stroke="#B7950B" strokeWidth="1.5" />
-          <circle cx="22" cy="31" r="1.4" fill="#2C3E50" />
-          <circle cx="30" cy="31" r="1.4" fill="#2C3E50" />
-          {isHit ? (
-            <path d="M19 36 Q26 40 33 36" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-          ) : (
-            <path d="M20 35 Q26 38 32 35" fill="none" stroke="#2C3E50" strokeWidth="1.8" strokeLinecap="round" />
+          {/* Yellow/gold coin */}
+          <circle cx="26" cy="26" r="23" fill="#F5C542" stroke="#C0392B" strokeWidth="3" />
+          {/* Dog head */}
+          <ellipse cx="26" cy="26" rx="15" ry="14" fill="#F5C542" stroke="#C0392B" strokeWidth="2" />
+          {/* Pointy Shiba ears on top */}
+          <polygon points="8,6 2,16 14,14" fill="#E8A838" stroke="#C0392B" strokeWidth="1.5" />
+          <polygon points="44,6 50,16 38,14" fill="#E8A838" stroke="#C0392B" strokeWidth="1.5" />
+          {/* Big classic Doge eyes */}
+          <ellipse cx="16" cy="21" rx="4.5" ry="5.5" fill="#2C3E50" />
+          <ellipse cx="36" cy="21" rx="4.5" ry="5.5" fill="#2C3E50" />
+          {/* Eye highlights */}
+          <circle cx="17.5" cy="19.5" r="1.5" fill="#fff" />
+          <circle cx="37.5" cy="19.5" r="1.5" fill="#fff" />
+          {/* Small snout */}
+          <ellipse cx="26" cy="30" rx="4" ry="2.5" fill="#FDEBD0" stroke="#C0392B" strokeWidth="1" />
+          {/* Small body to look more like a dog */}
+          <ellipse cx="26" cy="38" rx="9" ry="5" fill="#F5C542" stroke="#C0392B" strokeWidth="1.5" />
+          {/* Nose */}
+          <ellipse cx="26" cy="29.5" rx="1.5" ry="1" fill="#2C3E50" />
+          {/* Small doge mouth */}
+          <path d="M21 34 Q26 36 31 34" fill="none" stroke="#2C3E50" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Hit reaction - bigger smile + WOW */}
+          {isHit && (
+            <>
+              <path d="M19 33 Q26 38 33 33" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+              <text x="26" y="44" textAnchor="middle" fill="#E74C3C" fontSize="7" fontWeight="900">WOW</text>
+            </>
           )}
-          {isHit && <text x="26" y="44" textAnchor="middle" fill="#2C3E50" fontSize="6" fontWeight="700">WOW</text>}
         </svg>
       );
 
     case "pepe":
+      // Classic Pepe the Frog - green frog head, huge eyes on top, downturned mouth
       return (
         <svg {...baseProps} className="drop-shadow">
-          <circle cx="26" cy="26" r="23" fill="#5DADE2" stroke="#1A5276" strokeWidth="2.5" />
-          <ellipse cx="26" cy="27" rx="19" ry="17" fill="#27AE60" stroke="#1E8449" strokeWidth="2" />
-          <ellipse cx="18" cy="21" rx="4" ry="5" fill="#2C3E50" transform={isHit ? "rotate(-15 18 21)" : ""} />
-          <ellipse cx="34" cy="21" rx="4" ry="5" fill="#2C3E50" transform={isHit ? "rotate(15 34 21)" : ""} />
-          <path d="M14 15 Q18 13 22 16" fill="none" stroke="#2C3E50" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M38 15 Q34 13 30 16" fill="none" stroke="#2C3E50" strokeWidth="2.2" strokeLinecap="round" />
+          {/* Green Pepe coin */}
+          <circle cx="26" cy="26" r="23" fill="#27AE60" stroke="#1E8449" strokeWidth="3" />
+          {/* Frog head - round with flat top for classic Pepe look */}
+          <ellipse cx="26" cy="25" rx="17" ry="12" fill="#27AE60" stroke="#1E8449" strokeWidth="2" />
+          {/* Huge classic Pepe eyes on top of head */}
+          <ellipse cx="15" cy="15" rx="5.5" ry="6.5" fill="#FFFFFF" stroke="#1E8449" strokeWidth="1.5" />
+          <ellipse cx="37" cy="15" rx="5.5" ry="6.5" fill="#FFFFFF" stroke="#1E8449" strokeWidth="1.5" />
+          {/* Black pupils */}
+          <circle cx="15" cy="16" r="2.8" fill="#2C3E50" />
+          <circle cx="37" cy="16" r="2.8" fill="#2C3E50" />
+          {/* Eye shine */}
+          <circle cx="17" cy="13.5" r="1.2" fill="#fff" />
+          <circle cx="39" cy="13.5" r="1.2" fill="#fff" />
+          {/* Classic sad Pepe downturned mouth */}
+          <path d="M16 32 Q26 35 36 32" fill="none" stroke="#2C3E50" strokeWidth="2.2" strokeLinecap="round" />
+          {/* Hit reaction - angry eyebrows + open mouth + tongue */}
           {isHit && (
             <>
-              <path d="M14 14 Q19 11 23 15" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-              <path d="M38 14 Q33 11 29 15" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+              <path d="M12 12 Q16 9 20 13" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+              <path d="M40 12 Q36 9 32 13" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+              <path d="M19 33 Q26 39 33 33" fill="none" stroke="#2C3E50" strokeWidth="2.5" strokeLinecap="round" />
+              <path d="M23 37 Q26 41 29 37" fill="none" stroke="#E74C3C" strokeWidth="1.8" />
             </>
           )}
-          <path d={isHit ? "M18 35 Q26 42 34 35" : "M19 34 Q26 38 33 34"} fill="none" stroke="#2C3E50" strokeWidth="2.5" strokeLinecap="round" />
-          {isHit && <path d="M22 38 L26 43 L30 38" fill="none" stroke="#2C3E50" strokeWidth="1.8" />}
         </svg>
       );
 
     case "shib":
+      // Iconic SHIB logo - cute Shiba Inu dog face, red/orange, big ears, classic meme look
       return (
         <svg {...baseProps} className="drop-shadow">
-          <circle cx="26" cy="26" r="23" fill="#E67E22" stroke="#D35400" strokeWidth="2.5" />
-          <polygon points="12,12 18,4 24,13" fill="#D35400" stroke="#B9770E" strokeWidth="1.5" />
-          <polygon points="40,12 34,4 28,13" fill="#D35400" stroke="#B9770E" strokeWidth="1.5" />
-          <ellipse cx="18" cy="22" rx="3.5" ry="5" fill="#2C3E50" />
-          <ellipse cx="34" cy="22" rx="3.5" ry="5" fill="#2C3E50" />
-          <circle cx="19" cy="20" r="1.2" fill="#F5B041" />
-          <circle cx="35" cy="20" r="1.2" fill="#F5B041" />
-          <circle cx="26" cy="30" r="2.5" fill="#2C3E50" />
-          <path d={isHit ? "M20 35 Q26 39 32 35" : "M21 34 Q26 37 31 34"} fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
-          {isHit && <path d="M23 38 Q26 41 29 38" fill="none" stroke="#E74C3C" strokeWidth="1.5" />}
+          {/* Red/orange coin like SHIB logo */}
+          <circle cx="26" cy="26" r="23" fill="#FF6B35" stroke="#C0392B" strokeWidth="3" />
+          {/* Dog head - round Shiba style for iconic SHIB logo look */}
+          <ellipse cx="26" cy="26" rx="15" ry="14" fill="#FF6B35" stroke="#C0392B" strokeWidth="2" />
+          {/* Big iconic SHIB ears */}
+          <polygon points="8,6 2,15 13,13" fill="#C0392B" stroke="#922B21" strokeWidth="1.5" />
+          <polygon points="44,6 50,15 39,13" fill="#C0392B" stroke="#922B21" strokeWidth="1.5" />
+          {/* Big cute dog eyes - classic SHIB meme */}
+          <ellipse cx="16" cy="21" rx="4.5" ry="5.5" fill="#2C3E50" />
+          <ellipse cx="36" cy="21" rx="4.5" ry="5.5" fill="#2C3E50" />
+          {/* Eye highlights */}
+          <circle cx="17.5" cy="19.5" r="1.5" fill="#fff" />
+          <circle cx="37.5" cy="19.5" r="1.5" fill="#fff" />
+          {/* Snout */}
+          <ellipse cx="26" cy="30" rx="4.5" ry="2.8" fill="#FADBD8" stroke="#C0392B" strokeWidth="1" />
+          {/* Nose */}
+          <ellipse cx="26" cy="29.5" rx="1.6" ry="1" fill="#2C3E50" />
+          {/* Small smile like logo */}
+          <path d="M21 34 Q26 36 31 34" fill="none" stroke="#2C3E50" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Hit reaction - bigger grin + SHIB logo text */}
+          {isHit && (
+            <>
+              <path d="M19 33 Q26 38 33 33" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+              <text x="26" y="44" textAnchor="middle" fill="#fff" fontSize="6" fontWeight="900">SHIB</text>
+            </>
+          )}
         </svg>
       );
 
@@ -225,22 +263,27 @@ function getCustomCoinFace(coinId: string, isHit: boolean) {
       );
 
     case "lmao":
+      // Laughing smiley face with big blue tears (classic LMAO meme style)
       return (
         <svg {...baseProps} className="drop-shadow">
-          <circle cx="26" cy="26" r="23" fill="#F1C40F" stroke="#D4AC0D" strokeWidth="2.5" />
-          <circle cx="18" cy="20" r="4" fill="#2C3E50" />
-          <circle cx="34" cy="20" r="4" fill="#2C3E50" />
+          {/* Yellow smiley coin */}
+          <circle cx="26" cy="26" r="23" fill="#F1C40F" stroke="#D4AC0D" strokeWidth="3" />
+          {/* Laughing eyes - curved closed happy eyes */}
+          <path d="M14 18 Q18 15 22 18" fill="none" stroke="#2C3E50" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M30 18 Q34 15 38 18" fill="none" stroke="#2C3E50" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Big laughing open mouth with teeth hint */}
+          <path d="M15 30 Q26 42 37 30" fill="#2C3E50" />
+          <path d="M18 33 Q26 38 34 33" fill="none" stroke="#F1C40F" strokeWidth="2" />
+          {/* Big blue tears - always visible big for laughing smiley, even bigger on hit */}
+          <ellipse cx="14" cy="22" rx="3.5" ry="7" fill="#3498DB" />
+          <ellipse cx="38" cy="22" rx="3.5" ry="7" fill="#3498DB" />
           {isHit && (
             <>
-              <circle cx="16" cy="27" r="1.8" fill="#3498DB" />
-              <circle cx="36" cy="27" r="1.8" fill="#3498DB" />
-              <path d="M16 29 Q15 33 17 34" fill="none" stroke="#3498DB" strokeWidth="1.2" />
-              <path d="M36 29 Q37 33 35 34" fill="none" stroke="#3498DB" strokeWidth="1.2" />
+              <ellipse cx="13" cy="28" rx="2" ry="4" fill="#3498DB" />
+              <ellipse cx="39" cy="28" rx="2" ry="4" fill="#3498DB" />
+              <text x="26" y="46" textAnchor="middle" fill="#E74C3C" fontSize="7" fontWeight="900">LMAO</text>
             </>
           )}
-          <path d={isHit ? "M15 32 Q26 42 37 32" : "M16 33 Q26 39 36 33"} fill="#2C3E50" />
-          <path d="M18 34 Q26 37 34 34" fill="none" stroke="#F1C40F" strokeWidth="2" />
-          {isHit && <text x="26" y="46" textAnchor="middle" fill="#E74C3C" fontSize="8" fontWeight="900">LMAO</text>}
         </svg>
       );
 
