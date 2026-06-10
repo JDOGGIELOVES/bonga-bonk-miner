@@ -1,5 +1,6 @@
 import type { Wallet } from "@solana/wallet-adapter-react";
 import bs58 from "bs58";
+import { formatErrorMessage } from "@/lib/format-error";
 
 type SolanaSignMessageFeature = {
   signMessage: (input: {
@@ -135,8 +136,9 @@ export async function signClaimMessage(params: {
       );
       if (result) return result;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Sign failed";
-      throw new Error(`${walletName} could not sign: ${message}`);
+      throw new Error(
+        `${walletName} could not sign: ${formatErrorMessage(error, "Sign failed")}`
+      );
     }
   }
 
@@ -148,8 +150,9 @@ export async function signClaimMessage(params: {
         signedMessage: messageBytes,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Sign failed";
-      throw new Error(`${walletName} could not sign: ${message}`);
+      throw new Error(
+        `${walletName} could not sign: ${formatErrorMessage(error, "Sign failed")}`
+      );
     }
   }
 
@@ -161,8 +164,9 @@ export async function signClaimMessage(params: {
         signedMessage: messageBytes,
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Sign failed";
-      throw new Error(`${walletName} could not sign: ${message}`);
+      throw new Error(
+        `${walletName} could not sign: ${formatErrorMessage(error, "Sign failed")}`
+      );
     }
   }
 
@@ -171,8 +175,9 @@ export async function signClaimMessage(params: {
       const result = await signViaSolflareProvider(messageBytes);
       if (result) return result;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Sign failed";
-      throw new Error(`Solflare could not sign: ${message}`);
+      throw new Error(
+        `Solflare could not sign: ${formatErrorMessage(error, "Sign failed")}`
+      );
     }
   }
 

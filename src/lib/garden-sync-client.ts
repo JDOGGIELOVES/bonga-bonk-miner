@@ -4,6 +4,7 @@ import { buildGardenClaimMessage } from "@/lib/garden-claim-messages";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
 import type { GardenState } from "@/lib/vibes-garden";
 import type { GardenSyncAction } from "@/lib/garden-sync-server";
+import { formatErrorMessage } from "@/lib/format-error";
 
 export interface GardenEarnStatus {
   storageReady: boolean;
@@ -137,7 +138,7 @@ export async function requestGardenOnChainClaim(params: {
     | { error: string };
 
   if (!response.ok || !("ok" in data) || !data.ok) {
-    throw new Error("error" in data ? data.error : "Garden claim failed.");
+    throw new Error(formatErrorMessage(data, "Garden claim failed."));
   }
 
   return {

@@ -13,6 +13,7 @@ import {
   type GardenEarnStatus,
 } from "@/lib/garden-sync-client";
 import { GARDEN_DAILY_EARN_CAP } from "@/lib/vibes-garden";
+import { formatErrorMessage } from "@/lib/format-error";
 import { gameAudio } from "@/lib/audio/audio-manager";
 import { ExternalLink, Wallet } from "lucide-react";
 
@@ -74,9 +75,15 @@ export function GardenClaimBonga({ refreshKey = 0 }: GardenClaimBongaProps) {
 
     try {
       const wallet = publicKey.toBase58();
+      const claimAmount = Math.floor(claimable * 100) / 100;
+      if (claimAmount <= 0) {
+        setErrorMsg("No verified garden $BONGA ready to claim yet.");
+        return;
+      }
+
       const result = await requestGardenOnChainClaim({
         wallet,
-        amount: claimable,
+        amount: claimAmount,
         connectedWallet,
         signMessage,
       });
@@ -94,7 +101,7 @@ export function GardenClaimBonga({ refreshKey = 0 }: GardenClaimBongaProps) {
           : prev
       );
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Garden claim failed.");
+      setErrorMsg(formatErrorMessage(err, "Garden claim failed."));
     } finally {
       setClaiming(false);
       setTimeout(() => {
