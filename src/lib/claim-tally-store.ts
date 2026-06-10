@@ -147,7 +147,18 @@ function parseTally(raw: string): GlobalClaimTally {
 
 export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
   const raw = await readRecord(TALLY_BLOB_PATH);
-  if (!raw) return emptyTally();
+  if (!raw) {
+    // Bootstrap the tally blob on first read (e.g. before any claims have been made).
+    // This prevents repeated 400 "blob not found" errors from Vercel Blob on every poll.
+    const empty = emptyTally();
+    try {
+      await writeRecord(TALLY_BLOB_PATH, JSON.stringify(empty));
+    } catch (e) {
+      // If write fails (e.g. no blob creds yet), just return empty for now.
+      console.error("Failed to bootstrap claim tally blob:", e);
+    }
+    return empty;
+  }
 
   try {
     return parseTally(raw);
