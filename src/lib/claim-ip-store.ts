@@ -17,6 +17,9 @@ export interface IpDailyRecord {
   petClaims: number;
   petSubmissions: number;
   bongaTotal: number;
+  minerBongaTotal?: number;
+  gardenBongaTotal?: number;
+  petBongaTotal?: number;
   lastClaimAt: number;
   updatedAt: string;
 }
@@ -32,11 +35,27 @@ export function maxWalletsPerIpPerDay(): number {
   return envInt("CLAIM_MAX_WALLETS_PER_IP_DAY", 3);
 }
 
+/** Legacy global IP cap — prefer per-kind limits below. */
 export function maxBongaPerIpPerDay(): number {
   return envInt(
     "CLAIM_MAX_BONGA_PER_IP_DAY",
     PET_LOVE_REWARD + minerDailyClaimLimit() + gardenDailyClaimLimit()
   );
+}
+
+export function maxBongaPerIpForKind(kind: "miner" | "pet" | "garden"): number {
+  if (kind === "garden") return gardenDailyClaimLimit();
+  if (kind === "pet") return PET_LOVE_REWARD;
+  return minerDailyClaimLimit();
+}
+
+function ipKindBongaSpent(
+  record: IpDailyRecord,
+  kind: "miner" | "pet" | "garden"
+): number {
+  if (kind === "garden") return Math.max(0, Number(record.gardenBongaTotal) || 0);
+  if (kind === "pet") return Math.max(0, Number(record.petBongaTotal) || 0);
+  return Math.max(0, Number(record.minerBongaTotal) || 0);
 }
 
 export function maxPetClaimsPerIpPerDay(): number {
@@ -324,10 +343,14 @@ export async function assertIpCanClaim(params: {
     };
   }
 
-  if (record.bongaTotal + params.amount > maxBongaPerIpPerDay()) {
+  const kindCap = maxBongaPerIpForKind(params.kind);
+  const kindSpent = ipKindBongaSpent(record, params.kind);
+  if (kindSpent + params.amount > kindCap + 0.001) {
+    const label =
+      params.kind === "garden" ? "garden" : params.kind === "pet" ? "Pet Love" : "miner";
     return {
       ok: false,
-      reason: `Daily $BONGA limit reached for this connection (${maxBongaPerIpPerDay()} max).`,
+      reason: `Daily ${label} $BONGA limit reached for this connection (${kindCap} max).`,
     };
   }
 
@@ -408,9 +431,16 @@ export async function recordIpClaim(params: {
   const record = await getIpDailyRecord(params.ipKey, params.date);
   trackWallet(record, params.wallet);
   record.bongaTotal += params.amount;
+  if (params.kind === "garden") {
+    record.gardenBongaTotal = ipKindBongaSpent(record, "garden") + params.amount;
+    record.gardenClaims += 1;
+  } else if (params.kind === "pet") {
+    record.petBongaTotal = ipKindBongaSpent(record, "pet") + params.amount;
+    record.petClaims += 1;
+  } else {
+    record.minerBongaTotal = ipKindBongaSpent(record, "miner") + params.amount;
+    record.minerClaims += 1;
+  }
   record.lastClaimAt = Date.now();
-  if (params.kind === "pet") record.petClaims += 1;
-  else if (params.kind === "garden") record.gardenClaims += 1;
-  else record.minerClaims += 1;
   await saveIpDailyRecord(record);
 }
