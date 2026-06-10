@@ -1,0 +1,23 @@
+BONGA TELEGRAM BOT — FREE ON YOUR PC
+====================================
+
+Double-click this file to start the bot:
+
+  start-bonga-bot.bat
+
+Leave the black window OPEN. Closing it = bot offline.
+
+Works when:
+  - Your PC is on
+  - This window is open (or minimized)
+
+Morning affirmations post to:
+  https://t.me/bonga_sol_community
+
+Bot username:
+  @bonga_affirm_bot
+
+Already configured — you don't need to edit any files.
+
+Optional: pin start-bonga-bot.bat to desktop
+  Right-click start-bonga-bot.bat → Show more options → Send to → Desktop

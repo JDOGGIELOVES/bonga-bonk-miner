@@ -1,0 +1,22 @@
+services:
+  - type: worker
+    name: bonga-telegram-bot
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: BOT_TOKEN
+        sync: false
+      - key: CHAT_ID
+        sync: false
+      - key: CRON_TIME
+        value: "08:00"
+      - key: CRON_TIMEZONE
+        value: UTC
+      - key: ADMIN_USER_IDS
+        sync: false
+      - key: SITE_URL
+        value: https://bongabonks.com
+      - key: COMMUNITY_URL
+        value: https://t.me/bonga_sol_community

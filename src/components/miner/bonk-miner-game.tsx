@@ -37,9 +37,11 @@ const PARTICLE_COLORS = ["#FF6200", "#2DB8A8", "#8B5CF6", "#4ADE80"];
 
 interface BonkMinerGameProps {
   onWalletConnect?: () => void;
+  /** When true, renders only game content (no page chrome — used inside GameHub). */
+  embedded?: boolean;
 }
 
-export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
+export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGameProps) {
   const { connected } = useWallet();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [coins, setCoins] = useState<FloatingCoin[]>([]);
@@ -201,7 +203,7 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
     setGameState({ ...gameState, playerName: name || "Bonker" });
   };
 
-  const soundButton = (
+  const soundButton = embedded ? null : (
     <Button
       variant="ghost"
       size="icon"
@@ -217,30 +219,8 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
     </Button>
   );
 
-  return (
-    <div className="flex min-h-screen flex-col bg-bonga-page">
-      <BongaHeader
-        onWalletConnect={onWalletConnect}
-        soundSlot={soundButton}
-      />
-
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 text-center"
-        >
-          <p className="bonga-section-label">Play & Mine</p>
-          <h2 className="bonga-heading mt-2 text-2xl sm:text-3xl">
-            Raise the Frequency
-          </h2>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-            Tap to bonk. Mine $BONGA. Spread positive energy with Bonk&apos;s Sister.
-          </p>
-        </motion.div>
-
-        <BongaCaBanner prominent />
-
+  const gameContent = (
+    <>
         {!gameState ? (
           <div className="flex min-h-[50vh] items-center justify-center">
             <motion.div
@@ -334,9 +314,6 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
         </p>
           </>
         )}
-      </main>
-
-      <BongaFooter />
 
       {gameState && (
         <>
@@ -354,6 +331,37 @@ export function BonkMinerGame({ onWalletConnect }: BonkMinerGameProps) {
           />
         </>
       )}
+    </>
+  );
+
+  if (embedded) {
+    return <div>{gameContent}</div>;
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col bg-bonga-page">
+      <BongaHeader onWalletConnect={onWalletConnect} soundSlot={soundButton} />
+
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 text-center"
+        >
+          <p className="bonga-section-label">Play & Mine</p>
+          <h2 className="bonga-heading mt-2 text-2xl sm:text-3xl">
+            Raise the Frequency
+          </h2>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+            Tap to bonk. Mine $BONGA. Spread positive energy with Bonk&apos;s Sister.
+          </p>
+        </motion.div>
+
+        <BongaCaBanner prominent />
+        {gameContent}
+      </main>
+
+      <BongaFooter />
       <AudioControls />
     </div>
   );

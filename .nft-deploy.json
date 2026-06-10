@@ -1,0 +1,14 @@
+{
+  "deployedAt": "2026-06-08T20:13:46.898Z",
+  "network": "mainnet-beta",
+  "candyMachineAddress": "BbWqpzPW95VDnbK5niSxWSaH4KDuifvHHqa89XQTTmt1",
+  "collectionAddress": "29euf1CexRvPydBUnu9HtSpMBUanKADoicie3MT4nBPY",
+  "legacyCollectionAddress": "DbMJsyBqVDeBc9EcRu8Nbw3RS1nZMdsYw1SnUX6dZNNT",
+  "treasury": "8w1KpwzpAttJAonNHohTyAhzcw4iYuCrQPhppPRw5ASb",
+  "supply": 2000,
+  "priceSol": 0.08,
+  "metadataPrefix": "https://bongabonks.com/api/nft/metadata/",
+  "itemsLoadedAt": "2026-06-08T21:20:00.000Z",
+  "collectionFixedAt": "2026-06-08T21:35:00.000Z",
+  "creatorsFixedAt": "2026-06-08T21:40:00.000Z"
+}

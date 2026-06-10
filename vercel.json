@@ -7,5 +7,11 @@
     "env": {
       "NODE_OPTIONS": "--max-old-space-size=8192"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/telegram/daily-affirmation",
+      "schedule": "0 12 * * *"
+    }
+  ]
 }

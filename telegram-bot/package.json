@@ -1,0 +1,29 @@
+{
+  "name": "bonga-telegram-affirmation-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Bonga-branded Telegram bot — daily affirmations, peace, love, good bonks.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "telegram:resolve-chat": "node scripts/resolve-chat-id.mjs bonga_sol_community",
+    "telegram:doctor": "node scripts/telegram-doctor.mjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "grammy": "^1.35.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.19.2",
+    "typescript": "^5"
+  }
+}

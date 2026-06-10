@@ -1,0 +1,15 @@
+WRONG FILE? If you see Solana, Treasury, NFT stuff — you opened the WEBSITE folder.
+
+TELEGRAM BOT TOKEN GOES HERE (open in Notepad):
+
+  C:\Users\geohi\bonga-bonk-miner\telegram-bot\.env
+
+Press Windows+R, paste this, press Enter:
+
+  notepad C:\Users\geohi\bonga-bonk-miner\telegram-bot\.env
+
+That file should be SHORT — only a few lines like:
+
+  BOT_TOKEN=paste_your_new_token_from_botfather
+
+NOT TELEGRAM_BOT_TOKEN. NOT the big Solana file.

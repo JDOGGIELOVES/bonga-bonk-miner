@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SolanaProvider } from "@/components/solana/solana-provider";
-import { BonkMinerGame } from "@/components/miner/bonk-miner-game";
+import { GameHub } from "@/components/miner/game-hub";
 import { WelcomeToast } from "@/components/miner/welcome-toast";
 
 export function MinerShell() {
@@ -10,7 +10,7 @@ export function MinerShell() {
 
   return (
     <SolanaProvider>
-      <BonkMinerGame onWalletConnect={() => setShowWelcome(true)} />
+      <GameHub onWalletConnect={() => setShowWelcome(true)} />
       <WelcomeToast
         show={showWelcome}
         onDismiss={() => setShowWelcome(false)}

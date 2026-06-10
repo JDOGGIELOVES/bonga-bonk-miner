@@ -17,7 +17,8 @@
     "nft:deploy": "node scripts/deploy-candy-machine.mjs",
     "nft:load-items": "node scripts/load-cm-items.mjs",
     "nft:diagnose": "node scripts/diagnose-cm.mjs",
-    "nft:simulate": "node scripts/simulate-mint.mjs"
+    "nft:simulate": "node scripts/simulate-mint.mjs",
+    "telegram:setup": "node scripts/setup-telegram-webhook.mjs"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-candy-machine": "^6.1.0",

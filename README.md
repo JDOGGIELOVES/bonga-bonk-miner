@@ -10,7 +10,9 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000) (or the port shown in terminal).
+
+The homepage is now a **Game Hub** with tabs: Bonk Miner (original) and Vibes Garden (new peaceful idle/quest mode).
 
 ## Features
 

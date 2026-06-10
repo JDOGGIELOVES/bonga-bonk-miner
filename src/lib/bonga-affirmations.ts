@@ -198,6 +198,120 @@ export const BONGA_AFFIRMATIONS: BongaAffirmation[] = [
     category: "peace",
     emoji: "🤫",
   },
+  {
+    id: "peace-still",
+    text: "Stillness is not empty — it's where my best ideas bonk gently into view.",
+    category: "peace",
+    emoji: "🕊️",
+  },
+  {
+    id: "peace-sunset",
+    text: "I close tabs in my mind the way the sun closes the day — slowly, with color.",
+    category: "peace",
+    emoji: "🌇",
+  },
+  {
+    id: "peace-water",
+    text: "I let worry flow downstream — I stay on the peaceful bank.",
+    category: "peace",
+    emoji: "💧",
+  },
+  {
+    id: "bonk-dance",
+    text: "A little dance bonk resets my whole nervous system — permission granted.",
+    category: "bonk",
+    emoji: "💃",
+  },
+  {
+    id: "bonk-stretch",
+    text: "I stretch before I scroll — my body gets the first bonk of the day.",
+    category: "bonk",
+    emoji: "🙆",
+  },
+  {
+    id: "bonk-meme",
+    text: "Memes are medicine when taken with breath — I dose responsibly.",
+    category: "bonk",
+    emoji: "🐸",
+  },
+  {
+    id: "bonk-volume",
+    text: "I turn down the volume on drama and up the volume on lo-fi peace.",
+    category: "bonk",
+    emoji: "🔊",
+  },
+  {
+    id: "community-welcome",
+    text: "New faces in the fam deserve a warm bonk — I lead with welcome energy.",
+    category: "community",
+    emoji: "🚪",
+  },
+  {
+    id: "community-celebrate",
+    text: "Someone else's win is my win — I celebrate without keeping score.",
+    category: "community",
+    emoji: "🎊",
+  },
+  {
+    id: "community-listen",
+    text: "I listen like Tai Chi listens to breath — fully, without rushing to fix.",
+    category: "community",
+    emoji: "👂",
+  },
+  {
+    id: "community-spread",
+    text: "Good vibes are contagious — I'm patient zero for peaceful bonks today.",
+    category: "community",
+    emoji: "🦠",
+  },
+  {
+    id: "self-pause",
+    text: "Pause is power — I don't owe anyone a rushed reply.",
+    category: "self",
+    emoji: "⏸️",
+  },
+  {
+    id: "self-small",
+    text: "Small steps count — one peaceful choice stacks into a whole season.",
+    category: "self",
+    emoji: "🪜",
+  },
+  {
+    id: "self-honest",
+    text: "I can be honest about hard days and still be gentle with myself.",
+    category: "self",
+    emoji: "💬",
+  },
+  {
+    id: "self-sleepy",
+    text: "Sleepy Bonga energy is valid — rest is part of raising the frequency.",
+    category: "self",
+    emoji: "😴",
+  },
+  {
+    id: "frequency-sun",
+    text: "I absorb sunlight like a meadow — warmth is part of my signal.",
+    category: "frequency",
+    emoji: "☀️",
+  },
+  {
+    id: "frequency-music",
+    text: "The right song is a frequency shift — I curate my soundtrack on purpose.",
+    category: "frequency",
+    emoji: "🎵",
+  },
+  {
+    id: "frequency-nature",
+    text: "Ten minutes outside retunes me — nature is the original Bonga playlist.",
+    category: "frequency",
+    emoji: "🌲",
+  },
+  {
+    id: "frequency-intention",
+    text: "I set intention before I set notifications — my vibe leads the day.",
+    category: "frequency",
+    emoji: "🎯",
+  },
 ];
 
 const CLAIMED_KEY = "bonga-affirmation-claimed";
@@ -219,9 +333,12 @@ function dayIndex(): number {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
+export function getAffirmationCycleIndex(): number {
+  return dayIndex() % BONGA_AFFIRMATIONS.length;
+}
+
 export function getTodaysAffirmation(): BongaAffirmation {
-  const idx = dayIndex() % BONGA_AFFIRMATIONS.length;
-  return BONGA_AFFIRMATIONS[idx];
+  return BONGA_AFFIRMATIONS[getAffirmationCycleIndex()];
 }
 
 export function getAffirmationById(id: string): BongaAffirmation | undefined {
