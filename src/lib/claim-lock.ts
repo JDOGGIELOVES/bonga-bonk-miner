@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 
 const LOCK_TTL_MS = 90_000;
 
@@ -44,29 +45,6 @@ function localPath(wallet: string, date: string): string {
   return path.join(getLocalDataDir(), `${safeKey(wallet, date)}.json`);
 }
 
-async function readBlobText(pathname: string): Promise<string | null> {
-  const { get } = await import("@vercel/blob");
-  try {
-    const result = await get(pathname, { access: "public", useCache: false });
-    if (result?.stream) {
-      return new Response(result.stream).text();
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-async function writeBlobText(pathname: string, text: string): Promise<void> {
-  const { put } = await import("@vercel/blob");
-  await put(pathname, text, {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/json",
-  });
-}
-
 interface ClaimLockRecord {
   id: string;
   wallet: string;
@@ -98,6 +76,14 @@ async function writeLock(record: ClaimLockRecord): Promise<void> {
   await writeFile(filePath, text, "utf8");
 }
 
+async function releaseLock(record: ClaimLockRecord): Promise<void> {
+  try {
+    await writeLock({ ...record, expiresAt: Date.now() - 1 });
+  } catch {
+    /* best effort */
+  }
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -124,17 +110,19 @@ export async function withWalletClaimLock<T>(
       expiresAt: Date.now() + LOCK_TTL_MS,
     };
     await writeLock(next);
-    await sleep(40);
 
-    const verify = await readLock(wallet, date);
+    let verify: ClaimLockRecord | null = null;
+    for (let readAttempt = 0; readAttempt < 6; readAttempt++) {
+      await sleep(40 + readAttempt * 35);
+      verify = await readLock(wallet, date);
+      if (verify?.id === lockId) break;
+    }
+
     if (verify?.id === lockId) {
       try {
         return await fn();
       } finally {
-        const current = await readLock(wallet, date);
-        if (current?.id === lockId) {
-          await writeLock({ ...next, expiresAt: Date.now() - 1 });
-        }
+        await releaseLock(next);
       }
     }
 
