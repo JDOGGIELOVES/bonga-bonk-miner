@@ -312,27 +312,27 @@ export function BonkMinerGame({ onWalletConnect, embedded = false }: BonkMinerGa
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Lifetime · {gameState.totalBonga} $BONGA · {gameState.totalTaps.toLocaleString()} bonks
         </p>
+
+        {gameState && (
+          <>
+            <UpgradeShop
+              open={shopOpen}
+              onClose={() => setShopOpen(false)}
+              totalBonga={gameState.totalBonga}
+            />
+            <LeaderboardPanel
+              open={leaderboardOpen}
+              onClose={() => setLeaderboardOpen(false)}
+              entries={gameState.leaderboard}
+              playerName={gameState.playerName}
+              onNameChange={updatePlayerName}
+            />
           </>
         )}
-
-      {gameState && (
-        <>
-          <UpgradeShop
-            open={shopOpen}
-            onClose={() => setShopOpen(false)}
-            totalBonga={gameState.totalBonga}
-          />
-          <LeaderboardPanel
-            open={leaderboardOpen}
-            onClose={() => setLeaderboardOpen(false)}
-            entries={gameState.leaderboard}
-            playerName={gameState.playerName}
-            onNameChange={updatePlayerName}
-          />
-        </>
-      )}
-    </>
-  );
+      </> 
+    )}
+  </>
+);
 
   if (embedded) {
     return <div>{gameContent}</div>;
