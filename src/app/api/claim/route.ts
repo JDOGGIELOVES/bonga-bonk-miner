@@ -16,6 +16,7 @@ import {
   recordMinerClaim,
   rollbackMinerClaim,
 } from "@/lib/miner-earn-store";
+import { BONGA_CLAIM_BATCH } from "@/lib/miner-game";
 import {
   assertIpCanClaim,
   ipStorageKey,
@@ -85,9 +86,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid claim request." }, { status: 400 });
     }
 
-    if (amount <= 0 || amount > config.dailyLimit || !Number.isInteger(amount)) {
+    if (
+      amount < BONGA_CLAIM_BATCH ||
+      amount % BONGA_CLAIM_BATCH !== 0 ||
+      amount > config.dailyLimit ||
+      !Number.isInteger(amount)
+    ) {
       return NextResponse.json(
-        { error: `Amount must be a whole number between 1 and ${config.dailyLimit}.` },
+        { error: `Amount must be a multiple of ${BONGA_CLAIM_BATCH} (10, 20, or 30) up to your daily limit of ${config.dailyLimit}.` },
         { status: 400 }
       );
     }

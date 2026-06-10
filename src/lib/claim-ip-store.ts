@@ -3,7 +3,6 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
-import { DAILY_BONGA_LIMIT } from "@/lib/miner-game";
 import { gardenDailyClaimLimit } from "@/lib/garden-earn-store";
 import { minerDailyClaimLimit } from "@/lib/wallet-daily-cap";
 

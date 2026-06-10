@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   getClaimableBonga,
   processClaim,
+  DAILY_BONGA_LIMIT,
+  BONGA_CLAIM_BATCH,
   type GameState,
 } from "@/lib/miner-game";
 import { gameAudio } from "@/lib/audio/audio-manager";
@@ -58,6 +60,13 @@ export function ClaimBonga({
   const claimable =
     onChainEnabled && serverClaimable !== null ? serverClaimable : localClaimable;
 
+  // Only claim in batches of BONGA_CLAIM_BATCH (e.g. 10) to keep tx fees reasonable.
+  // We send the largest multiple of the batch that is <= claimable.
+  const claimBatchAmount = Math.max(
+    0,
+    Math.floor(claimable / BONGA_CLAIM_BATCH) * BONGA_CLAIM_BATCH
+  );
+
   useEffect(() => {
     let cancelled = false;
 
@@ -92,7 +101,7 @@ export function ClaimBonga({
   }, [onChainEnabled, publicKey, serverEarnRefreshKey]);
 
   const handleClaim = async () => {
-    if (!connected || !publicKey || claimable <= 0) return;
+    if (!connected || !publicKey || claimBatchAmount < BONGA_CLAIM_BATCH) return;
 
     setClaiming(true);
     setErrorMsg("");
@@ -102,38 +111,43 @@ export function ClaimBonga({
       const wallet = publicKey.toBase58();
 
       if (onChainEnabled) {
+        // Always claim in batch increments server-side too
+        const amountToClaim = claimBatchAmount;
+        if (amountToClaim < BONGA_CLAIM_BATCH) return;
+
         const result = await requestOnChainClaim({
           wallet,
-          amount: claimable,
+          amount: amountToClaim,
           date: todayKey(),
           connectedWallet,
           signMessage,
         });
 
-        const next = processClaim(state, wallet, claimable);
+        const next = processClaim(state, wallet, amountToClaim);
         onStateChange(next);
         setServerEarned((prev) =>
           prev
             ? {
                 ...prev,
-                claimed: prev.claimed + claimable,
-                claimable: 0,
+                claimed: prev.claimed + amountToClaim,
+                claimable: Math.max(0, (prev.claimable ?? 0) - amountToClaim),
               }
             : prev
         );
         gameAudio.playCoinCollect();
         setSuccessMsg(
-          `Sent ${claimable} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
+          `Sent ${amountToClaim} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
         );
         setExplorerUrl(result.explorerUrl);
         onClaimSuccess?.();
       } else {
         await new Promise((r) => setTimeout(r, 1200));
-        const next = processClaim(state, wallet);
+        const amountToClaim = claimBatchAmount || claimable;
+        const next = processClaim(state, wallet, amountToClaim);
         onStateChange(next);
         gameAudio.playCoinCollect();
         setSuccessMsg(
-          `Claimed ${claimable} $BONGA (simulated). Enable on-chain claims in production.`
+          `Claimed ${amountToClaim} $BONGA (simulated). Enable on-chain claims in production.`
         );
       }
     } catch (err) {
@@ -159,7 +173,7 @@ export function ClaimBonga({
     onChainEnabled &&
     connected &&
     !waitingForServer &&
-    claimable <= 0 &&
+    claimBatchAmount < BONGA_CLAIM_BATCH &&
     !successMsg &&
     !errorMsg;
 
@@ -175,7 +189,7 @@ export function ClaimBonga({
     !errorMsg &&
     !waitingForServer &&
     !showOnChainStatus &&
-    claimable <= 0 &&
+    claimBatchAmount < BONGA_CLAIM_BATCH &&
     !(onChainEnabled && !connected && localClaimable > 0);
 
   if (hideClaimCard) return null;
@@ -232,7 +246,7 @@ export function ClaimBonga({
               ? "You already received today\u2019s verified $BONGA from the treasury. Come back tomorrow UTC."
               : localClaimable > 0
                 ? "Local progress doesn\u2019t count for payouts anymore. With your wallet connected, keep tapping — 100 verified bonks = 1 $BONGA on-chain."
-                : "With your wallet connected, tap coins in the game. 100 verified bonks = 1 $BONGA on-chain (up to 10/day)."}
+                : `With your wallet connected, tap coins in the game. 100 verified bonks = 1 $BONGA on-chain (up to ${DAILY_BONGA_LIMIT}/day in ${BONGA_CLAIM_BATCH} $BONGA batches).`}
           </p>
           {serverEarned && (
             <p className="mt-2 text-xs text-muted-foreground">
@@ -280,7 +294,7 @@ export function ClaimBonga({
                 claiming ||
                 claimStatus === null ||
                 waitingForServer ||
-                claimable <= 0
+                claimBatchAmount < BONGA_CLAIM_BATCH
               }
             >
               {claiming
@@ -290,7 +304,7 @@ export function ClaimBonga({
                 : claimStatus === null
                   ? "Loading..."
                   : onChainEnabled
-                    ? `Claim ${claimable} $BONGA On-Chain`
+                    ? `Claim ${claimBatchAmount} $BONGA On-Chain`
                     : `Claim Mined $BONGA`}
             </Button>
           ) : (

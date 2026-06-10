@@ -29,6 +29,7 @@ import {
   processTap,
   getShareText,
   getClaimableBonga,
+  DAILY_BONGA_LIMIT,
   MEME_COINS,
   type GameState,
 } from "@/lib/miner-game";
@@ -339,7 +340,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
               {connected && getClaimableBonga(gameState) > 0
                 ? "Claim your mined $BONGA above"
-                : "100 bonks = 1 $BONGA · 10 max per day"}
+                : `100 bonks = 1 $BONGA · ${DAILY_BONGA_LIMIT} max per day`}
             </p>
           </div>
 
