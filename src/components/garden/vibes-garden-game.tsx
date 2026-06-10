@@ -64,7 +64,7 @@ export function VibesGardenGame() {
     if (!state) return;
     const tick = setInterval(() => {
       // Pause when tab is hidden to reduce background CPU (prevents high load / potential instability)
-      if (document.hidden) return;
+      if (typeof document !== "undefined" && document.hidden) return;
       setState((prev) =>
         prev ? applyIdleEarnings(prev, isHolderRef.current) : prev
       );
