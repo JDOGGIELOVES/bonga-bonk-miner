@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PET_LOVE_REWARD } from "@/lib/pet-love";
+import { isPetLoveClaimsPaused, PET_LOVE_REWARD } from "@/lib/pet-love";
 import {
   getSubmissionForWalletToday,
   hasClaimedPetRewardToday,
@@ -21,12 +21,15 @@ export async function GET(request: Request) {
     const claimedToday = await hasClaimedPetRewardToday(wallet);
     const treasury = getTreasuryConfig();
 
+    const claimsPaused = isPetLoveClaimsPaused();
+
     return NextResponse.json({
       submittedToday: submission != null,
       claimedToday,
       submission: submission ? toPublicGalleryItem(submission) : null,
       reward: PET_LOVE_REWARD,
-      treasuryEnabled: treasury?.enabled === true,
+      treasuryEnabled: treasury?.enabled === true && !claimsPaused,
+      claimsPaused,
       dailyOnChainLimit: treasury?.dailyLimit,
     });
   } catch (error) {

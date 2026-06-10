@@ -250,8 +250,12 @@ export function PetLoveModule() {
   };
 
   const alreadyClaimed = status?.claimedToday === true;
+  const claimsPaused = status?.claimsPaused === true;
   const canClaim =
-    hasSubmittedToday && !alreadyClaimed && status?.treasuryEnabled === true;
+    hasSubmittedToday &&
+    !alreadyClaimed &&
+    status?.treasuryEnabled === true &&
+    !claimsPaused;
 
   return (
     <div className="space-y-8">
@@ -381,6 +385,11 @@ export function PetLoveModule() {
               </Button>
             ) : alreadyClaimed ? (
               <Badge variant="green">Reward claimed today</Badge>
+            ) : claimsPaused ? (
+              <p className="text-xs text-amber-700 dark:text-amber-300">
+                Pet Love payouts are temporarily paused. Your photo is saved — check
+                back soon to claim your {PET_LOVE_REWARD} $BONGA.
+              </p>
             ) : (
               <p className="text-xs text-amber-700 dark:text-amber-300">
                 Photo saved. On-chain claim is not available yet — treasury env vars

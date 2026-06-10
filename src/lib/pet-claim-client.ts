@@ -21,6 +21,7 @@ export interface PetStatus {
   submission: PetGalleryItem | null;
   reward: number;
   treasuryEnabled: boolean;
+  claimsPaused?: boolean;
   dailyOnChainLimit?: number;
 }
 

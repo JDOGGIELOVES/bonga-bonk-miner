@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
-import { PET_LOVE_REWARD, todayKey } from "@/lib/pet-love";
+import { isPetLoveClaimsPaused, PET_LOVE_REWARD, todayKey } from "@/lib/pet-love";
 import { verifyPetSignature } from "@/lib/pet-love-messages";
 import {
   getSubmissionById,
@@ -33,9 +33,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (process.env.CLAIMS_PAUSED === "true") {
+    if (isPetLoveClaimsPaused()) {
       return NextResponse.json(
-        { error: "Claims are temporarily paused. Try again shortly." },
+        { error: "Pet Love claims are temporarily paused. Photo uploads still work." },
         { status: 503 }
       );
     }

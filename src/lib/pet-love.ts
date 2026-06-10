@@ -73,3 +73,9 @@ export function todayKey(): string {
 export function walletDayKey(wallet: string, date = todayKey()): string {
   return `${wallet.toLowerCase()}:${date}`;
 }
+
+/** Pet Love payouts paused unless PET_LOVE_CLAIMS_PAUSED=false in Vercel. */
+export function isPetLoveClaimsPaused(): boolean {
+  if (process.env.CLAIMS_PAUSED === "true") return true;
+  return process.env.PET_LOVE_CLAIMS_PAUSED !== "false";
+}
