@@ -4,34 +4,32 @@ import bs58 from "bs58";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
-import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
-import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
+import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
-import {
-  claimableFromRecord,
-  getMinerEarnRecord,
-  isMinerEarnStorageReady,
-  recordMinerClaim,
-  rollbackMinerClaim,
-} from "@/lib/miner-earn-store";
 import {
   assertIpCanClaim,
   ipStorageKey,
   recordIpClaim,
+  maxGardenClaimsPerIpPerDay,
 } from "@/lib/claim-ip-store";
 import { getClientIp } from "@/lib/request-ip";
+import { verifyGardenClaimSignature } from "@/lib/garden-claim-messages";
+import {
+  gardenClaimableFromRecord,
+  gardenDailyClaimLimit,
+  getGardenEarnRecord,
+  isGardenClaimsPaused,
+  isGardenEarnStorageReady,
+  recordGardenClaim,
+  rollbackGardenClaim,
+  rolloverGardenRecordIfNeeded,
+} from "@/lib/garden-earn-store";
 import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const STATUS_CACHE_MS = 60_000;
-let statusCache: {
-  at: number;
-  payload: Record<string, unknown>;
-} | null = null;
 
 function rpcRateLimitMessage() {
   return "Solana RPC rate limit hit. Add a dedicated RPC URL (Helius/QuickNode) to SOLANA_RPC_URL in Vercel, then redeploy.";
@@ -51,18 +49,18 @@ export async function POST(request: Request) {
       );
     }
 
-    if (process.env.CLAIMS_PAUSED === "true") {
+    if (isGardenClaimsPaused()) {
       return NextResponse.json(
-        { error: "Claims are temporarily paused. Try again shortly." },
+        { error: "Garden claims are temporarily paused. Keep growing — sync still works." },
         { status: 503 }
       );
     }
 
-    if (!isMinerEarnStorageReady()) {
+    if (!isGardenEarnStorageReady()) {
       return NextResponse.json(
         {
           error:
-            "Miner earn tracking is not configured. Connect Vercel Blob before enabling on-chain claims.",
+            "Garden earn tracking is not configured. Connect Vercel Blob before enabling garden claims.",
         },
         { status: 503 }
       );
@@ -82,12 +80,13 @@ export async function POST(request: Request) {
     const signatureB58 = body.signature?.trim();
 
     if (!wallet || !signatureB58 || !Number.isFinite(amount)) {
-      return NextResponse.json({ error: "Invalid claim request." }, { status: 400 });
+      return NextResponse.json({ error: "Invalid garden claim request." }, { status: 400 });
     }
 
-    if (amount <= 0 || amount > config.dailyLimit || !Number.isInteger(amount)) {
+    const dailyLimit = gardenDailyClaimLimit();
+    if (amount <= 0 || amount > dailyLimit) {
       return NextResponse.json(
-        { error: `Amount must be a whole number between 1 and ${config.dailyLimit}.` },
+        { error: `Amount must be between 0.01 and ${dailyLimit} garden $BONGA.` },
         { status: 400 }
       );
     }
@@ -103,7 +102,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
     }
 
-    const signature = bs58.decode(signatureB58);
     let signedMessage: Uint8Array | undefined;
     if (body.signedMessage?.trim()) {
       try {
@@ -113,13 +111,14 @@ export async function POST(request: Request) {
       }
     }
 
-    const valid = verifyClaimSignature({
+    const valid = verifyGardenClaimSignature({
       wallet,
       amount,
       date,
-      signature,
+      signature: bs58.decode(signatureB58),
       signedMessage,
     });
+
     if (!valid) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
@@ -129,8 +128,15 @@ export async function POST(request: Request) {
 
     try {
       const result = await withWalletClaimLock(wallet, date, async () => {
-        const earnRecord = await getMinerEarnRecord(wallet, date);
-        const serverClaimable = claimableFromRecord(earnRecord);
+        const record = rolloverGardenRecordIfNeeded(await getGardenEarnRecord(wallet, date));
+
+        if (!record.bootstrapped) {
+          throw new Error(
+            "Connect wallet and play the garden once to link today's progress before claiming."
+          );
+        }
+
+        const serverClaimable = gardenClaimableFromRecord(record);
 
         if (ipKey) {
           const ipCheck = await assertIpCanClaim({
@@ -138,18 +144,22 @@ export async function POST(request: Request) {
             wallet,
             amount,
             date,
-            kind: "miner",
-            boundIpKey: earnRecord.ipKey,
+            kind: "garden",
+            boundIpKey: record.ipKey,
           });
           if (!ipCheck.ok) {
             throw new Error(ipCheck.reason);
           }
         }
 
-        if (amount > serverClaimable) {
+        if (Math.abs(amount - serverClaimable) > 0.009) {
           throw new Error(
-            `You can only claim ${serverClaimable} $BONGA based on verified taps today.`
+            `You can only claim ${serverClaimable} $BONGA based on verified garden progress today.`
           );
+        }
+
+        if (record.claimed + amount > record.bongaFarmedToday + 0.001) {
+          throw new Error("Claim exceeds verified garden earnings for today.");
         }
 
         const alreadyClaimed = await getTodayClaimedFromTreasury({
@@ -166,7 +176,7 @@ export async function POST(request: Request) {
           );
         }
 
-        await recordMinerClaim(wallet, date, amount);
+        await recordGardenClaim(wallet, date, amount);
 
         try {
           const { signature: txSignature } = await transferBongaFromTreasury({
@@ -177,7 +187,7 @@ export async function POST(request: Request) {
 
           await recordGlobalClaim(amount);
           if (ipKey) {
-            await recordIpClaim({ ipKey, wallet, amount, date, kind: "miner" });
+            await recordIpClaim({ ipKey, wallet, amount, date, kind: "garden" });
           }
 
           return {
@@ -187,7 +197,7 @@ export async function POST(request: Request) {
             explorerUrl: `https://solscan.io/tx/${txSignature}`,
           };
         } catch (transferError) {
-          await rollbackMinerClaim(wallet, date, amount);
+          await rollbackGardenClaim(wallet, date, amount);
           throw transferError;
         }
       });
@@ -195,79 +205,25 @@ export async function POST(request: Request) {
       return NextResponse.json(result);
     } catch (lockError) {
       const message =
-        lockError instanceof Error ? lockError.message : "Claim failed.";
+        lockError instanceof Error ? lockError.message : "Garden claim failed.";
       const status = message.includes("in progress") ? 429 : 400;
       return NextResponse.json({ error: message }, { status });
     }
   } catch (error) {
-    console.error("Claim failed:", error);
+    console.error("Garden claim failed:", error);
     if (isRpcRateLimitError(error)) {
       return NextResponse.json({ error: rpcRateLimitMessage() }, { status: 503 });
     }
-    const message = error instanceof Error ? error.message : "Claim failed.";
+    const message = error instanceof Error ? error.message : "Garden claim failed.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  if (url.searchParams.get("mint") === "status") {
-    try {
-      const { getMintStatusPayload } = await import("@/lib/mint-status-server");
-      return NextResponse.json(await getMintStatusPayload());
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Mint status unavailable.";
-      return NextResponse.json(
-        { simulated: true, live: false, error: message },
-        { status: 502 }
-      );
-    }
-  }
-
-  try {
-    const config = getTreasuryConfig();
-    if (!config) {
-      return NextResponse.json({
-        enabled: false,
-        hint: "Set ON_CHAIN_CLAIMS_ENABLED=true and treasury env vars in Vercel.",
-      });
-    }
-
-    const now = Date.now();
-    if (statusCache && now - statusCache.at < STATUS_CACHE_MS) {
-      return NextResponse.json(statusCache.payload);
-    }
-
-    let balances;
-    try {
-      balances = await getTreasuryBalances(config);
-    } catch (error) {
-      if (isRpcRateLimitError(error)) {
-        return NextResponse.json({
-          enabled: true,
-          treasury: config.treasuryPublicKey.toBase58(),
-          mint: config.mint.toBase58(),
-          dailyLimit: config.dailyLimit,
-          balancesUnavailable: true,
-          hint: rpcRateLimitMessage(),
-        });
-      }
-      throw error;
-    }
-
-    const payload = {
-      enabled: true,
-      treasury: config.treasuryPublicKey.toBase58(),
-      mint: config.mint.toBase58(),
-      dailyLimit: config.dailyLimit,
-      balances,
-    };
-    statusCache = { at: now, payload };
-
-    return NextResponse.json(payload);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Treasury status unavailable.";
-    return NextResponse.json({ enabled: false, error: message }, { status: 500 });
-  }
+export async function GET() {
+  return NextResponse.json({
+    paused: isGardenClaimsPaused(),
+    dailyLimit: gardenDailyClaimLimit(),
+    maxClaimsPerIp: maxGardenClaimsPerIpPerDay(),
+    walletOnChainCap: walletMaxOnChainBongaPerDay(),
+  });
 }

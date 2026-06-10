@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { GardenVisual } from "@/components/garden/garden-visual";
 import { GardenShop } from "@/components/garden/garden-shop";
 import { GardenQuests } from "@/components/garden/garden-quests";
+import { GardenClaimBonga } from "@/components/garden/garden-claim-bonga";
+import { buildBootstrapAction, syncGardenActions } from "@/lib/garden-sync-client";
+import type { GardenSyncAction } from "@/lib/garden-sync-server";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
 import {
   GARDEN_DAILY_EARN_CAP,
@@ -30,7 +33,7 @@ import { Info, ShoppingBag, Sparkles, Wallet } from "lucide-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 export function VibesGardenGame() {
-  const { connected } = useWallet();
+  const { connected, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
   const { isHolder, checking } = useBongaNftHolder();
   const [state, setState] = useState<GardenState | null>(null);
@@ -41,6 +44,11 @@ export function VibesGardenGame() {
   const floatId = useRef(0);
   const isHolderRef = useRef(isHolder);
   const catchupDoneRef = useRef(false);
+  const serverBootstrappedRef = useRef(false);
+  const walletLinkedRef = useRef<string | null>(null);
+  const syncInFlightRef = useRef(false);
+  const pendingActionsRef = useRef<GardenSyncAction[]>([]);
+  const [syncRefreshKey, setSyncRefreshKey] = useState(0);
 
   useEffect(() => {
     isHolderRef.current = isHolder;
@@ -62,21 +70,80 @@ export function VibesGardenGame() {
     setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
   }, [state, isHolder, checking]);
 
+  const flushGardenSync = useCallback(
+    async (actions: GardenSyncAction[], currentState?: GardenState | null) => {
+      if (!connected || !publicKey || actions.length === 0) return;
+      if (syncInFlightRef.current) {
+        pendingActionsRef.current.push(...actions);
+        return;
+      }
+
+      syncInFlightRef.current = true;
+      const wallet = publicKey.toBase58();
+      const batch: GardenSyncAction[] = [...actions];
+
+      if (!serverBootstrappedRef.current && currentState) {
+        batch.unshift(buildBootstrapAction(currentState));
+      }
+
+      try {
+        const result = await syncGardenActions({ wallet, actions: batch });
+        if (result.ok) {
+          if (result.bootstrapped) serverBootstrappedRef.current = true;
+          setSyncRefreshKey((key) => key + 1);
+        }
+      } catch {
+        /* local play continues */
+      } finally {
+        syncInFlightRef.current = false;
+        const pending = pendingActionsRef.current.splice(0);
+        if (pending.length > 0) {
+          void flushGardenSync(pending, currentState);
+        }
+      }
+    },
+    [connected, publicKey]
+  );
+
+  const queueGardenSync = useCallback(
+    (action: GardenSyncAction, currentState?: GardenState | null) => {
+      if (!connected || !publicKey) return;
+      void flushGardenSync([action], currentState);
+    },
+    [connected, publicKey, flushGardenSync]
+  );
+
   useEffect(() => {
-    if (!state) return;
-    const tick = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      setState((prev) =>
-        prev ? applyIdleEarnings(prev, isHolderRef.current) : prev
-      );
-    }, 10000);
-    return () => clearInterval(tick);
-  }, [state]);
+    serverBootstrappedRef.current = false;
+    walletLinkedRef.current = null;
+  }, [publicKey?.toBase58()]);
+
+  useEffect(() => {
+    if (!connected || !publicKey || !state) return;
+    const wallet = publicKey.toBase58();
+    if (walletLinkedRef.current === wallet) return;
+    walletLinkedRef.current = wallet;
+    void flushGardenSync([{ type: "tick", now: Date.now() }], state);
+  }, [connected, publicKey, flushGardenSync, state]);
 
   useEffect(() => {
     if (!state || !catchupDoneRef.current) return;
     setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
-  }, [isHolder]);
+  }, [isHolder, state]);
+
+  useEffect(() => {
+    if (!state) return;
+    const tick = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      setState((prev) => {
+        if (!prev) return prev;
+        const next = applyIdleEarnings(prev, isHolderRef.current);
+        queueGardenSync({ type: "tick", now: Date.now() }, next);
+        return next;
+      });
+    }, 10000);
+    return () => clearInterval(tick);
+  }, [state, queueGardenSync]);
 
   const showFloat = useCallback((text: string) => {
     const id = ++floatId.current;
@@ -90,6 +157,7 @@ export function VibesGardenGame() {
       void gameAudio.resume();
       const { state: next, earned, capped } = waterPlant(state, instanceId, isHolder);
       setState(next);
+      queueGardenSync({ type: "water", instanceId }, next);
       if (earned > 0) {
         showFloat(`+${earned.toFixed(2)} $BONGA`);
         gameAudio.playCoinCollect();
@@ -97,7 +165,7 @@ export function VibesGardenGame() {
         showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
       }
     },
-    [state, isHolder, showFloat]
+    [state, isHolder, showFloat, queueGardenSync]
   );
 
   const handleBuy = useCallback(
@@ -110,11 +178,15 @@ export function VibesGardenGame() {
         return;
       }
       setState(result.state);
+      queueGardenSync(
+        { type: "buy", plantTypeId, zone },
+        result.state
+      );
       setShopMsg(`Planted in ${zone}! Stacks with your other plants. 🌼`);
       setTimeout(() => setShopMsg(""), 3000);
       gameAudio.playCoinCollect();
     },
-    [state, isHolder]
+    [state, isHolder, queueGardenSync]
   );
 
   const tryQuest = useCallback(
@@ -123,12 +195,13 @@ export function VibesGardenGame() {
       const result = completeQuest(state, questId);
       if (result.ok && result.reward > 0) {
         setState(result.state);
+        queueGardenSync({ type: "quest", questId }, result.state);
         showFloat(`Quest +${result.reward} $BONGA`);
       } else if (result.capped) {
         showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
       }
     },
-    [state, showFloat]
+    [state, showFloat, queueGardenSync]
   );
 
   const handleMeditate = useCallback(() => {
@@ -231,6 +304,11 @@ export function VibesGardenGame() {
                 quests).
               </li>
               <li>
+                <span className="font-semibold text-foreground">Verified claims</span> — connect
+                wallet to sync progress server-side. Only verified idle + taps count toward on-chain
+                payouts (local numbers are for play).
+              </li>
+              <li>
                 <span className="font-semibold text-foreground">Duplicates stack</span> — another
                 of the same plant adds full idle + tap again.
               </li>
@@ -310,6 +388,8 @@ export function VibesGardenGame() {
           Plant Shop
         </Button>
       </div>
+
+      <GardenClaimBonga refreshKey={syncRefreshKey} />
 
       <GardenQuests
         state={state}

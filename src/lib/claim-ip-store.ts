@@ -4,6 +4,8 @@ import os from "os";
 import path from "path";
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
 import { DAILY_BONGA_LIMIT } from "@/lib/miner-game";
+import { gardenDailyClaimLimit } from "@/lib/garden-earn-store";
+import { minerDailyClaimLimit } from "@/lib/wallet-daily-cap";
 
 export interface IpDailyRecord {
   date: string;
@@ -11,6 +13,7 @@ export interface IpDailyRecord {
   wallets: string[];
   tapCount: number;
   minerClaims: number;
+  gardenClaims: number;
   petClaims: number;
   petSubmissions: number;
   bongaTotal: number;
@@ -32,7 +35,7 @@ export function maxWalletsPerIpPerDay(): number {
 export function maxBongaPerIpPerDay(): number {
   return envInt(
     "CLAIM_MAX_BONGA_PER_IP_DAY",
-    PET_LOVE_REWARD + DAILY_BONGA_LIMIT * 3
+    PET_LOVE_REWARD + minerDailyClaimLimit() + gardenDailyClaimLimit()
   );
 }
 
@@ -55,6 +58,10 @@ export function isPetClientIpRequired(): boolean {
 
 export function maxMinerClaimsPerIpPerDay(): number {
   return envInt("CLAIM_MAX_MINER_CLAIMS_PER_IP_DAY", 3);
+}
+
+export function maxGardenClaimsPerIpPerDay(): number {
+  return envInt("CLAIM_MAX_GARDEN_CLAIMS_PER_IP_DAY", 3);
 }
 
 export function minMsBetweenIpClaims(): number {
@@ -140,6 +147,7 @@ function emptyRecord(ipKey: string, date: string): IpDailyRecord {
     wallets: [],
     tapCount: 0,
     minerClaims: 0,
+    gardenClaims: 0,
     petClaims: 0,
     petSubmissions: 0,
     bongaTotal: 0,
@@ -148,8 +156,9 @@ function emptyRecord(ipKey: string, date: string): IpDailyRecord {
   };
 }
 
-function maxWalletsForKind(kind: "miner" | "pet"): number {
-  return kind === "pet" ? maxPetWalletsPerIpPerDay() : maxWalletsPerIpPerDay();
+function maxWalletsForKind(kind: "miner" | "pet" | "garden"): number {
+  if (kind === "pet") return maxPetWalletsPerIpPerDay();
+  return maxWalletsPerIpPerDay();
 }
 
 export async function getIpDailyRecord(
@@ -253,7 +262,7 @@ export async function assertIpCanClaim(params: {
   wallet: string;
   amount: number;
   date: string;
-  kind: "miner" | "pet";
+  kind: "miner" | "pet" | "garden";
   boundIpKey?: string;
 }): Promise<{ ok: true } | { ok: false; reason: string }> {
   if (!isIpClaimLimitsEnabled()) return { ok: true };
@@ -302,6 +311,16 @@ export async function assertIpCanClaim(params: {
     return {
       ok: false,
       reason: "Miner claim limit reached for this connection today.",
+    };
+  }
+
+  if (
+    params.kind === "garden" &&
+    record.gardenClaims >= maxGardenClaimsPerIpPerDay()
+  ) {
+    return {
+      ok: false,
+      reason: "Garden claim limit reached for this connection today.",
     };
   }
 
@@ -382,7 +401,7 @@ export async function recordIpClaim(params: {
   wallet: string;
   amount: number;
   date: string;
-  kind: "miner" | "pet";
+  kind: "miner" | "pet" | "garden";
 }): Promise<void> {
   if (!isIpClaimLimitsEnabled()) return;
 
@@ -391,6 +410,7 @@ export async function recordIpClaim(params: {
   record.bongaTotal += params.amount;
   record.lastClaimAt = Date.now();
   if (params.kind === "pet") record.petClaims += 1;
+  else if (params.kind === "garden") record.gardenClaims += 1;
   else record.minerClaims += 1;
   await saveIpDailyRecord(record);
 }

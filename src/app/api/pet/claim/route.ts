@@ -21,6 +21,7 @@ import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import { buildPetClaimMessage } from "@/lib/pet-love-messages";
 import { assertIpCanClaim, recordIpClaim } from "@/lib/claim-ip-store";
 import { requirePetClientIpKey } from "@/lib/request-ip";
+import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -175,9 +176,10 @@ export async function POST(request: Request) {
           date,
         });
 
-        if (alreadyClaimed + amount > config.dailyLimit) {
+        const walletCap = walletMaxOnChainBongaPerDay();
+        if (alreadyClaimed + amount > walletCap) {
           throw new Error(
-            `Daily on-chain limit reached (${config.dailyLimit} $BONGA/day across miner + pet).`
+            `Daily on-chain wallet limit reached (${walletCap} $BONGA/day across miner, garden, and pet).`
           );
         }
 
