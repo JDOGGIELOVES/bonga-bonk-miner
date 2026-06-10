@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 import {
   DAILY_BONGA_LIMIT,
   TAPS_PER_BONGA,
@@ -55,29 +56,6 @@ function getLocalDataDir(): string {
 function localRecordPath(wallet: string, date: string): string {
   const safe = wallet.replace(/[^a-zA-Z0-9]/g, "_");
   return path.join(getLocalDataDir(), safe, `${date}.json`);
-}
-
-async function readBlobText(pathname: string): Promise<string | null> {
-  const { get } = await import("@vercel/blob");
-  try {
-    const result = await get(pathname, { access: "public", useCache: false });
-    if (result?.stream) {
-      return new Response(result.stream).text();
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
-async function writeBlobText(pathname: string, text: string): Promise<void> {
-  const { put } = await import("@vercel/blob");
-  await put(pathname, text, {
-    access: "public",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-    contentType: "application/json",
-  });
 }
 
 function emptyRecord(wallet: string, date: string): MinerEarnRecord {
