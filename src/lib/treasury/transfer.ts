@@ -8,12 +8,20 @@ import {
 } from "@solana/spl-token";
 import type { TreasuryConfig } from "@/lib/treasury/config";
 import { withRpcRetry } from "@/lib/treasury/rpc";
+import {
+  treasuryPayoutsAllowed,
+  treasuryPayoutsBlockedReason,
+} from "@/lib/treasury/payout-guard";
 
 export async function transferBongaFromTreasury(params: {
   config: TreasuryConfig;
   recipientWallet: PublicKey;
   amount: number;
 }): Promise<{ signature: string }> {
+  if (!treasuryPayoutsAllowed()) {
+    throw new Error(treasuryPayoutsBlockedReason());
+  }
+
   const { config, recipientWallet, amount } = params;
   const treasury = Keypair.fromSecretKey(config.treasuryPrivateKey);
 

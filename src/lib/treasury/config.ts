@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import { DAILY_BONGA_LIMIT } from "@/lib/miner-game";
+import { treasuryPayoutsAllowed } from "@/lib/treasury/payout-guard";
 
 export const TREASURY_CLAIM_DOMAIN = "Bonga Bonk Miner";
 
@@ -24,6 +25,8 @@ function parsePublicKey(value: string | undefined, label: string): PublicKey | n
 }
 
 export function getTreasuryConfig(): TreasuryConfig | null {
+  if (!treasuryPayoutsAllowed()) return null;
+
   const enabled = process.env.ON_CHAIN_CLAIMS_ENABLED === "true";
   if (!enabled) return null;
 

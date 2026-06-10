@@ -74,17 +74,8 @@ export function buildClaimMessage(params: {
   ].join("\n");
 }
 
-function messageMatchesClaim(
-  messageBytes: Uint8Array,
-  expected: { wallet: string; amount: number; date: string }
-) {
-  const text = new TextDecoder().decode(messageBytes);
-  return (
-    text === buildClaimMessage(expected) ||
-    (text.includes(expected.wallet) &&
-      text.includes(String(expected.amount)) &&
-      text.includes(expected.date))
-  );
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  return a.length === b.length && a.every((byte, index) => byte === b[index]);
 }
 
 export function verifyClaimSignature(params: {
@@ -102,19 +93,8 @@ export function verifyClaimSignature(params: {
   const canonicalMessage = buildClaimMessage(expected);
   const canonicalBytes = new TextEncoder().encode(canonicalMessage);
 
-  const messageCandidates: Uint8Array[] = [canonicalBytes];
-  if (
-    params.signedMessage &&
-    !messageCandidates.some(
-      (candidate) =>
-        candidate.length === params.signedMessage!.length &&
-        candidate.every((byte, index) => byte === params.signedMessage![index])
-    )
-  ) {
-    if (!messageMatchesClaim(params.signedMessage, expected)) {
-      return false;
-    }
-    messageCandidates.push(params.signedMessage);
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
   }
 
   let publicKeyBytes: Uint8Array;
@@ -126,7 +106,9 @@ export function verifyClaimSignature(params: {
 
   if (params.signature.length !== 64) return false;
 
-  return messageCandidates.some((messageBytes) =>
-    nacl.sign.detached.verify(messageBytes, params.signature, publicKeyBytes)
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
   );
 }

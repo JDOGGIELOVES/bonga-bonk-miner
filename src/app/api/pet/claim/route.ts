@@ -11,6 +11,8 @@ import {
 } from "@/lib/pet-love-store";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
+import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
+import { withWalletClaimLock } from "@/lib/claim-lock";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
     const config = getTreasuryConfig();
     if (!config) {
       return NextResponse.json(
-        { error: "On-chain pet rewards are not enabled on this deployment." },
+        { error: treasuryPayoutsBlockedReason() },
         { status: 503 }
       );
     }
@@ -136,54 +138,62 @@ export async function POST(request: Request) {
 
     const clientIp = getClientIp(request);
     const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
-    if (ipKey) {
-      const ipCheck = await assertIpCanClaim({
-        ipKey,
-        wallet,
-        amount,
-        date,
-        kind: "pet",
+
+    try {
+      const result = await withWalletClaimLock(wallet, date, async () => {
+        if (ipKey) {
+          const ipCheck = await assertIpCanClaim({
+            ipKey,
+            wallet,
+            amount,
+            date,
+            kind: "pet",
+          });
+          if (!ipCheck.ok) {
+            throw new Error(ipCheck.reason);
+          }
+        }
+
+        const alreadyClaimed = await getTodayClaimedFromTreasury({
+          treasury: config.treasuryPublicKey,
+          recipientWallet: recipient,
+          mint: config.mint,
+          date,
+        });
+
+        if (alreadyClaimed + amount > config.dailyLimit) {
+          throw new Error(
+            `Daily on-chain limit reached (${config.dailyLimit} $BONGA/day across miner + pet).`
+          );
+        }
+
+        const { signature: txSignature } = await transferBongaFromTreasury({
+          config,
+          recipientWallet: recipient,
+          amount,
+        });
+
+        await recordGlobalClaim(amount);
+        await recordPetClaim(wallet, date, submissionId);
+        if (ipKey) {
+          await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
+        }
+
+        return {
+          ok: true as const,
+          signature: txSignature,
+          amount,
+          explorerUrl: `https://solscan.io/tx/${txSignature}`,
+        };
       });
-      if (!ipCheck.ok) {
-        return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
-      }
+
+      return NextResponse.json(result);
+    } catch (lockError) {
+      const message =
+        lockError instanceof Error ? lockError.message : "Claim failed.";
+      const status = message.includes("in progress") ? 429 : 400;
+      return NextResponse.json({ error: message }, { status });
     }
-
-    const alreadyClaimed = await getTodayClaimedFromTreasury({
-      treasury: config.treasuryPublicKey,
-      recipientWallet: recipient,
-      mint: config.mint,
-      date,
-    });
-
-    if (alreadyClaimed + amount > config.dailyLimit) {
-      return NextResponse.json(
-        {
-          error: `Daily on-chain limit reached (${config.dailyLimit} $BONGA/day across miner + pet).`,
-          alreadyClaimed,
-        },
-        { status: 429 }
-      );
-    }
-
-    const { signature: txSignature } = await transferBongaFromTreasury({
-      config,
-      recipientWallet: recipient,
-      amount,
-    });
-
-    await recordGlobalClaim(amount);
-    await recordPetClaim(wallet, date, submissionId);
-    if (ipKey) {
-      await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
-    }
-
-    return NextResponse.json({
-      ok: true,
-      signature: txSignature,
-      amount,
-      explorerUrl: `https://solscan.io/tx/${txSignature}`,
-    });
   } catch (error) {
     console.error("Pet claim failed:", error);
     if (isRpcRateLimitError(error)) {

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import { getTreasuryConfig } from "@/lib/treasury/config";
+import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
+import { withWalletClaimLock } from "@/lib/claim-lock";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
@@ -12,6 +14,7 @@ import {
   getMinerEarnRecord,
   isMinerEarnStorageReady,
   recordMinerClaim,
+  rollbackMinerClaim,
 } from "@/lib/miner-earn-store";
 import {
   assertIpCanClaim,
@@ -42,7 +45,7 @@ export async function POST(request: Request) {
     const config = getTreasuryConfig();
     if (!config) {
       return NextResponse.json(
-        { error: "On-chain claims are not enabled on this deployment." },
+        { error: treasuryPayoutsBlockedReason() },
         { status: 503 }
       );
     }
@@ -120,71 +123,80 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
-    const earnRecord = await getMinerEarnRecord(wallet, date);
-    const serverClaimable = claimableFromRecord(earnRecord);
     const clientIp = getClientIp(request);
     const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
 
-    if (ipKey) {
-      const ipCheck = await assertIpCanClaim({
-        ipKey,
-        wallet,
-        amount,
-        date,
-        kind: "miner",
-        boundIpKey: earnRecord.ipKey,
+    try {
+      const result = await withWalletClaimLock(wallet, date, async () => {
+        const earnRecord = await getMinerEarnRecord(wallet, date);
+        const serverClaimable = claimableFromRecord(earnRecord);
+
+        if (ipKey) {
+          const ipCheck = await assertIpCanClaim({
+            ipKey,
+            wallet,
+            amount,
+            date,
+            kind: "miner",
+            boundIpKey: earnRecord.ipKey,
+          });
+          if (!ipCheck.ok) {
+            throw new Error(ipCheck.reason);
+          }
+        }
+
+        if (amount > serverClaimable) {
+          throw new Error(
+            `You can only claim ${serverClaimable} $BONGA based on verified taps today.`
+          );
+        }
+
+        const alreadyClaimed = await getTodayClaimedFromTreasury({
+          treasury: config.treasuryPublicKey,
+          recipientWallet: recipient,
+          mint: config.mint,
+          date,
+        });
+
+        if (alreadyClaimed + amount > config.dailyLimit) {
+          throw new Error(
+            `Daily on-chain claim limit reached (${config.dailyLimit} $BONGA/day).`
+          );
+        }
+
+        await recordMinerClaim(wallet, date, amount);
+
+        try {
+          const { signature: txSignature } = await transferBongaFromTreasury({
+            config,
+            recipientWallet: recipient,
+            amount,
+          });
+
+          await recordGlobalClaim(amount);
+          if (ipKey) {
+            await recordIpClaim({ ipKey, wallet, amount, date, kind: "miner" });
+          }
+
+          return {
+            ok: true as const,
+            signature: txSignature,
+            amount,
+            explorerUrl: `https://solscan.io/tx/${txSignature}`,
+          };
+        } catch (transferError) {
+          await rollbackMinerClaim(wallet, date, amount);
+          throw transferError;
+        }
       });
-      if (!ipCheck.ok) {
-        return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
-      }
+
+      return NextResponse.json(result);
+    } catch (lockError) {
+      const message =
+        lockError instanceof Error ? lockError.message : "Claim failed.";
+      const status = message.includes("in progress") ? 429 : 400;
+      return NextResponse.json({ error: message }, { status });
     }
-
-    if (amount > serverClaimable) {
-      return NextResponse.json(
-        {
-          error: `You can only claim ${serverClaimable} $BONGA based on verified taps today.`,
-          claimable: serverClaimable,
-          taps: earnRecord.taps,
-        },
-        { status: 400 }
-      );
-    }
-
-    const alreadyClaimed = await getTodayClaimedFromTreasury({
-      treasury: config.treasuryPublicKey,
-      recipientWallet: recipient,
-      mint: config.mint,
-      date,
-    });
-
-    if (alreadyClaimed + amount > config.dailyLimit) {
-      return NextResponse.json(
-        {
-          error: `Daily on-chain claim limit reached (${config.dailyLimit} $BONGA/day).`,
-          alreadyClaimed,
-        },
-        { status: 429 }
-      );
-    }
-
-    const { signature: txSignature } = await transferBongaFromTreasury({
-      config,
-      recipientWallet: recipient,
-      amount,
-    });
-
-    await recordGlobalClaim(amount);
-    await recordMinerClaim(wallet, date, amount);
-    if (ipKey) {
-      await recordIpClaim({ ipKey, wallet, amount, date, kind: "miner" });
-    }
-
-    return NextResponse.json({
-      ok: true,
-      signature: txSignature,
-      amount,
-      explorerUrl: `https://solscan.io/tx/${txSignature}`,
-    });
   } catch (error) {
     console.error("Claim failed:", error);
     if (isRpcRateLimitError(error)) {

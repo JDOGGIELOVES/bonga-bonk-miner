@@ -202,6 +202,17 @@ export async function recordMinerClaim(
   return record;
 }
 
+export async function rollbackMinerClaim(
+  wallet: string,
+  date: string,
+  amount: number
+): Promise<MinerEarnRecord> {
+  const record = await getMinerEarnRecord(wallet, date);
+  record.claimed = Math.max(0, record.claimed - amount);
+  await saveMinerEarnRecord(record);
+  return record;
+}
+
 export function isMinerEarnStorageReady(): boolean {
   if (isVercelRuntime()) return hasBlobCredentials();
   return true;
