@@ -200,7 +200,7 @@ export async function POST(request: Request) {
           amount,
           explorerUrl: `https://solscan.io/tx/${txSignature}`,
         };
-      });
+      }, "pet");
 
       return NextResponse.json(result);
     } catch (lockError) {

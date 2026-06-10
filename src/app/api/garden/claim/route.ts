@@ -200,7 +200,7 @@ export async function POST(request: Request) {
           await rollbackGardenClaim(wallet, date, amount);
           throw transferError;
         }
-      });
+      }, "garden");
 
       return NextResponse.json(result);
     } catch (lockError) {

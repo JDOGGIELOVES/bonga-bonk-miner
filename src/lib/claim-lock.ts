@@ -3,7 +3,10 @@ import os from "os";
 import path from "path";
 import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 
-const LOCK_TTL_MS = 90_000;
+const LOCK_TTL_MS = 45_000;
+const MAX_WAIT_MS = 50_000;
+
+export type ClaimLockKind = "miner" | "garden" | "pet";
 
 function envFlag(name: string): boolean {
   return Boolean(process.env[name]?.trim());
@@ -32,30 +35,35 @@ function getLocalDataDir(): string {
   return path.join(process.cwd(), ".bonga-claim-locks");
 }
 
-function safeKey(wallet: string, date: string): string {
+function safeKey(wallet: string, date: string, kind: ClaimLockKind): string {
   const safe = wallet.replace(/[^a-zA-Z0-9]/g, "_");
-  return `${safe}_${date}`;
+  return `${kind}_${safe}_${date}`;
 }
 
-function blobPath(wallet: string, date: string): string {
-  return `bonga-claims/locks/${safeKey(wallet, date)}.json`;
+function blobPath(wallet: string, date: string, kind: ClaimLockKind): string {
+  return `bonga-claims/locks/${safeKey(wallet, date, kind)}.json`;
 }
 
-function localPath(wallet: string, date: string): string {
-  return path.join(getLocalDataDir(), `${safeKey(wallet, date)}.json`);
+function localPath(wallet: string, date: string, kind: ClaimLockKind): string {
+  return path.join(getLocalDataDir(), `${safeKey(wallet, date, kind)}.json`);
 }
 
 interface ClaimLockRecord {
   id: string;
   wallet: string;
   date: string;
+  kind: ClaimLockKind;
   expiresAt: number;
 }
 
-async function readLock(wallet: string, date: string): Promise<ClaimLockRecord | null> {
+async function readLock(
+  wallet: string,
+  date: string,
+  kind: ClaimLockKind
+): Promise<ClaimLockRecord | null> {
   const raw = useBlobStorage()
-    ? await readBlobText(blobPath(wallet, date))
-    : await readFile(localPath(wallet, date), "utf8").catch(() => null);
+    ? await readBlobText(blobPath(wallet, date, kind))
+    : await readFile(localPath(wallet, date, kind), "utf8").catch(() => null);
 
   if (!raw) return null;
   try {
@@ -68,10 +76,10 @@ async function readLock(wallet: string, date: string): Promise<ClaimLockRecord |
 async function writeLock(record: ClaimLockRecord): Promise<void> {
   const text = `${JSON.stringify(record)}\n`;
   if (useBlobStorage()) {
-    await writeBlobText(blobPath(record.wallet, record.date), text);
+    await writeBlobText(blobPath(record.wallet, record.date, record.kind), text);
     return;
   }
-  const filePath = localPath(record.wallet, record.date);
+  const filePath = localPath(record.wallet, record.date, record.kind);
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, text, "utf8");
 }
@@ -88,18 +96,26 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Serialize claim payouts per wallet/day across serverless instances. */
+function lockIsActive(record: ClaimLockRecord | null): record is ClaimLockRecord {
+  return Boolean(record && record.expiresAt > Date.now());
+}
+
+/** Serialize claim payouts per wallet/day/kind across serverless instances. */
 export async function withWalletClaimLock<T>(
   wallet: string,
   date: string,
-  fn: () => Promise<T>
+  fn: () => Promise<T>,
+  kind: ClaimLockKind = "miner"
 ): Promise<T> {
   const lockId = crypto.randomUUID();
+  const deadline = Date.now() + MAX_WAIT_MS;
 
-  for (let attempt = 0; attempt < 12; attempt++) {
-    const existing = await readLock(wallet, date);
-    if (existing && existing.expiresAt > Date.now()) {
-      await sleep(80 + attempt * 40);
+  while (Date.now() < deadline) {
+    const existing = await readLock(wallet, date, kind);
+
+    if (lockIsActive(existing)) {
+      const waitMs = Math.min(existing.expiresAt - Date.now() + 50, 2_500);
+      await sleep(waitMs);
       continue;
     }
 
@@ -107,26 +123,43 @@ export async function withWalletClaimLock<T>(
       id: lockId,
       wallet,
       date,
+      kind,
       expiresAt: Date.now() + LOCK_TTL_MS,
     };
-    await writeLock(next);
 
-    let verify: ClaimLockRecord | null = null;
-    for (let readAttempt = 0; readAttempt < 6; readAttempt++) {
-      await sleep(40 + readAttempt * 35);
-      verify = await readLock(wallet, date);
-      if (verify?.id === lockId) break;
+    try {
+      await writeLock(next);
+    } catch {
+      await sleep(200);
+      continue;
     }
 
-    if (verify?.id === lockId) {
-      try {
-        return await fn();
-      } finally {
-        await releaseLock(next);
+    let acquired = false;
+    for (let readAttempt = 0; readAttempt < 8; readAttempt++) {
+      await sleep(40 + readAttempt * 30);
+      const verify = await readLock(wallet, date, kind);
+      if (verify?.id === lockId) {
+        acquired = true;
+        break;
+      }
+      // Blob read-back can lag on private stores — trust our write after several tries.
+      if (!verify && readAttempt >= 5) {
+        acquired = true;
+        break;
       }
     }
 
-    await sleep(60 + attempt * 30);
+    if (!acquired) {
+      await releaseLock(next);
+      await sleep(120);
+      continue;
+    }
+
+    try {
+      return await fn();
+    } finally {
+      await releaseLock(next);
+    }
   }
 
   throw new Error("Another claim is in progress for this wallet. Try again in a moment.");

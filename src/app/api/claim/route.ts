@@ -190,7 +190,7 @@ export async function POST(request: Request) {
           await rollbackMinerClaim(wallet, date, amount);
           throw transferError;
         }
-      });
+      }, "miner");
 
       return NextResponse.json(result);
     } catch (lockError) {
