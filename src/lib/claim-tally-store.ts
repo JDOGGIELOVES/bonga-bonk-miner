@@ -79,7 +79,12 @@ async function readBlobText(pathname: string): Promise<string | null> {
         return streamToText(result.stream);
       }
     } catch (error) {
-      console.error(`Claim tally blob get failed (${pathname}, ${access}):`, error);
+      // 400/404 are common when the tally blob hasn't been written yet (first claim creates it)
+      // or due to transient store config during deploys. Only log real problems.
+      const msg = error instanceof Error ? error.message : String(error);
+      if (!/400 Bad Request|404|not found|does not exist/i.test(msg)) {
+        console.error(`Claim tally blob get failed (${pathname}, ${access}):`, error);
+      }
     }
 
     try {
@@ -89,7 +94,10 @@ async function readBlobText(pathname: string): Promise<string | null> {
         return response.text();
       }
     } catch (error) {
-      console.error(`Claim tally blob head failed (${pathname}):`, error);
+      const msg = error instanceof Error ? error.message : String(error);
+      if (!/400|404|not found/i.test(msg)) {
+        console.error(`Claim tally blob head failed (${pathname}):`, error);
+      }
     }
   }
 
