@@ -15,6 +15,8 @@ export interface MinerEarnRecord {
   taps: number;
   claimed: number;
   lastTapAt: number;
+  /** Hashed client IP — wallet locked to first connection of the day. */
+  ipKey?: string;
   updatedAt: string;
 }
 
@@ -143,14 +145,28 @@ export async function registerServerTap(params: {
   wallet: string;
   date: string;
   tapIndex: number;
+  ipKey?: string;
   now?: number;
 }): Promise<
   | { ok: true; record: MinerEarnRecord }
   | { ok: false; reason: string; record: MinerEarnRecord }
 > {
-  const { wallet, date, tapIndex } = params;
+  const { wallet, date, tapIndex, ipKey } = params;
   const now = params.now ?? Date.now();
   const record = await getMinerEarnRecord(wallet, date);
+
+  if (ipKey) {
+    if (record.ipKey && record.ipKey !== ipKey) {
+      return {
+        ok: false,
+        reason: "This wallet is linked to a different connection for today.",
+        record,
+      };
+    }
+    if (!record.ipKey) {
+      record.ipKey = ipKey;
+    }
+  }
 
   if (tapIndex !== record.taps + 1) {
     return {

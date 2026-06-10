@@ -13,6 +13,12 @@ import {
   isMinerEarnStorageReady,
   recordMinerClaim,
 } from "@/lib/miner-earn-store";
+import {
+  assertIpCanClaim,
+  ipStorageKey,
+  recordIpClaim,
+} from "@/lib/claim-ip-store";
+import { getClientIp } from "@/lib/request-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -116,6 +122,23 @@ export async function POST(request: Request) {
 
     const earnRecord = await getMinerEarnRecord(wallet, date);
     const serverClaimable = claimableFromRecord(earnRecord);
+    const clientIp = getClientIp(request);
+    const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
+
+    if (ipKey) {
+      const ipCheck = await assertIpCanClaim({
+        ipKey,
+        wallet,
+        amount,
+        date,
+        kind: "miner",
+        boundIpKey: earnRecord.ipKey,
+      });
+      if (!ipCheck.ok) {
+        return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
+      }
+    }
+
     if (amount > serverClaimable) {
       return NextResponse.json(
         {
@@ -152,6 +175,9 @@ export async function POST(request: Request) {
 
     await recordGlobalClaim(amount);
     await recordMinerClaim(wallet, date, amount);
+    if (ipKey) {
+      await recordIpClaim({ ipKey, wallet, amount, date, kind: "miner" });
+    }
 
     return NextResponse.json({
       ok: true,

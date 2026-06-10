@@ -3,9 +3,16 @@ import { PublicKey } from "@solana/web3.js";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import {
   earnedBongaFromTaps,
+  getMinerEarnRecord,
   isMinerEarnStorageReady,
   registerServerTap,
 } from "@/lib/miner-earn-store";
+import {
+  assertIpCanTap,
+  ipStorageKey,
+  recordIpTap,
+} from "@/lib/claim-ip-store";
+import { getClientIp } from "@/lib/request-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -59,7 +66,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
     }
 
-    const result = await registerServerTap({ wallet, date, tapIndex });
+    const clientIp = getClientIp(request);
+    const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
+    const earnRecord = await getMinerEarnRecord(wallet, date);
+
+    if (ipKey) {
+      const ipCheck = await assertIpCanTap({
+        ipKey,
+        wallet,
+        date,
+        boundIpKey: earnRecord.ipKey,
+      });
+      if (!ipCheck.ok) {
+        return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
+      }
+    }
+
+    const result = await registerServerTap({ wallet, date, tapIndex, ipKey });
     if (!result.ok) {
       return NextResponse.json(
         {
@@ -69,6 +92,10 @@ export async function POST(request: Request) {
         },
         { status: result.reason === "Tap too fast." ? 429 : 400 }
       );
+    }
+
+    if (ipKey) {
+      await recordIpTap({ ipKey, wallet, date });
     }
 
     return NextResponse.json({

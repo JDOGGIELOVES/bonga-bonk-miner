@@ -15,6 +15,12 @@ import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import { buildPetClaimMessage } from "@/lib/pet-love-messages";
+import {
+  assertIpCanClaim,
+  ipStorageKey,
+  recordIpClaim,
+} from "@/lib/claim-ip-store";
+import { getClientIp } from "@/lib/request-ip";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -128,6 +134,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }
 
+    const clientIp = getClientIp(request);
+    const ipKey = clientIp ? ipStorageKey(clientIp) : undefined;
+    if (ipKey) {
+      const ipCheck = await assertIpCanClaim({
+        ipKey,
+        wallet,
+        amount,
+        date,
+        kind: "pet",
+      });
+      if (!ipCheck.ok) {
+        return NextResponse.json({ error: ipCheck.reason }, { status: 429 });
+      }
+    }
+
     const alreadyClaimed = await getTodayClaimedFromTreasury({
       treasury: config.treasuryPublicKey,
       recipientWallet: recipient,
@@ -153,6 +174,9 @@ export async function POST(request: Request) {
 
     await recordGlobalClaim(amount);
     await recordPetClaim(wallet, date, submissionId);
+    if (ipKey) {
+      await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
+    }
 
     return NextResponse.json({
       ok: true,
