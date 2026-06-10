@@ -29,6 +29,7 @@ import {
   processTap,
   getShareText,
   getClaimableBonga,
+  MEME_COINS,
   type GameState,
 } from "@/lib/miner-game";
 import { gameAudio } from "@/lib/audio/audio-manager";
@@ -119,8 +120,8 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
                 x: 10 + Math.random() * 80,
                 y: 10 + Math.random() * 70,
                 coinId:
-                  ["doge", "pepe", "shib", "wojak", "bonk", "moon"][
-                    Math.floor(Math.random() * 6)
+                  ["doge", "pepe", "shib", "wojak", "bonk", "moon", "lmao"][
+                    Math.floor(Math.random() * 7)
                   ],
               }
             : c
@@ -137,20 +138,24 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     }, 800);
   }, []);
 
-  const addParticles = useCallback((x: number, y: number) => {
-    const newParticles: Particle[] = Array.from({ length: 6 }, (_, i) => ({
+  const addParticles = useCallback((x: number, y: number, baseColor?: string) => {
+    const colors = baseColor 
+      ? [baseColor, PARTICLE_COLORS[0], baseColor, PARTICLE_COLORS[2], baseColor] 
+      : PARTICLE_COLORS;
+
+    const newParticles: Particle[] = Array.from({ length: 7 }, (_, i) => ({
       id: `particle-${++effectIdRef.current}-${i}`,
-      x: x + (Math.random() - 0.5) * 40,
-      y: y + (Math.random() - 0.5) * 40,
-      color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
-      size: 4 + Math.random() * 6,
+      x: x + (Math.random() - 0.5) * 38,
+      y: y + (Math.random() - 0.5) * 38,
+      color: colors[i % colors.length],
+      size: 3.5 + Math.random() * 7.5,
     }));
-    setParticles((prev) => [...prev.slice(-30), ...newParticles]);
+    setParticles((prev) => [...prev.slice(-32), ...newParticles]);
     setTimeout(() => {
       setParticles((prev) =>
         prev.filter((p) => !newParticles.find((np) => np.id === p.id))
       );
-    }, 600);
+    }, 620);
   }, []);
 
   const handleTap = useCallback(
@@ -194,9 +199,10 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
       if (comboTimerRef.current) clearTimeout(comboTimerRef.current);
       comboTimerRef.current = setTimeout(() => setCombo(0), 1500);
 
+      const hitMeme = MEME_COINS.find((m) => m.id === hitCoin.coinId);
       addEffect(x - 30, y - 40, "bonk");
       addEffect(x + 20, y - 60, "star");
-      addParticles(x, y);
+      addParticles(x, y, hitMeme?.color);
 
       gameAudio.playBonk(combo);
 

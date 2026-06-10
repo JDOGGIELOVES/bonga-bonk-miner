@@ -3,12 +3,13 @@ export const DAILY_BONGA_LIMIT = 10;
 export const STORAGE_KEY = "bonga-bonk-miner";
 
 export const MEME_COINS = [
-  { id: "doge", emoji: "🐕", name: "Doge", color: "#C2A633" },
-  { id: "pepe", emoji: "🐸", name: "Pepe", color: "#4CAF50" },
-  { id: "shib", emoji: "🦊", name: "Shib", color: "#FF6B35" },
-  { id: "wojak", emoji: "😢", name: "Wojak", color: "#90CAF9" },
-  { id: "bonk", emoji: "🔨", name: "BONK", color: "#FF8C42" },
-  { id: "moon", emoji: "🌙", name: "Moon", color: "#9B5DE5" },
+  { id: "doge", name: "Doge", color: "#C2A633" },
+  { id: "pepe", name: "Pepe", color: "#4CAF50" },
+  { id: "shib", name: "Shib", color: "#FF6B35" },
+  { id: "wojak", name: "Wojak", color: "#90CAF9" },
+  { id: "bonk", name: "BONK", color: "#FF8C42" },
+  { id: "moon", name: "Moon", color: "#9B5DE5" },
+  { id: "lmao", name: "LMAO", color: "#FFD700" },
 ] as const;
 
 export const UPGRADES = [
