@@ -48,10 +48,9 @@ export function verifyPetSignature(params: {
   const messageCandidates: Uint8Array[] = [expectedBytes];
 
   if (params.signedMessage) {
-    const signedText = new TextDecoder().decode(params.signedMessage);
-    if (!signedText.includes(params.wallet) || signedText !== params.message) {
-      if (signedText !== params.message) return false;
-    }
+    // Always try the signedMessage bytes too (some wallets return a different representation)
+    // Do not early-reject; let the signature verification decide.
+    // This matches the pattern used in regular claim and stake lock verification.
     messageCandidates.push(params.signedMessage);
   }
 
