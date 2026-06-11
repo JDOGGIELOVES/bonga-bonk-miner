@@ -8,6 +8,7 @@ import {
   PLANT_CATALOG,
   countOwnedPlants,
   formatGardenBonga,
+  formatNextDailyReset,
   getDailyEarnRemaining,
   isPlantAvailableInShop,
   type GardenState,
@@ -68,6 +69,7 @@ export function GardenShop({
           Daily farm cap: {formatGardenBonga(state.bongaFarmedToday)} / {GARDEN_DAILY_EARN_CAP}{" "}
           ({formatGardenBonga(earnRemaining)} left today)
         </p>
+        <p className="text-[10px] text-muted-foreground">Next reset: {formatNextDailyReset()}</p>
         {message && (
           <p className="mt-2 text-sm font-medium text-bonga-teal">{message}</p>
         )}
