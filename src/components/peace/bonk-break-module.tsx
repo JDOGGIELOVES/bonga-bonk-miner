@@ -171,13 +171,14 @@ export function BonkBreakModule() {
           </div>
         ) : (
           <div className="relative z-10 w-full max-w-sm text-center">
-            {/* The dog uses the exact BONK meme Shiba Inu image you linked (save as /public/bonk-shiba.jpg).
-                A wooden club bonker swings down from the right to hit the head on every tap.
-                X eyes, tongue, and stars appear on the hit as requested. */}
-            <div className="relative mx-auto mb-3 w-56 h-48">
+            {/* IMPORTANT: Download the exact BONK meme Shiba Inu from your link and save it in the project as:
+               public/bonk-shiba.jpg
+               Then the dog will show the real meme image + the wooden club will swing to hit it.
+               X eyes, tongue out, and stars will overlay on every tap. */}
+            <div className="relative mx-auto mb-3 w-64 h-52 overflow-hidden rounded-xl border border-border/50 bg-muted/10">
               <img 
                 src="/bonk-shiba.jpg" 
-                alt="Shiba Inu getting bonked" 
+                alt="Shiba Inu getting bonked with wooden club - BONK meme style" 
                 className="w-full h-full object-contain" 
               />
 
