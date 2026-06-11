@@ -27,11 +27,11 @@ export function PetLoveLanding() {
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted-foreground md:text-lg">
             Share a hand-petting moment with any pet — stay anonymous, build
-            community, earn {PET_LOVE_REWARD} $BONGA once per wallet per day.
+            community, earn {PET_LOVE_REWARD} $BONGA once per wallet per day (claiming requires holding a Bonga NFT).
           </p>
           <p className="mx-auto mt-2 max-w-lg text-xs text-muted-foreground">
             Verified on your device before upload. One photo per connected wallet
-            per UTC day. Gallery shows pets, not wallets.
+            per UTC day. Gallery shows pets, not wallets. NFT holders only for rewards.
           </p>
         </div>
       </section>
