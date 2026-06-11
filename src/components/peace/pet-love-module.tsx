@@ -281,7 +281,7 @@ export function PetLoveModule() {
       }
       await refreshPastUploads(wallet);
 
-      setMessage("Shared with the community! Claim your daily reward below.");
+      setMessage("Shared with the community! Your photo is now in the gallery.");
       resetSelection();
       requestAnimationFrame(() => {
         actionsRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -332,7 +332,6 @@ export function PetLoveModule() {
     !alreadyClaimed &&
     !ipClaimCapReached &&
     !globalClaimCapReached &&
-    status?.treasuryEnabled === true &&
     !claimsPaused;
 
   return (
