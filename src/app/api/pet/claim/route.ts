@@ -199,7 +199,13 @@ export async function POST(request: Request) {
           amount,
         });
 
-        await recordGlobalClaim(amount, 'pet', wallet);
+        // Record to lifetime community tally
+        // Wrapped to not fail the payout if tally update fails
+        try {
+          await recordGlobalClaim(amount, 'pet', wallet);
+        } catch (e) {
+          console.error("Failed to record global pet claim to tally (payout already succeeded):", e);
+        }
         await recordPetClaim(wallet, date, submissionId);
         await recordPetDailyGlobalClaim(date);
         await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });

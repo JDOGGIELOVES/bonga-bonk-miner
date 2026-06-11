@@ -197,7 +197,7 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
           <div className="bonga-card p-5 text-center">
             <p className="bonga-section-label">Community Treasury</p>
             <p className="mt-2 text-sm font-medium">
-              7% royalties from secondary NFT sales + verified player claims (miner, garden, pet) flow to the Bonga Community Treasury on Solana.
+              7% royalties from secondary NFT sales + verified player claims (miner, garden, pet, staking) flow to the Bonga Community Treasury on Solana.
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
               Cumulative lifetime total (never resets daily): <span className="font-semibold text-foreground">{(communityTally?.totalBonga ?? 0).toLocaleString()} $BONGA</span> across {(communityTally?.claimCount ?? 0).toLocaleString()} claims.

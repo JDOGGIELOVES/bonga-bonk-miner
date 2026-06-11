@@ -120,7 +120,12 @@ export async function POST(request: Request) {
         await recordStakeClaim(wallet, amount);
 
         // Record to lifetime community tally under "stake" category
-        await recordGlobalClaim(amount, "stake", wallet);
+        // Wrapped in try/catch so that a tally update failure doesn't prevent the user from receiving their payout
+        try {
+          await recordGlobalClaim(amount, "stake", wallet);
+        } catch (e) {
+          console.error("Failed to record global stake claim to tally (payout already succeeded):", e);
+        }
 
         return {
           signature: txSig,

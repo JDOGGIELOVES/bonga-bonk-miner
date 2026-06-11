@@ -195,7 +195,13 @@ export async function POST(request: Request) {
             amount,
           });
 
-          await recordGlobalClaim(amount, 'garden', wallet);
+          // Record to lifetime community tally
+          // Wrapped to not fail the payout if tally update fails
+          try {
+            await recordGlobalClaim(amount, 'garden', wallet);
+          } catch (e) {
+            console.error("Failed to record global garden claim to tally (payout already succeeded):", e);
+          }
           if (ipKey) {
             await recordIpClaim({ ipKey, wallet, amount, date, kind: "garden" });
           }
