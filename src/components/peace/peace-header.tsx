@@ -9,7 +9,6 @@ import { usePathname } from "next/navigation";
 const NAV = [
   { href: "#breathe", label: "Breathe" },
   { href: "#meditate", label: "Meditate" },
-  { href: "#bonk-break", label: "Bonk Break" },
   { href: "#stretch", label: "Stretch" },
   { href: "#tai-chi", label: "Tai Chi" },
   { href: "#affirmations", label: "Affirmations" },

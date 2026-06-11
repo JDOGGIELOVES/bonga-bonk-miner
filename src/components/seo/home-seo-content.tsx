@@ -30,7 +30,7 @@ export function HomeSeoContent() {
             <Link href="/nft">Bonga NFT collection — mint on Solana</Link>
           </li>
           <li>
-            <Link href="/peace">Bonga Peace — mindfulness and bonk breaks</Link>
+            <Link href="/peace">Bonga Peace — mindfulness tools</Link>
           </li>
           <li>
             <Link href="/about">About Bonga Bonk&apos;s Sister — official story</Link>

@@ -27,7 +27,7 @@ export function TaiChiSection() {
             href="/peace"
             className="text-sm font-semibold text-bonga-teal hover:underline"
           >
-            Open full Bonga Peace app → breathing, bonk break &amp; more
+            Open full Bonga Peace app → breathing, Tai Chi &amp; more
           </Link>
         </p>
       </div>

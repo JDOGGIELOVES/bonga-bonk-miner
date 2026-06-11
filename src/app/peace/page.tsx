@@ -4,9 +4,9 @@ import { PeaceJsonLd } from "@/components/seo/site-json-ld";
 import { buildPageMetadata } from "@/lib/site-seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Bonga Peace — Mindfulness & Bonk Breaks the Bonga Way",
+  title: "Bonga Peace — Mindfulness the Bonga Way",
   description:
-    "Bonga Peace from Bonk's Sister — guided breathing, transcendental meditation, stretching, Tai Chi, Bonk Break, affirmations, and check-ins. Mindfulness with good bonks at bongabonks.com.",
+    "Bonga Peace from Bonk's Sister — guided breathing, transcendental meditation, stretching, Tai Chi, affirmations, and check-ins. Mindfulness with good bonks at bongabonks.com.",
   path: "/peace",
   keywords: [
     "Bonga Peace",
@@ -14,11 +14,9 @@ export const metadata: Metadata = buildPageMetadata({
     "transcendental meditation",
     "Bonga meditation",
     "mantra meditation",
-    "Bonk break",
     "Bonga stretching",
     "Bonga Tai Chi",
     "Bonga affirmations",
-    "Bonk stress relief",
     "Bonga breathing",
     "mindfulness Bonk",
     "bongabonks peace",

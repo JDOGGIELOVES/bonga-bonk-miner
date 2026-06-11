@@ -182,7 +182,7 @@ export default function CommunityPage() {
               <div className="bonga-card p-6">
                 <h3 className="font-display text-xl font-bold">Spread the Peace</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Explore <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link> tools — breathing, stretching, affirmations, and Bonk Breaks. Mindfulness meets the bonk.
+                  Explore <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link> tools — breathing, stretching, affirmations, and check-ins. Mindfulness meets the bonk.
                 </p>
               </div>
               <div className="bonga-card p-6">

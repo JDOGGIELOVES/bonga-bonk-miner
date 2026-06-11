@@ -5,7 +5,6 @@ import Link from "next/link";
 import { PeaceHeader } from "@/components/peace/peace-header";
 import { PeaceHero } from "@/components/peace/peace-hero";
 import { BreathingModule } from "@/components/peace/breathing-module";
-import { BonkBreakModule } from "@/components/peace/bonk-break-module";
 import { TaiChiModule } from "@/components/peace/tai-chi-module";
 import { StretchingModule } from "@/components/peace/stretching-module";
 import { PeaceAudioToggle } from "@/components/peace/peace-audio-toggle";
@@ -57,21 +56,6 @@ export function PeaceLanding() {
           </p>
           <div className="mt-10">
             <TranscendentalMeditationModule />
-          </div>
-        </div>
-      </section>
-
-      <section id="bonk-break" className="section-anchor py-16">
-        <div className="mx-auto max-w-2xl px-4">
-          <h2 className="text-center font-display text-3xl font-bold">
-            Bonk <span className="text-gradient">Break</span>
-          </h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            One minute to tap the stress away — playful release when the timeline
-            gets loud
-          </p>
-          <div className="mt-10">
-            <BonkBreakModule />
           </div>
         </div>
       </section>

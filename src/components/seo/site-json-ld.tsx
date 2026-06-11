@@ -195,7 +195,7 @@ export function PeaceJsonLd() {
         url: absoluteUrl("/peace"),
         name: "Bonga Peace — Mindfulness the Bonga Way",
         description:
-          "Free Bonga Peace tools: guided breathing, daily stretching, Tai Chi flows, Bonk Break stress release, affirmations, and check-ins.",
+          "Free Bonga Peace tools: guided breathing, daily stretching, Tai Chi flows, affirmations, and check-ins.",
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",

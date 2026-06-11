@@ -15,7 +15,7 @@ export const ABOUT_FAQ = [
   {
     question: "What can I do on bongabonks.com?",
     answer:
-      "Play Bonga Bonk Miner to tap and mine $BONGA, mint Bonga NFTs on Solana, and use Bonga Peace for breathing, stretching, Tai Chi, Bonk Breaks, and daily affirmations — all free in the browser.",
+      "Play Bonga Bonk Miner to tap and mine $BONGA, mint Bonga NFTs on Solana, and use Bonga Peace for breathing, stretching, Tai Chi, affirmations, and daily check-ins — all free in the browser.",
   },
   {
     question: "What is the Bonga Bonk's Sister CA?",
@@ -54,7 +54,7 @@ export const ECOSYSTEM_LINKS = [
     href: "/peace",
     title: "Bonga Peace",
     description:
-      "Guided breathing, daily stretches, Tai Chi flows, Bonk Break stress release, and affirmations the Bonga way.",
+      "Guided breathing, daily stretches, Tai Chi flows, affirmations, and check-ins the Bonga way.",
     emoji: "🧘",
     accent: "text-bonga-purple",
   },

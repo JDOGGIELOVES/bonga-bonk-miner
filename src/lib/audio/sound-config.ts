@@ -51,7 +51,7 @@ export const DEFAULT_AUDIO_SETTINGS = {
   masterVolume: 0.75,
   sfxVolume: 0.85,
   musicVolume: 0.35,
-  musicEnabled: false,
+  musicEnabled: true,
 } as const;
 
 export type AudioSettings = {

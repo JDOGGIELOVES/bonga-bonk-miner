@@ -117,7 +117,7 @@ export function AboutContent() {
               <p className="text-2xl">✌️</p>
               <h3 className="mt-2 font-display font-bold text-bonga-teal">Bonga peace</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Stretching, Tai Chi, affirmations, and Bonk Breaks — mindfulness
+                Stretching, Tai Chi, affirmations, and check-ins — mindfulness
                 that doesn&apos;t take itself too seriously.
               </p>
             </div>
