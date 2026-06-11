@@ -40,7 +40,7 @@ export function BongaHeader({
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border/40 bg-card/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-[60] border-b border-border/40 bg-card/70 backdrop-blur-xl">
       <div className="mx-auto flex max-w-2xl flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
         <Link href="/" className="group min-w-0 flex-1">
           <p className="font-display text-2xl font-extrabold tracking-tight text-bonga-orange sm:text-2xl">
@@ -154,6 +154,15 @@ export function BongaHeader({
             )}
           >
             Treasury
+          </Link>
+          <Link
+            href="/how-to-connect"
+            className={getLinkClass(
+              "/how-to-connect",
+              "rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-2.5 sm:py-1"
+            )}
+          >
+            How to Connect
           </Link>
           {soundSlot}
           <Button

@@ -39,8 +39,14 @@ export function GardenShop({
   const earnRemaining = getDailyEarnRemaining(state);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4">
-      <div className="bonga-card max-h-[92vh] w-full max-w-md overflow-y-auto rounded-b-none rounded-t-3xl p-5 pb-8 sm:max-h-[85vh] sm:rounded-bonga-lg sm:pb-5">
+    <div 
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bonga-card max-h-[92vh] w-full max-w-md overflow-y-auto rounded-b-none rounded-t-3xl p-5 pb-8 sm:max-h-[85vh] sm:rounded-bonga-lg sm:pb-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted sm:hidden" />
         <div className="flex items-center justify-between">
           <div>

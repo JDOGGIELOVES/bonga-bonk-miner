@@ -12,6 +12,7 @@ const LINKS = [
   { label: "Staking", href: "/staking" },
   { label: "Community", href: "/community" },
   { label: "Treasury", href: "/treasury" },
+  { label: "How to Connect", href: "/how-to-connect" },
   { label: "About Bonga", href: "/about" },
   { label: "bonga.uno", href: "https://bonga.uno" },
   { label: "@BongaSolana", href: "https://x.com/BongaSolana" },
