@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { SolanaProvider } from "@/components/solana/solana-provider";
 import { StakingClient } from "./staking-client";
 
 export const metadata: Metadata = {
   title: "Bonga NFT Staking — Lock Bonga NFTs to Earn $BONGA Rewards",
   description:
-    "Stake & lock your Bonga NFTs to earn generous $BONGA (75 per NFT per day, prorated). High-yield passive rewards paid from the transparent community treasury. You keep full custody of your NFTs. Raise the frequency.",
+    "Stake & lock your Bonga NFTs by rarity to earn tiered $BONGA rewards (Common 100 / Rare 150 / Legendary 200 / Cosmic 350 per day, prorated) from the transparent community treasury. You keep full custody. Raise the frequency.",
   keywords: [
     "Bonga staking",
     "stake Bonga NFT",
@@ -18,5 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default function StakingPage() {
-  return <StakingClient />;
+  return (
+    <SolanaProvider>
+      <StakingClient />
+    </SolanaProvider>
+  );
 }
