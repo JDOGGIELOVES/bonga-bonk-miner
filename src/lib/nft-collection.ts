@@ -294,7 +294,7 @@ export const COLLECTION_META = {
 export const COLLECTION_STATS = {
   totalSupply: 2000,
   minted: 0,
-  maxPerWallet: 4,
+  maxPerWallet: 3,
 };
 
 export const ROADMAP = [
