@@ -49,7 +49,7 @@ async function getTallyData() {
     if (!res.ok) throw new Error("Failed to fetch tally");
     return await res.json();
   } catch (e) {
-    return { totalBonga: 0, claimCount: 0 };
+    return { totalBonga: 0, claimCount: 0, miner: { bonga: 0, claims: 0 }, garden: { bonga: 0, claims: 0 }, pet: { bonga: 0, claims: 0 }, stake: { bonga: 0, claims: 0 } };
   }
 }
 
@@ -63,6 +63,7 @@ export default async function TreasuryPage() {
 
   const totalPaid = tally.totalBonga || 0;
   const totalClaims = tally.claimCount || 0;
+  const stakePaid = (tally as any).stake?.bonga || 0;
 
   let recentPayouts: Array<{
     signature: string;
@@ -168,7 +169,7 @@ export default async function TreasuryPage() {
 
               <div className="pt-4 border-t border-border/50">
                 <p className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">Transparency note:</strong> Every $BONGA paid out from this treasury (miner claims, garden claims, Pet Love rewards, etc.) is recorded on Solana and reflected in our public claim tally.
+                  <strong className="text-foreground">Transparency note:</strong> Every $BONGA paid out from this treasury (miner, garden, Pet Love, NFT staking rewards, etc.) is recorded on Solana and reflected in our public claim tally (now includes a dedicated staking category).
                 </p>
               </div>
             </div>
@@ -187,7 +188,7 @@ export default async function TreasuryPage() {
               </div>
               <div className="text-xl text-muted-foreground mt-1">$BONGA paid out</div>
               <div className="text-sm text-muted-foreground mt-2">
-                Across {(totalClaims || 0).toLocaleString()} claims
+                Across {(totalClaims || 0).toLocaleString()} claims (miner, garden, pet love, and NFT staking)
               </div>
             </div>
 

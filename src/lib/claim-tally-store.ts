@@ -29,6 +29,7 @@ export interface GlobalClaimTally {
   miner: CategoryTally;
   garden: CategoryTally;
   pet: CategoryTally;
+  stake: CategoryTally;
   updatedAt: string;
 }
 
@@ -43,6 +44,7 @@ function emptyTally(): GlobalClaimTally {
     miner: emptyCategory(),
     garden: emptyCategory(),
     pet: emptyCategory(),
+    stake: emptyCategory(),
     updatedAt: new Date().toISOString(),
   };
 }
@@ -171,6 +173,7 @@ function parseTally(raw: string): GlobalClaimTally {
   const miner = data.miner ?? emptyCategory();
   const garden = data.garden ?? emptyCategory();
   const pet = data.pet ?? emptyCategory();
+  const stake = data.stake ?? emptyCategory();
   return {
     totalBonga: Math.max(0, Number(data.totalBonga) || 0),
     claimCount: Math.max(0, Number(data.claimCount) || 0),
@@ -185,6 +188,10 @@ function parseTally(raw: string): GlobalClaimTally {
     pet: {
       bonga: Math.max(0, Number(pet.bonga) || 0),
       claims: Math.max(0, Number(pet.claims) || 0),
+    },
+    stake: {
+      bonga: Math.max(0, Number(stake.bonga) || 0),
+      claims: Math.max(0, Number(stake.claims) || 0),
     },
     updatedAt:
       typeof data.updatedAt === "string"
@@ -284,7 +291,7 @@ export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
   }
 }
 
-export type ClaimCategory = 'miner' | 'garden' | 'pet';
+export type ClaimCategory = 'miner' | 'garden' | 'pet' | 'stake';
 
 export interface WalletClaimEntry {
   ts: number;
@@ -389,6 +396,7 @@ export async function recordGlobalClaim(
         miner: { ...current.miner },
         garden: { ...current.garden },
         pet: { ...current.pet },
+        stake: { ...current.stake },
         updatedAt: new Date().toISOString(),
       };
 
@@ -401,6 +409,9 @@ export async function recordGlobalClaim(
       } else if (category === 'pet') {
         next.pet.bonga += safeAmount;
         next.pet.claims += 1;
+      } else if (category === 'stake') {
+        next.stake.bonga += safeAmount;
+        next.stake.claims += 1;
       } else {
         // legacy: distribute to total only (should not happen after migration)
       }

@@ -112,3 +112,98 @@ export function verifyClaimSignature(params: {
     publicKeyBytes
   );
 }
+
+// --- Staking (virtual lock) action messages ---
+
+export function buildStakeLockMessage(params: {
+  wallet: string;
+  count: number;
+  at: string; // ISO timestamp or nonce for the lock action
+}) {
+  const { wallet, count, at } = params;
+  return [
+    TREASURY_CLAIM_DOMAIN,
+    "Stake Lock",
+    `Wallet: ${wallet}`,
+    `Count: ${count}`,
+    `At: ${at}`,
+  ].join("\n");
+}
+
+export function verifyStakeLockSignature(params: {
+  wallet: string;
+  count: number;
+  at: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const expected = {
+    wallet: params.wallet,
+    count: params.count,
+    at: params.at,
+  };
+  const canonicalMessage = buildStakeLockMessage(expected);
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}
+
+export function buildStakeUnlockMessage(params: {
+  wallet: string;
+  at: string;
+}) {
+  const { wallet, at } = params;
+  return [
+    TREASURY_CLAIM_DOMAIN,
+    "Stake Unlock",
+    `Wallet: ${wallet}`,
+    `At: ${at}`,
+  ].join("\n");
+}
+
+export function verifyStakeUnlockSignature(params: {
+  wallet: string;
+  at: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const expected = { wallet: params.wallet, at: params.at };
+  const canonicalMessage = buildStakeUnlockMessage(expected);
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}

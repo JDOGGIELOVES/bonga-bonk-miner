@@ -34,6 +34,7 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
   const miner = tally?.miner ?? { bonga: 0, claims: 0 };
   const garden = tally?.garden ?? { bonga: 0, claims: 0 };
   const pet = tally?.pet ?? { bonga: 0, claims: 0 };
+  const stake = tally?.stake ?? { bonga: 0, claims: 0 };
   const lastUpdated = tally?.updatedAt ? new Date(tally.updatedAt).toLocaleString() : null;
 
   const CategoryRow = ({ label, data, color }: { label: string; data: CategoryTally; color: string }) => (
@@ -94,10 +95,11 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-2">
         <CategoryRow label="Bonk Miner" data={miner} color="text-bonga-orange" />
         <CategoryRow label="Garden" data={garden} color="text-bonga-teal" />
         <CategoryRow label="Pet Love" data={pet} color="text-bonga-purple" />
+        <CategoryRow label="NFT Staking" data={stake} color="text-bonga-orange" />
       </div>
     </motion.div>
   );

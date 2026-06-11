@@ -313,8 +313,8 @@ export const ROADMAP = [
   {
     phase: "Phase 3",
     title: "Staking & Rewards",
-    status: "soon" as const,
-    items: ["Stake Bonga NFTs for $BONGA", "Monthly airdrops", "IRL event access"],
+    status: "live" as const,
+    items: ["Stake Bonga NFTs for $BONGA (75/day per NFT)", "High-yield lock rewards", "IRL event access"],
   },
   {
     phase: "Phase 4",
@@ -340,8 +340,8 @@ export const UTILITY = [
   },
   {
     icon: "💰",
-    title: "Staking Rewards",
-    description: "Stake your Bonga NFT to earn $BONGA tokens and exclusive airdrops.",
+    title: "NFT Staking — Lock to Earn",
+    description: "Lock Bonga NFTs on the staking page to earn ~75 $BONGA per NFT per day (prorated, claimable from treasury). You keep custody.",
   },
   {
     icon: "👕",

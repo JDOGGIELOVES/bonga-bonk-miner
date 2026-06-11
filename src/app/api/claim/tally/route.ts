@@ -18,6 +18,7 @@ export async function GET() {
         miner: { bonga: 0, claims: 0 },
         garden: { bonga: 0, claims: 0 },
         pet: { bonga: 0, claims: 0 },
+        stake: { bonga: 0, claims: 0 },
       },
       { status: 500 }
     );

@@ -202,7 +202,7 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
             <p className="mt-2 text-xs text-muted-foreground">
               Cumulative lifetime total (never resets daily): <span className="font-semibold text-foreground">{(communityTally?.totalBonga ?? 0).toLocaleString()} $BONGA</span> across {(communityTally?.claimCount ?? 0).toLocaleString()} claims.
               <br />
-              Miner: {(communityTally?.miner.bonga ?? 0).toLocaleString()} · Garden: {(communityTally?.garden.bonga ?? 0).toLocaleString()} · Pet: {(communityTally?.pet.bonga ?? 0).toLocaleString()}
+              Miner: {(communityTally?.miner.bonga ?? 0).toLocaleString()} · Garden: {(communityTally?.garden.bonga ?? 0).toLocaleString()} · Pet: {(communityTally?.pet.bonga ?? 0).toLocaleString()} · Staking: {(communityTally?.stake?.bonga ?? 0).toLocaleString()}
               {communityTally?.updatedAt && <span className="block text-[10px]">Last updated: {new Date(communityTally.updatedAt).toLocaleString()}</span>}
             </p>
             {claimStatus?.balances && (

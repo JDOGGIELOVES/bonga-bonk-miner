@@ -6,7 +6,7 @@ import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 const LOCK_TTL_MS = 45_000;
 const MAX_WAIT_MS = 50_000;
 
-export type ClaimLockKind = "miner" | "garden" | "pet" | "tally";
+export type ClaimLockKind = "miner" | "garden" | "pet" | "tally" | "stake";
 
 function envFlag(name: string): boolean {
   return Boolean(process.env[name]?.trim());

@@ -128,6 +128,15 @@ export function BongaHeader({
             NFTs
           </Link>
           <Link
+            href="/staking"
+            className={getLinkClass(
+              "/staking",
+              "rounded-full border border-bonga-orange/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-3 sm:py-1.5"
+            )}
+          >
+            Staking
+          </Link>
+          <Link
             href="/community"
             className={getLinkClass(
               "/community",

@@ -33,6 +33,9 @@ export const PRIMARY_KEYWORDS = [
   "Raise the Frequency",
   "Bonga Peace",
   "Bonga mindfulness",
+  "Bonga staking",
+  "stake Bonga NFT",
+  "Bonga NFT rewards",
 ] as const;
 
 export const SOCIAL_LINKS = {
@@ -49,6 +52,7 @@ export const PUBLIC_ROUTES = [
   { path: "/pet-love", changeFrequency: "daily" as const, priority: 0.9 },
   { path: "/community", changeFrequency: "weekly" as const, priority: 0.85 },
   { path: "/treasury", changeFrequency: "daily" as const, priority: 0.8 },
+  { path: "/staking", changeFrequency: "weekly" as const, priority: 0.85 },
 ];
 
 export function absoluteUrl(path = ""): string {

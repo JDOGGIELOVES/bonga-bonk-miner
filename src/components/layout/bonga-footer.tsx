@@ -9,6 +9,7 @@ const LINKS = [
   { label: "Vibes Garden", href: "/?mode=garden" },
   { label: "Bonga Peace", href: "/peace" },
   { label: "NFTs", href: "/nft" },
+  { label: "Staking", href: "/staking" },
   { label: "Community", href: "/community" },
   { label: "Treasury", href: "/treasury" },
   { label: "About Bonga", href: "/about" },
