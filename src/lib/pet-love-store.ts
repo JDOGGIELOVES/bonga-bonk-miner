@@ -104,7 +104,7 @@ function blobAccess(): BlobAccess {
 
 function storageConfigMessage(): string {
   return (
-    "Pet Love storage is not configured on Vercel. In Dashboard → Storage → Blob, connect your store to this project (OIDC), or set BLOB_READ_WRITE_TOKEN, then redeploy Production."
+    "Pet Love storage is not configured on Vercel (or has hit limits). In Dashboard → Storage → Blob, connect your store to this project (OIDC) or set BLOB_READ_WRITE_TOKEN, check Usage tab for limits, clean up old data if needed, then redeploy Production."
   );
 }
 
@@ -779,4 +779,57 @@ export async function readSubmissionImage(id: string): Promise<{
   const buffer = await readFile(path.join(getLocalImagesDir(), match));
   const contentType = match.endsWith(".png") ? "image/png" : "image/jpeg";
   return { buffer, contentType };
+}
+
+/**
+ * Prune old Pet Love blobs to free storage quota.
+ * Deletes blobs under pet-love/images/, submissions/, by-wallet/, claims/ older than `daysToKeep`.
+ * Call this manually (e.g. from a script or temp API) when you hit Blob limits.
+ * Returns count of deletions attempted.
+ */
+export async function pruneOldPetBlobs(daysToKeep = 60): Promise<{ deleted: number; errors: number; message: string }> {
+  if (!useBlobStorage()) {
+    return { deleted: 0, errors: 0, message: "Not using Blob storage (local mode)." };
+  }
+
+  const { list, del } = await import("@vercel/blob");
+  const cutoff = Date.now() - daysToKeep * 24 * 60 * 60 * 1000;
+
+  let deleted = 0;
+  let errors = 0;
+
+  const prefixes = [
+    "pet-love/images/",
+    "pet-love/submissions/",
+    "pet-love/by-wallet/",
+    "pet-love/claims/",
+    "pet-love/daily-claim-count/",
+  ];
+
+  for (const prefix of prefixes) {
+    try {
+      const { blobs } = await list({ prefix, limit: 1000 });
+      for (const blob of blobs) {
+        const uploaded = blob.uploadedAt ? new Date(blob.uploadedAt).getTime() : 0;
+        if (uploaded > 0 && uploaded < cutoff) {
+          try {
+            await del(blob.url || blob.pathname);
+            deleted++;
+          } catch (e) {
+            console.error("Failed to delete old pet blob", blob.pathname, e);
+            errors++;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to list prefix ${prefix} for prune`, e);
+      errors++;
+    }
+  }
+
+  return {
+    deleted,
+    errors,
+    message: `Pruned ${deleted} old blobs (errors: ${errors}). Check Vercel Blob usage to confirm space freed. Old gallery photos may disappear.`,
+  };
 }
