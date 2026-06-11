@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 import { withWalletClaimLock } from "./claim-lock";
+import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 
 const TALLY_BLOB_PATH = "bonga-claims/global-tally.json";
 const WALLET_CLAIM_LOGS_PATH = "bonga-claims/wallet-claim-logs.json";
@@ -77,6 +78,22 @@ function blobAccess(): BlobAccess {
   return "public";
 }
 
+export function getTallyStorageStatus() {
+  const blobToken = envFlag("BLOB_READ_WRITE_TOKEN");
+  const blobStoreId = envFlag("BLOB_STORE_ID");
+  const oidcEnv = envFlag("VERCEL_OIDC_TOKEN");
+  const vercel = isVercelRuntime();
+  const oidcReady = blobStoreId && (oidcEnv || vercel);
+  return {
+    vercel,
+    blobToken,
+    blobStoreId,
+    oidcEnv,
+    storageReady: vercel ? blobToken || oidcReady : true,
+    mode: useBlobStorage() ? "blob" : "local",
+  };
+}
+
 function getLocalDataDir(): string {
   if (isVercelRuntime()) {
     return path.join(os.tmpdir(), "bonga-claim-tally");
@@ -86,57 +103,6 @@ function getLocalDataDir(): string {
 
 function localRecordPath(relative: string): string {
   return path.join(getLocalDataDir(), relative);
-}
-
-async function streamToText(
-  stream: ReadableStream<Uint8Array> | NodeJS.ReadableStream
-): Promise<string> {
-  if ("getReader" in stream) {
-    return new Response(stream).text();
-  }
-
-  const chunks: Buffer[] = [];
-  for await (const chunk of stream as AsyncIterable<Buffer | Uint8Array | string>) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks).toString("utf8");
-}
-
-async function readBlobText(pathname: string): Promise<string | null> {
-  const { get, head } = await import("@vercel/blob");
-  const primary = blobAccess();
-  const fallback: BlobAccess = primary === "public" ? "private" : "public";
-
-  for (const access of [primary, fallback]) {
-    try {
-      const result = await get(pathname, { access, useCache: false });
-      if (result?.stream) {
-        return streamToText(result.stream);
-      }
-    } catch (error) {
-      // 400/404 are common when the tally blob hasn't been written yet (first claim creates it)
-      // or due to transient store config during deploys. Only log real problems.
-      const msg = error instanceof Error ? error.message : String(error);
-      if (!/400 Bad Request|404|not found|does not exist/i.test(msg)) {
-        console.error(`Claim tally blob get failed (${pathname}, ${access}):`, error);
-      }
-    }
-
-    try {
-      const meta = await head(pathname);
-      const response = await fetch(meta.url, { cache: "no-store" });
-      if (response.ok) {
-        return response.text();
-      }
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : String(error);
-      if (!/400|404|not found/i.test(msg)) {
-        console.error(`Claim tally blob head failed (${pathname}):`, error);
-      }
-    }
-  }
-
-  return null;
 }
 
 async function readRecord(pathname: string): Promise<string | null> {
@@ -153,13 +119,7 @@ async function readRecord(pathname: string): Promise<string | null> {
 
 async function writeRecord(pathname: string, body: string): Promise<void> {
   if (useBlobStorage()) {
-    const { put } = await import("@vercel/blob");
-    await put(pathname, body, {
-      access: blobAccess(),
-      contentType: "application/json",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
+    await writeBlobText(pathname, body);
     return;
   }
 
