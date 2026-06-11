@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
 import {
   fetchStakeStatus,
+  fetchGlobalClaimTally,
   requestStakeLock,
   requestStakeUnlock,
   requestStakeClaim,
@@ -38,6 +39,8 @@ export function StakingClient() {
     Legendary: 0,
     "Cosmic Bonga": 0,
   });
+
+  const [globalStakeTally, setGlobalStakeTally] = useState<{ bonga: number; claims: number } | null>(null);
 
   const walletAddress = publicKey?.toBase58() ?? null;
 
@@ -75,6 +78,21 @@ export function StakingClient() {
       cancelled = true;
     };
   }, [walletAddress]);
+
+  // Load global staking community tally (running total of bonga claimed via staking)
+  const loadGlobalStakeTally = () => {
+    fetchGlobalClaimTally().then((t) => {
+      setGlobalStakeTally(t.stake);
+    }).catch(() => {
+      // ignore, will show —
+    });
+  };
+
+  useEffect(() => {
+    loadGlobalStakeTally();
+    const id = setInterval(loadGlobalStakeTally, 60000);
+    return () => clearInterval(id);
+  }, []);
 
   const stakedCount = status?.stakedCount ?? 0;
   const heldCount = status?.heldCount ?? heldFromHook ?? 0;
@@ -209,6 +227,9 @@ export function StakingClient() {
             <div className="mt-3 text-sm text-bonga-teal">
               Tiered rewards: Common 100 • Rare 150 • Legendary 200 • Cosmic 350 $BONGA per day • Prorated • Claim anytime (min 10)
             </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Community has claimed <span className="font-medium text-foreground">{globalStakeTally ? globalStakeTally.bonga.toLocaleString() : '—'} $BONGA</span> from NFT staking across {globalStakeTally ? globalStakeTally.claims.toLocaleString() : '—'} claims.
+            </div>
           </div>
 
           <BongaCaBanner />
@@ -286,6 +307,17 @@ export function StakingClient() {
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
                     Rewards accrue the longer you keep your NFTs locked. Claim in chunks of {status?.minClaim ?? 10}+ to keep fees low.
+                  </p>
+                </div>
+
+                {/* Community Staking Tally - running total of bonga claimed via staking */}
+                <div className="mt-4 rounded-2xl bg-muted/30 p-4 text-center">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Community Staking Rewards Paid Out</p>
+                  <p className="mt-1 font-display text-2xl font-bold text-bonga-orange">
+                    {globalStakeTally ? globalStakeTally.bonga.toLocaleString() : '—'} $BONGA
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    across {globalStakeTally ? globalStakeTally.claims.toLocaleString() : '—'} claims
                   </p>
                 </div>
 
