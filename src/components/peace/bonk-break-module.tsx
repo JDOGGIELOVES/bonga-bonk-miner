@@ -179,7 +179,18 @@ export function BonkBreakModule() {
               <img 
                 src="/bonk-shiba.jpg" 
                 alt="Shiba Inu getting bonked with wooden club - BONK meme style" 
-                className="w-full h-full object-contain" 
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    const note = document.createElement('div');
+                    note.className = 'absolute inset-0 flex items-center justify-center bg-amber-50/90 text-center p-4 text-sm text-amber-800';
+                    note.innerHTML = '<strong>Image not found.</strong><br/>Download the BONK meme Shiba from your link and save it as <code>public/bonk-shiba.jpg</code> then redeploy.';
+                    parent.appendChild(note);
+                  }
+                }}
               />
 
               {/* Animated wooden club (pure wood bonker style, no hammer/red pad) */}
