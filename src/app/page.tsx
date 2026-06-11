@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { MinerShell } from "@/components/miner/miner-shell";
 import { HomeSeoContent } from "@/components/seo/home-seo-content";
 import { HomeJsonLd } from "@/components/seo/site-json-ld";
@@ -33,7 +34,9 @@ export default function Home() {
     <>
       <HomeJsonLd />
       <HomeSeoContent />
-      <MinerShell />
+      <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">Raising the frequency...</div>}>
+        <MinerShell />
+      </Suspense>
     </>
   );
 }

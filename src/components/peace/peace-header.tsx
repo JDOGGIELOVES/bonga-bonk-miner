@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
+import { usePathname } from "next/navigation";
 
 const NAV = [
   { href: "#breathe", label: "Breathe" },
@@ -17,6 +18,13 @@ const NAV = [
 
 export function PeaceHeader() {
   const { theme, toggleTheme } = useTheme();
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href.startsWith("/?mode=")) return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/50 bg-card/80 backdrop-blur-xl">
@@ -35,29 +43,33 @@ export function PeaceHeader() {
               {item.label}
             </a>
           ))}
+          {/* Consistent site-wide nav */}
+          <Link href="/" className={`text-sm font-medium transition-colors hover:underline ${isActive("/") ? "text-bonga-orange font-semibold" : "text-bonga-orange"}`}>
+            Home
+          </Link>
+          <Link href="/?mode=miner" className={`text-sm font-medium transition-colors hover:underline ${isActive("/?mode=miner") ? "text-bonga-orange font-semibold" : "text-bonga-orange"}`}>
+            Bonk Miner
+          </Link>
+          <Link href="/?mode=garden" className={`text-sm font-medium transition-colors hover:underline ${isActive("/?mode=garden") ? "text-bonga-teal font-semibold" : "text-bonga-teal"}`}>
+            Vibes Garden
+          </Link>
+          <Link href="/peace" className={`text-sm font-medium transition-colors hover:underline ${isActive("/peace") ? "text-bonga-teal font-semibold" : "text-bonga-teal"}`}>
+            Peace
+          </Link>
+          <Link href="/nft" className={`text-sm font-medium transition-colors hover:underline ${isActive("/nft") ? "text-bonga-orange font-semibold" : "text-bonga-orange"}`}>
+            NFTs
+          </Link>
+          <Link href="/community" className={`text-sm font-medium transition-colors hover:underline ${isActive("/community") ? "text-bonga-purple font-semibold" : "text-bonga-purple"}`}>
+            Community
+          </Link>
+          <Link href="/treasury" className={`text-sm font-medium transition-colors hover:underline ${isActive("/treasury") ? "text-bonga-teal font-semibold" : "text-bonga-teal"}`}>
+            Treasury
+          </Link>
           <Link
             href="/pet-love"
             className="text-sm font-medium text-bonga-orange hover:underline"
           >
             Pet Love
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-medium text-bonga-purple hover:underline"
-          >
-            About
-          </Link>
-          <Link
-            href="/"
-            className="text-sm font-medium text-bonga-orange hover:underline"
-          >
-            Bonk Miner
-          </Link>
-          <Link
-            href="/nft"
-            className="text-sm font-medium text-bonga-teal hover:underline"
-          >
-            NFTs
           </Link>
         </nav>
 

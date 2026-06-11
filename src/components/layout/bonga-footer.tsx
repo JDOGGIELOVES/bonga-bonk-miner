@@ -1,15 +1,31 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const LINKS = [
-  { label: "About Bonga", href: "/about" },
+  { label: "Home", href: "/" },
+  { label: "Bonk Miner", href: "/?mode=miner" },
+  { label: "Vibes Garden", href: "/?mode=garden" },
   { label: "Bonga Peace", href: "/peace" },
   { label: "NFTs", href: "/nft" },
+  { label: "Community", href: "/community" },
+  { label: "Treasury", href: "/treasury" },
+  { label: "About Bonga", href: "/about" },
   { label: "bonga.uno", href: "https://bonga.uno" },
   { label: "@BongaSolana", href: "https://x.com/BongaSolana" },
   { label: "Telegram", href: "https://t.me/bonga_sol_community" },
 ];
 
 export function BongaFooter() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href.startsWith("/?mode=")) return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
   return (
     <footer className="mt-auto border-t border-border/40 bg-card/50">
       <div className="mx-auto max-w-2xl px-4 py-8 text-center sm:px-6">
@@ -23,6 +39,7 @@ export function BongaFooter() {
         <div className="mt-4 flex flex-wrap justify-center gap-4">
           {LINKS.map((link) => {
             const external = link.href.startsWith("http");
+            const active = isActive(link.href);
             return (
               <Link
                 key={link.href}
@@ -30,7 +47,11 @@ export function BongaFooter() {
                 {...(external
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
-                className="text-xs font-medium text-foreground/70 transition-colors hover:text-bonga-orange"
+                className={`text-xs font-medium transition-colors hover:text-bonga-orange ${
+                  active
+                    ? "text-bonga-orange font-semibold underline"
+                    : "text-foreground/70"
+                }`}
               >
                 {link.label}
               </Link>

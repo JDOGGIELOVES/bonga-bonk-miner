@@ -20,8 +20,12 @@ export const SOUND_PATHS = {
   coinCollect: "/sounds/coin-collect.mp3",
   /** Extra sparkle layer on $BONGA earn */
   sparkle: "/sounds/sparkle.mp3",
-  /** Chill hippie / lo-fi background loop */
-  bgm: "/sounds/lofi-peace.mp3",
+  /** Reggae background loop for the Bonk Miner game.
+   *  Option 1: Drop your own reggae MP3/OGG into /public/sounds/ as "reggae-bonk.mp3" (local preferred for reliability).
+   *  Option 2: Remote URL is set in SOUND_URLS.bgm (current: Kevin MacLeod reggae track).
+   *  If missing, falls back to procedural sounds.
+   */
+  bgm: "/sounds/reggae-bonk.mp3",
   /** Gentle flute for Tai Chi sessions */
   taiChiFlute: "/sounds/taichi-flute.mp3",
 } as const;
@@ -36,7 +40,10 @@ export const SOUND_URLS = {
   ] as string[],
   coinCollect: "",
   sparkle: "",
-  bgm: "",
+  // Free reggae track for Bonk Miner (Kevin MacLeod - B-Roll - Islandesque, CC BY 4.0)
+  // Attribution required: "B-Roll - Islandesque by Kevin MacLeod | incompetech.com"
+  // License: https://creativecommons.org/licenses/by/4.0/
+  bgm: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/B-Roll%20-%20Islandesque.mp3",
 } as const;
 
 export const DEFAULT_AUDIO_SETTINGS = {

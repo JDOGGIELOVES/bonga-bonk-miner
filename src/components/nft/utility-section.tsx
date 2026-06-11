@@ -13,6 +13,9 @@ export function UtilitySection() {
         <p className="mt-2 text-center text-muted-foreground">
           Your Bonga NFT is more than art — it&apos;s a key to the ecosystem
         </p>
+        <p className="mt-3 text-center text-xs text-bonga-teal">
+          7% royalties from secondary sales go to the Bonga Community Treasury
+        </p>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {UTILITY.map((item, i) => (

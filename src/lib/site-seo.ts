@@ -47,6 +47,8 @@ export const PUBLIC_ROUTES = [
   { path: "/nft", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/peace", changeFrequency: "weekly" as const, priority: 0.9 },
   { path: "/pet-love", changeFrequency: "daily" as const, priority: 0.9 },
+  { path: "/community", changeFrequency: "weekly" as const, priority: 0.85 },
+  { path: "/treasury", changeFrequency: "daily" as const, priority: 0.8 },
 ];
 
 export function absoluteUrl(path = ""): string {

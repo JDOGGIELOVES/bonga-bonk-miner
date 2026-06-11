@@ -12,18 +12,23 @@ interface HolderCache {
   checkedAt: number;
 }
 
-/** NFT holder status for Vibes Garden bonuses (cached API check). */
-export function useBongaNftHolder(): {
+export interface BongaNftHolderStatus {
   isHolder: boolean;
+  count: number;
   checking: boolean;
-} {
+}
+
+/** NFT holder status for Vibes Garden bonuses + count of held NFTs (cached API check). */
+export function useBongaNftHolder(): BongaNftHolderStatus {
   const { publicKey, connected } = useWallet();
   const [isHolder, setIsHolder] = useState(false);
+  const [count, setCount] = useState(0);
   const [checking, setChecking] = useState(false);
 
   useEffect(() => {
     if (!connected || !publicKey) {
       setIsHolder(false);
+      setCount(0);
       return;
     }
 
@@ -32,9 +37,10 @@ export function useBongaNftHolder(): {
     try {
       const raw = localStorage.getItem(CACHE_KEY);
       if (raw) {
-        const cache = JSON.parse(raw) as HolderCache;
+        const cache = JSON.parse(raw) as HolderCache & { count?: number };
         if (cache.wallet === wallet && Date.now() - cache.checkedAt < CACHE_MS) {
           setIsHolder(cache.isHolder);
+          setCount(cache.count ?? 0);
           return;
         }
       }
@@ -47,21 +53,27 @@ export function useBongaNftHolder(): {
 
     fetch(`/api/nft/holder?wallet=${encodeURIComponent(wallet)}`)
       .then((res) => res.json())
-      .then((data: { isHolder?: boolean }) => {
+      .then((data: { isHolder?: boolean; count?: number }) => {
         if (cancelled) return;
         const holder = Boolean(data.isHolder);
+        const nftCount = Number(data.count) || 0;
         setIsHolder(holder);
+        setCount(nftCount);
         localStorage.setItem(
           CACHE_KEY,
           JSON.stringify({
             wallet,
             isHolder: holder,
+            count: nftCount,
             checkedAt: Date.now(),
-          } satisfies HolderCache)
+          })
         );
       })
       .catch(() => {
-        if (!cancelled) setIsHolder(false);
+        if (!cancelled) {
+          setIsHolder(false);
+          setCount(0);
+        }
       })
       .finally(() => {
         if (!cancelled) setChecking(false);
@@ -72,5 +84,5 @@ export function useBongaNftHolder(): {
     };
   }, [connected, publicKey]);
 
-  return { isHolder, checking };
+  return { isHolder, count, checking };
 }

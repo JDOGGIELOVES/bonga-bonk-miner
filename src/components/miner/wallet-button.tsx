@@ -6,7 +6,8 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { shortenAddress, formatSol } from "@/lib/solana";
-import { Wallet, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
+import { Wallet, LogOut, ChevronDown, Loader2, Sparkles } from "lucide-react";
 
 interface WalletButtonProps {
   onConnect?: () => void;
@@ -16,6 +17,7 @@ export function BongaWalletButton({ onConnect }: WalletButtonProps) {
   const { connection } = useConnection();
   const { publicKey, disconnect, connecting, connected, wallet } = useWallet();
   const { setVisible } = useWalletModal();
+  const { isHolder, count: nftCount, checking: nftChecking } = useBongaNftHolder();
   const [balance, setBalance] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -124,6 +126,11 @@ export function BongaWalletButton({ onConnect }: WalletButtonProps) {
               {wallet?.adapter.name && (
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
                   via {wallet.adapter.name}
+                </p>
+              )}
+              {!nftChecking && isHolder && (
+                <p className="mt-1 flex items-center gap-1 text-xs font-semibold text-bonga-teal">
+                  <Sparkles className="h-3 w-3" /> Holder — {nftCount} Bonga NFT{nftCount === 1 ? "" : "s"}
                 </p>
               )}
             </div>

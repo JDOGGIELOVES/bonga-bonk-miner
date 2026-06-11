@@ -10,6 +10,16 @@ export async function GET() {
     return NextResponse.json(tally);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Tally unavailable.";
-    return NextResponse.json({ error: message, totalBonga: 0, claimCount: 0 }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: message,
+        totalBonga: 0,
+        claimCount: 0,
+        miner: { bonga: 0, claims: 0 },
+        garden: { bonga: 0, claims: 0 },
+        pet: { bonga: 0, claims: 0 },
+      },
+      { status: 500 }
+    );
   }
 }

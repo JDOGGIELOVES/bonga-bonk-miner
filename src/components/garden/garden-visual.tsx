@@ -171,6 +171,20 @@ export function GardenVisual({ plants, onWater, beautyLevel }: GardenVisualProps
             />
           )}
 
+          {/* Extra lush effects as garden beauty grows (more peaceful particles / glow) */}
+          {beautyLevel >= 4 && (
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(255,255,255,0.06),transparent_60%)]" />
+          )}
+          {beautyLevel >= 5 && (
+            <motion.div
+              className="pointer-events-none absolute bottom-6 right-8 text-xl opacity-30"
+              animate={{ rotate: [0, 8, -6, 0], y: [0, -4, 0] }}
+              transition={{ repeat: Infinity, duration: 9, ease: "easeInOut" }}
+            >
+              ✨
+            </motion.div>
+          )}
+
           <ZoneDecor zone={activeZone} />
 
           <div className="relative">

@@ -47,6 +47,18 @@ export function NFTHeader() {
             )
           )}
           <Link
+            href="/community"
+            className="text-sm font-medium text-bonga-purple hover:underline"
+          >
+            Community
+          </Link>
+          <Link
+            href="/treasury"
+            className="text-sm font-medium text-bonga-teal hover:underline"
+          >
+            Treasury
+          </Link>
+          <Link
             href="/about"
             className="text-sm font-medium text-bonga-purple hover:underline"
           >

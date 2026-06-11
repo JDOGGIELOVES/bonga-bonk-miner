@@ -141,22 +141,24 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
 
   const addParticles = useCallback((x: number, y: number, baseColor?: string) => {
     const colors = baseColor 
-      ? [baseColor, PARTICLE_COLORS[0], baseColor, PARTICLE_COLORS[2], baseColor] 
+      ? [baseColor, PARTICLE_COLORS[0], baseColor, PARTICLE_COLORS[2], baseColor, PARTICLE_COLORS[1]] 
       : PARTICLE_COLORS;
 
-    const newParticles: Particle[] = Array.from({ length: 7 }, (_, i) => ({
+    // More particles + slight variety for richer tap feedback
+    const count = baseColor ? 9 : 7;
+    const newParticles: Particle[] = Array.from({ length: count }, (_, i) => ({
       id: `particle-${++effectIdRef.current}-${i}`,
-      x: x + (Math.random() - 0.5) * 38,
-      y: y + (Math.random() - 0.5) * 38,
+      x: x + (Math.random() - 0.5) * (baseColor ? 48 : 38),
+      y: y + (Math.random() - 0.5) * (baseColor ? 48 : 38),
       color: colors[i % colors.length],
-      size: 3.5 + Math.random() * 7.5,
+      size: (baseColor ? 4 : 3.5) + Math.random() * (baseColor ? 9 : 7.5),
     }));
-    setParticles((prev) => [...prev.slice(-32), ...newParticles]);
+    setParticles((prev) => [...prev.slice(-40), ...newParticles]);
     setTimeout(() => {
       setParticles((prev) =>
         prev.filter((p) => !newParticles.find((np) => np.id === p.id))
       );
-    }, 620);
+    }, 680);
   }, []);
 
   const handleTap = useCallback(
@@ -340,7 +342,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
               {connected && getClaimableBonga(gameState) > 0
                 ? "Claim your mined $BONGA above"
-                : `100 bonks = 1 $BONGA · ${DAILY_BONGA_LIMIT} max per day`}
+                : `100 bonks = 1 $BONGA  ·  ${DAILY_BONGA_LIMIT} max per day (peace & love)`}
             </p>
           </div>
 

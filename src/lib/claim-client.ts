@@ -17,9 +17,17 @@ export interface ClaimStatus {
   hint?: string;
 }
 
+export interface CategoryTally {
+  bonga: number;
+  claims: number;
+}
+
 export interface GlobalClaimTally {
   totalBonga: number;
   claimCount: number;
+  miner: CategoryTally;
+  garden: CategoryTally;
+  pet: CategoryTally;
   updatedAt?: string;
 }
 
@@ -39,13 +47,34 @@ export async function fetchGlobalClaimTally(): Promise<GlobalClaimTally> {
   try {
     const response = await fetch("/api/claim/tally", { cache: "no-store" });
     const data = (await response.json()) as GlobalClaimTally;
+    const miner = data.miner ?? { bonga: 0, claims: 0 };
+    const garden = data.garden ?? { bonga: 0, claims: 0 };
+    const pet = data.pet ?? { bonga: 0, claims: 0 };
     return {
       totalBonga: Number(data.totalBonga) || 0,
       claimCount: Number(data.claimCount) || 0,
+      miner: {
+        bonga: Number(miner.bonga) || 0,
+        claims: Number(miner.claims) || 0,
+      },
+      garden: {
+        bonga: Number(garden.bonga) || 0,
+        claims: Number(garden.claims) || 0,
+      },
+      pet: {
+        bonga: Number(pet.bonga) || 0,
+        claims: Number(pet.claims) || 0,
+      },
       updatedAt: data.updatedAt,
     };
   } catch {
-    return { totalBonga: 0, claimCount: 0 };
+    return {
+      totalBonga: 0,
+      claimCount: 0,
+      miner: { bonga: 0, claims: 0 },
+      garden: { bonga: 0, claims: 0 },
+      pet: { bonga: 0, claims: 0 },
+    };
   }
 }
 
@@ -110,4 +139,42 @@ export async function requestOnChainClaim(params: {
 /** Build-time hint only — prefer runtime `fetchClaimStatus()` in the UI. */
 export function isOnChainClaimsEnabled() {
   return process.env.NEXT_PUBLIC_ON_CHAIN_CLAIMS_ENABLED === "true";
+}
+
+export interface FlaggedWallet {
+  flaggedAt: string;
+  reason: string;
+  amountInWindow: number;
+  windowLabel?: string;
+}
+
+export async function fetchFlaggedWallets(): Promise<Record<string, FlaggedWallet[]>> {
+  try {
+    const response = await fetch("/api/claim/flags", { cache: "no-store" });
+    if (!response.ok) return {};
+    const parsed = await response.json();
+    // Support legacy
+    const result: Record<string, FlaggedWallet[]> = {};
+    for (const [w, val] of Object.entries(parsed)) {
+      result[w] = Array.isArray(val) ? val : [val as FlaggedWallet];
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+export interface BlockedWallet {
+  blockedUntil: string;
+  reason: string;
+}
+
+export async function fetchBlockedWallets(): Promise<Record<string, BlockedWallet>> {
+  try {
+    const response = await fetch("/api/claim/blocked", { cache: "no-store" });
+    if (!response.ok) return {};
+    return await response.json();
+  } catch {
+    return {};
+  }
 }

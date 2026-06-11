@@ -288,7 +288,7 @@ export const COLLECTION_META = {
   description:
     "2,000 peaceful chibi Shiba warriors from Bonk's Sister. Hippie, cosmic, and bonk-powered vibes on Solana.",
   externalUrl: "https://bongabonks.com/nft",
-  sellerFeeBasisPoints: 500,
+  sellerFeeBasisPoints: 700, // 7% royalties from secondary sales go to Bonga Community Treasury
 };
 
 export const COLLECTION_STATS = {
@@ -335,8 +335,8 @@ export const TEAM = [
 export const UTILITY = [
   {
     icon: "🎮",
-    title: "Bonk Miner Boosts",
-    description: "NFT holders get faster mining, exclusive clubs, and bonus $BONGA multipliers.",
+    title: "Bonk Miner & Vibes Garden Boosts",
+    description: "NFT holders get earnings multipliers (+ in both games), faster progress, and exclusive plants/clubs.",
   },
   {
     icon: "💰",

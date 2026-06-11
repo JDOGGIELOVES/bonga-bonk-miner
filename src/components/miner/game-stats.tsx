@@ -44,9 +44,9 @@ export function GameStats({ state, combo, connected }: GameStatsProps) {
       )}
 
       <div className="grid grid-cols-3 gap-4">
-        <StatBox label="Taps" value={state.tapsToday} />
+        <StatBox label="Taps today" value={state.tapsToday} />
         <StatBox
-          label="$BONGA"
+          label="Mined today"
           value={`${state.bongaToday}/${DAILY_BONGA_LIMIT}`}
           highlight={state.bongaToday > 0}
         />

@@ -5,7 +5,7 @@ import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
-import { recordGlobalClaim } from "@/lib/claim-tally-store";
+import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import {
@@ -93,6 +93,16 @@ export async function POST(request: Request) {
 
     if (date !== todayKey()) {
       return NextResponse.json({ error: "Claims are only valid for today (UTC)." }, { status: 400 });
+    }
+
+    // Auto-block check for flagged wallets (3 days)
+    const blockCheck = await isWalletBlocked(wallet);
+    if (blockCheck.blocked) {
+      const until = blockCheck.until ? new Date(blockCheck.until).toLocaleString() : "soon";
+      return NextResponse.json(
+        { error: `This wallet is temporarily blocked due to suspicious claiming activity. Blocked until ${until}. Reason: ${blockCheck.reason || "high velocity claims"}` },
+        { status: 403 }
+      );
     }
 
     let recipient: PublicKey;
@@ -185,7 +195,7 @@ export async function POST(request: Request) {
             amount,
           });
 
-          await recordGlobalClaim(amount);
+          await recordGlobalClaim(amount, 'garden', wallet);
           if (ipKey) {
             await recordIpClaim({ ipKey, wallet, amount, date, kind: "garden" });
           }

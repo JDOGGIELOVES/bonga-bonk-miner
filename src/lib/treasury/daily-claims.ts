@@ -124,3 +124,93 @@ export async function getTodayClaimedFromTreasury(params: {
     return total;
   });
 }
+
+export async function getRecentTreasuryPayouts(params: {
+  treasury: PublicKey;
+  mint: PublicKey;
+  limit?: number;
+}): Promise<Array<{
+  signature: string;
+  blockTime: number | null;
+  amount: number;
+  recipient: string;
+}>> {
+  const { treasury, mint, limit = 20 } = params;
+  const treasuryAta = getAssociatedTokenAddressSync(mint, treasury, false);
+
+  return withRpcRetry(async (connection) => {
+    const signatures = await connection.getSignaturesForAddress(treasuryAta, {
+      limit,
+    });
+
+    if (signatures.length === 0) return [];
+
+    const txs = await getParsedTransactionsLight(
+      connection,
+      signatures.map((s) => s.signature)
+    );
+
+    const payouts: Array<{
+      signature: string;
+      blockTime: number | null;
+      amount: number;
+      recipient: string;
+    }> = [];
+
+    for (let i = 0; i < txs.length; i++) {
+      const tx = txs[i];
+      const sig = signatures[i];
+      if (!tx) continue;
+
+      const instructions = tx.transaction.message.instructions;
+      const inner = tx.meta?.innerInstructions ?? [];
+
+      const allParsed = [
+        ...instructions
+          .filter((ix) => "parsed" in ix && ix.program === "spl-token")
+          .map((ix) => ("parsed" in ix ? ix.parsed : null)),
+        ...inner.flatMap((group) =>
+          group.instructions
+            .filter((ix) => "parsed" in ix && ix.program === "spl-token")
+            .map((ix) => ("parsed" in ix ? ix.parsed : null))
+        ),
+      ];
+
+      for (const parsed of allParsed) {
+        if (!parsed || typeof parsed !== "object") continue;
+        const info = (parsed as { info?: Record<string, unknown> }).info;
+        if (!info) continue;
+
+        const type = (parsed as { type?: string }).type;
+        if (type !== "transfer" && type !== "transferChecked") continue;
+
+        const source = info.source as string | undefined;
+        if (source !== treasuryAta.toBase58()) continue;
+
+        const destination = info.destination as string | undefined;
+        if (!destination) continue;
+
+        let amount = 0;
+        const tokenAmount = info.tokenAmount as { uiAmount?: number | null } | undefined;
+        if (tokenAmount?.uiAmount != null) {
+          amount = tokenAmount.uiAmount;
+        } else {
+          const raw = info.amount as string | undefined;
+          if (raw) amount = Number(raw) / 1_000_000; // 6 decimals for BONGA
+        }
+
+        if (amount > 0) {
+          payouts.push({
+            signature: sig.signature,
+            blockTime: sig.blockTime ?? null,
+            amount,
+            recipient: destination,
+          });
+          break;
+        }
+      }
+    }
+
+    return payouts;
+  });
+}

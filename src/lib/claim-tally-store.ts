@@ -1,17 +1,50 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { withWalletClaimLock } from "./claim-lock";
 
 const TALLY_BLOB_PATH = "bonga-claims/global-tally.json";
+const WALLET_CLAIM_LOGS_PATH = "bonga-claims/wallet-claim-logs.json";
+const FLAGGED_WALLETS_PATH = "bonga-claims/flagged-wallets.json";
+const BLOCKED_WALLETS_PATH = "bonga-claims/blocked-wallets.json";
+
+export const SUSPICIOUS_RULES = [
+  { windowMs: 5 * 60 * 1000, threshold: 1000, label: '5min' },
+  { windowMs: 10 * 60 * 1000, threshold: 2000, label: '10min' },
+  { windowMs: 60 * 60 * 1000, threshold: 3000, label: '1h' },
+] as const;
+
+export const SUSPICIOUS_HOURLY_THRESHOLD = 3000; // kept for reference / legacy
+
+const ONE_HOUR_MS = 60 * 60 * 1000;  // max window for pruning
+
+export interface CategoryTally {
+  bonga: number;
+  claims: number;
+}
 
 export interface GlobalClaimTally {
   totalBonga: number;
   claimCount: number;
+  miner: CategoryTally;
+  garden: CategoryTally;
+  pet: CategoryTally;
   updatedAt: string;
 }
 
+function emptyCategory(): CategoryTally {
+  return { bonga: 0, claims: 0 };
+}
+
 function emptyTally(): GlobalClaimTally {
-  return { totalBonga: 0, claimCount: 0, updatedAt: new Date().toISOString() };
+  return {
+    totalBonga: 0,
+    claimCount: 0,
+    miner: emptyCategory(),
+    garden: emptyCategory(),
+    pet: emptyCategory(),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 function envFlag(name: string): boolean {
@@ -135,14 +168,97 @@ async function writeRecord(pathname: string, body: string): Promise<void> {
 
 function parseTally(raw: string): GlobalClaimTally {
   const data = JSON.parse(raw) as Partial<GlobalClaimTally>;
+  const miner = data.miner ?? emptyCategory();
+  const garden = data.garden ?? emptyCategory();
+  const pet = data.pet ?? emptyCategory();
   return {
     totalBonga: Math.max(0, Number(data.totalBonga) || 0),
     claimCount: Math.max(0, Number(data.claimCount) || 0),
+    miner: {
+      bonga: Math.max(0, Number(miner.bonga) || 0),
+      claims: Math.max(0, Number(miner.claims) || 0),
+    },
+    garden: {
+      bonga: Math.max(0, Number(garden.bonga) || 0),
+      claims: Math.max(0, Number(garden.claims) || 0),
+    },
+    pet: {
+      bonga: Math.max(0, Number(pet.bonga) || 0),
+      claims: Math.max(0, Number(pet.claims) || 0),
+    },
     updatedAt:
       typeof data.updatedAt === "string"
         ? data.updatedAt
         : new Date().toISOString(),
   };
+}
+
+async function getWalletClaimLogs(): Promise<Record<string, WalletClaimEntry[]>> {
+  const raw = await readRecord(WALLET_CLAIM_LOGS_PATH);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+async function saveWalletClaimLogs(logs: Record<string, WalletClaimEntry[]>): Promise<void> {
+  await writeRecord(WALLET_CLAIM_LOGS_PATH, JSON.stringify(logs));
+}
+
+export async function getFlaggedWallets(): Promise<Record<string, FlaggedWallet[]>> {
+  const raw = await readRecord(FLAGGED_WALLETS_PATH);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    // Support legacy single-object format
+    const result: Record<string, FlaggedWallet[]> = {};
+    for (const [w, val] of Object.entries(parsed)) {
+      result[w] = Array.isArray(val) ? val : [val as FlaggedWallet];
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+async function saveFlaggedWallets(flagged: Record<string, FlaggedWallet[]>): Promise<void> {
+  await writeRecord(FLAGGED_WALLETS_PATH, JSON.stringify(flagged));
+}
+
+export async function getBlockedWallets(): Promise<Record<string, BlockedWallet>> {
+  const raw = await readRecord(BLOCKED_WALLETS_PATH);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+async function saveBlockedWallets(blocked: Record<string, BlockedWallet>): Promise<void> {
+  await writeRecord(BLOCKED_WALLETS_PATH, JSON.stringify(blocked));
+}
+
+export async function isWalletBlocked(wallet: string): Promise<{ blocked: boolean; until?: string; reason?: string }> {
+  const blocked = await getBlockedWallets();
+  const entry = blocked[wallet];
+  if (!entry) return { blocked: false };
+
+  const untilDate = new Date(entry.blockedUntil);
+  if (untilDate > new Date()) {
+    return {
+      blocked: true,
+      until: entry.blockedUntil,
+      reason: entry.reason,
+    };
+  }
+
+  // Expired block - clean up optionally
+  delete blocked[wallet];
+  await saveBlockedWallets(blocked);
+  return { blocked: false };
 }
 
 export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
@@ -168,19 +284,135 @@ export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
   }
 }
 
-export async function recordGlobalClaim(amount: number): Promise<GlobalClaimTally> {
+export type ClaimCategory = 'miner' | 'garden' | 'pet';
+
+export interface WalletClaimEntry {
+  ts: number;
+  amount: number;
+  category: ClaimCategory;
+}
+
+export interface FlaggedWallet {
+  flaggedAt: string;
+  reason: string;
+  amountInWindow: number;
+  windowLabel?: string;
+}
+
+export interface BlockedWallet {
+  blockedUntil: string;
+  reason: string;
+}
+
+async function trackAndFlagWalletClaim(
+  wallet: string,
+  amount: number,
+  category: ClaimCategory
+): Promise<void> {
+  const safeAmount = Math.max(0, Math.floor(amount));
+  if (safeAmount <= 0) return;
+
+  const now = Date.now();
+  const logs = await getWalletClaimLogs();
+  let walletLogs = logs[wallet] || [];
+
+  // prune entries older than max window (1h)
+  walletLogs = walletLogs.filter((entry) => now - entry.ts < ONE_HOUR_MS);
+
+  // add new claim
+  walletLogs.push({ ts: now, amount: safeAmount, category });
+  logs[wallet] = walletLogs;
+
+  await saveWalletClaimLogs(logs);
+
+  // Check all suspicious rules
+  const flagged = await getFlaggedWallets();
+  if (!flagged[wallet]) flagged[wallet] = [];
+
+  const blocked = await getBlockedWallets();
+
+  for (const rule of SUSPICIOUS_RULES) {
+    const windowLogs = walletLogs.filter((entry) => now - entry.ts < rule.windowMs);
+    const windowSum = windowLogs.reduce((sum, entry) => sum + entry.amount, 0);
+
+    if (windowSum > rule.threshold) {
+      // Avoid duplicate flags for the exact same window if recently flagged
+      const recentSame = flagged[wallet].some(
+        (f) =>
+          f.windowLabel === rule.label &&
+          now - new Date(f.flaggedAt).getTime() < rule.windowMs
+      );
+      if (!recentSame) {
+        flagged[wallet].push({
+          flaggedAt: new Date().toISOString(),
+          reason: `Claimed ${windowSum} $BONGA in last ${rule.label} (threshold ${rule.threshold}) across ${windowLogs.length} claims`,
+          amountInWindow: windowSum,
+          windowLabel: rule.label,
+        });
+
+        // Auto-block for 3 days on any new flag
+        const blockUntil = new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString();
+        const currentBlock = blocked[wallet];
+        if (!currentBlock || new Date(currentBlock.blockedUntil) < new Date(blockUntil)) {
+          blocked[wallet] = {
+            blockedUntil: blockUntil,
+            reason: `Auto-blocked for 3 days due to ${rule.label} violation (${windowSum} $BONGA)`,
+          };
+        }
+      }
+    }
+  }
+
+  await saveFlaggedWallets(flagged);
+  await saveBlockedWallets(blocked);
+}
+
+export async function recordGlobalClaim(
+  amount: number,
+  category?: ClaimCategory,
+  wallet?: string
+): Promise<GlobalClaimTally> {
   const safeAmount = Math.max(0, Math.floor(amount));
   if (safeAmount <= 0) {
     return getGlobalClaimTally();
   }
 
-  const current = await getGlobalClaimTally();
-  const next: GlobalClaimTally = {
-    totalBonga: current.totalBonga + safeAmount,
-    claimCount: current.claimCount + 1,
-    updatedAt: new Date().toISOString(),
-  };
+  // Use a global lock to serialize tally updates and prevent lost updates from concurrent claims
+  return await withWalletClaimLock(
+    "__GLOBAL_TALLY__",
+    "lifetime",
+    async () => {
+      const current = await getGlobalClaimTally();
+      const next: GlobalClaimTally = {
+        totalBonga: current.totalBonga + safeAmount,
+        claimCount: current.claimCount + 1,
+        miner: { ...current.miner },
+        garden: { ...current.garden },
+        pet: { ...current.pet },
+        updatedAt: new Date().toISOString(),
+      };
 
-  await writeRecord(TALLY_BLOB_PATH, JSON.stringify(next));
-  return next;
+      if (category === 'miner') {
+        next.miner.bonga += safeAmount;
+        next.miner.claims += 1;
+      } else if (category === 'garden') {
+        next.garden.bonga += safeAmount;
+        next.garden.claims += 1;
+      } else if (category === 'pet') {
+        next.pet.bonga += safeAmount;
+        next.pet.claims += 1;
+      } else {
+        // legacy: distribute to total only (should not happen after migration)
+      }
+
+      await writeRecord(TALLY_BLOB_PATH, JSON.stringify(next));
+
+      if (wallet && category) {
+        await trackAndFlagWalletClaim(wallet, safeAmount, category);
+      }
+
+      return next;
+    },
+    "tally"
+  );
 }

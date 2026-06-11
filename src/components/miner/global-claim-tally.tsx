@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Coins, Users } from "lucide-react";
-import { fetchGlobalClaimTally, type GlobalClaimTally } from "@/lib/claim-client";
+import { fetchGlobalClaimTally, type GlobalClaimTally, type CategoryTally } from "@/lib/claim-client";
 
 interface GlobalClaimTallyProps {
   refreshKey?: number;
@@ -30,7 +30,28 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
   }, [loadTally]);
 
   const total = tally?.totalBonga ?? 0;
-  const claims = tally?.claimCount ?? 0;
+  const totalClaims = tally?.claimCount ?? 0;
+  const miner = tally?.miner ?? { bonga: 0, claims: 0 };
+  const garden = tally?.garden ?? { bonga: 0, claims: 0 };
+  const pet = tally?.pet ?? { bonga: 0, claims: 0 };
+  const lastUpdated = tally?.updatedAt ? new Date(tally.updatedAt).toLocaleString() : null;
+
+  const CategoryRow = ({ label, data, color }: { label: string; data: CategoryTally; color: string }) => (
+    <div className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2">
+      <Coins className={`h-4 w-4 ${color}`} />
+      <div>
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
+        <p className="font-display text-sm font-bold">
+          {data.bonga.toLocaleString()}
+          <span className="text-[10px] font-normal text-muted-foreground ml-1">
+            ({data.claims})
+          </span>
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <motion.div
@@ -46,11 +67,12 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
             <span className="text-gradient">$BONGA</span>
           </p>
           <p className="mt-2 text-xs text-muted-foreground">
-            Running total paid out from the treasury — miner taps, garden &amp; Pet Love
+            Cumulative lifetime total paid out from the treasury (never resets daily — daily resets only apply to individual user earning caps). Broken down by source for exploit monitoring.
+            {lastUpdated && <span className="block">Last updated: {lastUpdated}</span>}
           </p>
         </div>
 
-        <div className="flex shrink-0 gap-3">
+        <div className="flex flex-wrap gap-2">
           <div className="flex items-center gap-2 rounded-2xl bg-muted/50 px-3 py-2">
             <Coins className="h-4 w-4 text-bonga-orange" />
             <div>
@@ -64,12 +86,18 @@ export function GlobalClaimTally({ refreshKey = 0 }: GlobalClaimTallyProps) {
             <Users className="h-4 w-4 text-bonga-teal" />
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                Claims
+                Total Claims
               </p>
-              <p className="font-display text-sm font-bold">{claims.toLocaleString()}</p>
+              <p className="font-display text-sm font-bold">{totalClaims.toLocaleString()}</p>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <CategoryRow label="Bonk Miner" data={miner} color="text-bonga-orange" />
+        <CategoryRow label="Garden" data={garden} color="text-bonga-teal" />
+        <CategoryRow label="Pet Love" data={pet} color="text-bonga-purple" />
       </div>
     </motion.div>
   );

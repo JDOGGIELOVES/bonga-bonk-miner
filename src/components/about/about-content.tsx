@@ -176,7 +176,10 @@ export function AboutContent() {
 
       <section className="py-16">
         <div className="mx-auto max-w-3xl px-4 text-center">
-          <h2 className="font-display text-2xl font-bold">Join the Bonga fam</h2>
+          <h2 className="font-display text-2xl font-bold">Join the Bonga Bonk&apos;s Sister Community</h2>
+          <p className="mt-1 text-sm">
+            <Link href="/community" className="font-medium text-bonga-purple hover:underline">Visit the full Community page →</Link>
+          </p>
           <p className="mt-3 text-muted-foreground">
             Bonga Bonk&apos;s Sister is building in public — vibes, alpha, memes,
             and peaceful bonks welcome.
