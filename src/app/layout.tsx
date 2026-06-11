@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalJsonLd } from "@/components/seo/site-json-ld";
 import {
@@ -89,6 +90,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${jakarta.variable} font-body`}>
         <GlobalJsonLd />
         <ThemeProvider>{children}</ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
