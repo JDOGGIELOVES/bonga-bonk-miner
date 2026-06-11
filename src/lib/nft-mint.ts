@@ -1,4 +1,4 @@
-import { BONGA_NFTS, type BongaNFT } from "@/lib/nft-collection";
+import { BONGA_NFTS, COLLECTION_STATS, type BongaNFT } from "@/lib/nft-collection";
 import { isMintSimulatedBuildHint } from "@/lib/mint-config";
 import type { WalletContextState } from "@solana/wallet-adapter-react";
 
@@ -134,8 +134,8 @@ export async function mintBongaNFT(
   const isLive = mintStatus?.live === true;
 
   const existing = loadWalletMints(walletAddress);
-  if (existing.length >= 3) {
-    return { success: false, error: "Max 3 mints per wallet reached" };
+  if (existing.length >= COLLECTION_STATS.maxPerWallet) {
+    return { success: false, error: `Max ${COLLECTION_STATS.maxPerWallet} mints per wallet reached` };
   }
 
   const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
