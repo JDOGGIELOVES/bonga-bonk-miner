@@ -160,20 +160,27 @@ export async function getStakeStatusForWallet(
   heldByRarity: Record<string, number> = {}
 ): Promise<StakeStatus> {
   const record = await getStakeRecord(wallet);
-  // Safety clamp per tier
+  // Safety clamp per tier — only clamp if we actually detected holdings (prevents transient detection failures from wiping stakes)
   let effectiveRecord = record;
   if (record) {
-    const clamped: Record<string, number> = {};
-    let needsSave = false;
-    for (const [tier, count] of Object.entries(record.staked || {})) {
-      const held = heldByRarity[tier] || 0;
-      const safe = Math.min(count || 0, held);
-      clamped[tier] = safe;
-      if (safe !== count) needsSave = true;
-    }
-    if (needsSave || Object.keys(clamped).length !== Object.keys(record.staked || {}).length) {
-      effectiveRecord = { ...record, staked: clamped };
-      await saveStakeRecord(wallet, effectiveRecord);
+    const totalDetectedHeld = Object.values(heldByRarity || {}).reduce((sum, c) => sum + (c || 0), 0);
+
+    if (totalDetectedHeld > 0) {
+      const clamped: Record<string, number> = {};
+      let needsSave = false;
+      for (const [tier, count] of Object.entries(record.staked || {})) {
+        const held = heldByRarity[tier] || 0;
+        const safe = Math.min(count || 0, held);
+        clamped[tier] = safe;
+        if (safe !== count) needsSave = true;
+      }
+      if (needsSave || Object.keys(clamped).length !== Object.keys(record.staked || {}).length) {
+        effectiveRecord = { ...record, staked: clamped };
+        await saveStakeRecord(wallet, effectiveRecord);
+      }
+    } else {
+      // Detection returned 0 held (possible transient RPC/metadata fetch issue) — preserve the existing staked record
+      effectiveRecord = record;
     }
   }
 

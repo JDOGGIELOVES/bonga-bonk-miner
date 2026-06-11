@@ -41,12 +41,12 @@ export function BongaHeader({
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/40 bg-card/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
+      <div className="mx-auto flex max-w-2xl flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
         <Link href="/" className="group min-w-0 flex-1">
-          <p className="font-display text-xl font-extrabold tracking-tight text-bonga-orange sm:text-2xl">
+          <p className="font-display text-2xl font-extrabold tracking-tight text-bonga-orange sm:text-2xl">
             BONGA
           </p>
-          <p className="truncate text-xs font-medium text-foreground/80 sm:text-sm">
+          <p className="truncate text-sm font-medium text-foreground/80 sm:text-sm">
             Bonk&apos;s Sister
           </p>
           <p className="hidden text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:block">
@@ -54,13 +54,14 @@ export function BongaHeader({
           </p>
         </Link>
 
-        <div className="flex shrink-0 items-center gap-1.5">
-          {/* Updated nav per upgrade plan: Home / Bonk Miner | Vibes Garden | Peace | NFTs | Community */}
+        {/* Nav links + controls wrapped to support two rows on mobile, preventing horizontal overflow */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Updated nav per upgrade plan: Home / Bonk Miner | Vibes Garden | Peace | NFTs | Staking | Community | Treasury */}
           <Link
             href="/"
             className={getLinkClass(
               "/",
-              "rounded-full border border-border/60 bg-card/60 px-2.5 py-1 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             Home
@@ -70,7 +71,7 @@ export function BongaHeader({
               onClick={() => onModeChange('miner')}
               className={getLinkClass(
                 "/?mode=miner",
-                "rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2.5 py-1 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-3 sm:py-1.5",
+                "rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1",
                 true
               )}
             >
@@ -81,7 +82,7 @@ export function BongaHeader({
               href="/?mode=miner"
               className={getLinkClass(
                 "/?mode=miner",
-                "rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2.5 py-1 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-3 sm:py-1.5"
+                "rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
               )}
             >
               Bonk Miner
@@ -92,7 +93,7 @@ export function BongaHeader({
               onClick={() => onModeChange('garden')}
               className={getLinkClass(
                 "/?mode=garden",
-                "rounded-full border border-bonga-teal/40 bg-bonga-teal/5 px-2.5 py-1 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-3 sm:py-1.5",
+                "rounded-full border border-bonga-teal/40 bg-bonga-teal/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-2.5 sm:py-1",
                 true
               )}
             >
@@ -103,7 +104,7 @@ export function BongaHeader({
               href="/?mode=garden"
               className={getLinkClass(
                 "/?mode=garden",
-                "rounded-full border border-bonga-teal/40 bg-bonga-teal/5 px-2.5 py-1 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-3 sm:py-1.5"
+                "rounded-full border border-bonga-teal/40 bg-bonga-teal/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-2.5 sm:py-1"
               )}
             >
               Vibes Garden
@@ -113,7 +114,7 @@ export function BongaHeader({
             href="/peace"
             className={getLinkClass(
               "/peace",
-              "rounded-full border border-bonga-teal/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-bonga-teal/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             Peace
@@ -122,7 +123,7 @@ export function BongaHeader({
             href="/nft"
             className={getLinkClass(
               "/nft",
-              "rounded-full border border-bonga-orange/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             NFTs
@@ -131,7 +132,7 @@ export function BongaHeader({
             href="/staking"
             className={getLinkClass(
               "/staking",
-              "rounded-full border border-bonga-orange/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             Staking
@@ -140,7 +141,7 @@ export function BongaHeader({
             href="/community"
             className={getLinkClass(
               "/community",
-              "rounded-full border border-bonga-purple/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-purple transition hover:bg-bonga-purple/10 sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-bonga-purple/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-purple transition hover:bg-bonga-purple/10 sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             Community
@@ -149,7 +150,7 @@ export function BongaHeader({
             href="/treasury"
             className={getLinkClass(
               "/treasury",
-              "rounded-full border border-bonga-teal/30 px-2.5 py-1 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-3 sm:py-1.5"
+              "rounded-full border border-bonga-teal/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-2.5 sm:py-1"
             )}
           >
             Treasury
@@ -158,7 +159,7 @@ export function BongaHeader({
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 rounded-full text-muted-foreground hover:text-foreground sm:h-9 sm:w-9"
             onClick={toggleTheme}
             aria-label="Toggle theme"
           >

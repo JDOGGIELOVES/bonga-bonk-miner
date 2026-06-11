@@ -67,13 +67,27 @@ export async function checkWalletIsBongaNftHolder(wallet: string): Promise<boole
 function findUriInMetadata(data: Buffer): string | null {
   try {
     const text = data.toString("utf8");
-    // Common locations for uri in Metaplex metadata accounts
-    const match = text.match(/(https?:\/\/[^\x00-\x20"\\]{10,}[^\x00-\x20"\\])|(ar:\/\/[^\x00-\x20"\\]{5,}[^\x00-\x20"\\])/);
-    if (match && match[0]) {
-      let uri = match[0].split("\u0000")[0].trim();
-      // basic cleanup
-      if (uri.includes(" ")) uri = uri.split(" ")[0];
-      if (uri.length > 15) return uri;
+    // More robust extraction for Metaplex metadata URI (http or arweave)
+    let uri: string | null = null;
+
+    // Try http/https first
+    const httpMatch = text.match(/https?:\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+/);
+    if (httpMatch && httpMatch[0]) {
+      uri = httpMatch[0].split(/[\s\x00-\x1F"']/)[0].trim();
+    }
+
+    // Fallback to ar:// 
+    if (!uri || uri.length < 10) {
+      const arMatch = text.match(/ar:\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+/);
+      if (arMatch && arMatch[0]) {
+        uri = arMatch[0].split(/[\s\x00-\x1F"']/)[0].trim();
+      }
+    }
+
+    if (uri && uri.length > 10) {
+      // final cleanup
+      uri = uri.replace(/[\x00-\x1F].*$/, '').trim();
+      if (uri.length > 10) return uri;
     }
   } catch {}
   return null;
