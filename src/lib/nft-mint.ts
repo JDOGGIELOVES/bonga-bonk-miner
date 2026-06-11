@@ -160,7 +160,7 @@ export async function mintBongaNFT(
   }
 
   if (!wallet) {
-    return { success: false, error: "Connect your wallet to mint on-chain" };
+    return { success: false, error: "Wallet not connected. Connect Phantom or Solflare to mint on-chain." };
   }
 
   const { mintBongaNFTOnChain } = await import("@/lib/nft-mint-onchain");

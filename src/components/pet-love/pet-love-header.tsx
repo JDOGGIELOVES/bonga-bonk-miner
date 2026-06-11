@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
+import { BongaWalletButton } from "@/components/miner/wallet-button";
 
 export function PetLoveHeader() {
   const { theme, toggleTheme } = useTheme();
@@ -42,19 +43,22 @@ export function PetLoveHeader() {
           </Link>
         </nav>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9 shrink-0 rounded-full"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-        >
-          {theme === "dark" ? (
-            <Sun className="h-4 w-4" />
-          ) : (
-            <Moon className="h-4 w-4" />
-          )}
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 shrink-0 rounded-full"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+          >
+            {theme === "dark" ? (
+              <Sun className="h-4 w-4" />
+            ) : (
+              <Moon className="h-4 w-4" />
+            )}
+          </Button>
+          <BongaWalletButton />
+        </div>
       </div>
     </header>
   );

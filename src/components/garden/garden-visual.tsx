@@ -14,6 +14,8 @@ interface GardenVisualProps {
   plants: PlantedCrop[];
   onWater: (instanceId: string) => void;
   beautyLevel: number;
+  plantPops?: Record<string, { id: number; text: string }>;
+  generalFeedback?: { id: number; text: string } | null;
 }
 
 const ZONE_STYLES: Record<
@@ -117,7 +119,7 @@ function ZoneDecor({ zone }: { zone: GardenZone }) {
   return <FarmDecor />;
 }
 
-export function GardenVisual({ plants, onWater, beautyLevel }: GardenVisualProps) {
+export function GardenVisual({ plants, onWater, beautyLevel, plantPops, generalFeedback }: GardenVisualProps) {
   const [activeZone, setActiveZone] = useState<GardenZone>("meadow");
   const style = ZONE_STYLES[activeZone];
   const zonePlants = getPlantsInZone(plants, activeZone);
@@ -185,6 +187,23 @@ export function GardenVisual({ plants, onWater, beautyLevel }: GardenVisualProps
             </motion.div>
           )}
 
+          {/* General feedback (quests, affirms, good deeds) rendered inside the visual window
+              so it doesn't cause outer layout jumps. */}
+          <AnimatePresence>
+            {generalFeedback && (
+              <motion.p
+                key={generalFeedback.id}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.2 }}
+                className="pointer-events-none absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-full bg-card/95 px-3 py-0.5 text-center text-xs font-bold text-bonga-orange shadow-sm sm:text-sm"
+              >
+                {generalFeedback.text}
+              </motion.p>
+            )}
+          </AnimatePresence>
+
           <ZoneDecor zone={activeZone} />
 
           <div className="relative">
@@ -234,6 +253,23 @@ export function GardenVisual({ plants, onWater, beautyLevel }: GardenVisualProps
                   <span className="mt-1 text-[11px] font-medium text-bonga-teal">
                     Tap to water
                   </span>
+
+                  {/* Localized pop feedback for this specific plant — prevents the whole
+                      garden visual from jumping when watering. Renders inside the card. */}
+                  {plantPops?.[crop.instanceId] && (
+                    <AnimatePresence>
+                      <motion.span
+                        key={plantPops[crop.instanceId].id}
+                        initial={{ opacity: 0, y: 2, scale: 0.9 }}
+                        animate={{ opacity: 1, y: -16, scale: 1 }}
+                        exit={{ opacity: 0, y: -22 }}
+                        transition={{ duration: 0.9, ease: "easeOut" }}
+                        className="pointer-events-none absolute left-1/2 top-[18%] z-20 -translate-x-1/2 whitespace-nowrap text-center font-display text-xs font-bold text-bonga-orange drop-shadow sm:text-sm"
+                      >
+                        {plantPops[crop.instanceId].text}
+                      </motion.span>
+                    </AnimatePresence>
+                  )}
                 </motion.button>
               );
             })}

@@ -1,5 +1,5 @@
 export const TAPS_PER_BONGA = 100;
-export const DAILY_BONGA_LIMIT = 30;
+export const DAILY_BONGA_LIMIT = 50;
 export const BONGA_CLAIM_BATCH = 10;
 export const STORAGE_KEY = "bonga-bonk-miner";
 

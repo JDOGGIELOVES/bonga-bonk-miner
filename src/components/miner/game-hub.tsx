@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { BonkMinerGame } from "@/components/miner/bonk-miner-game";
 import { GameModeTabs, type GameMode } from "@/components/miner/game-mode-tabs";
@@ -38,13 +38,25 @@ interface GameHubProps {
 }
 
 export function GameHub({ onWalletConnect }: GameHubProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlMode = searchParams.get("mode") as GameMode | null;
 
   const [mode, setMode] = useState<GameMode>(() => (urlMode === "garden" ? "garden" : "miner"));
 
-  // Expose mode to header for tab switching without reload
-  // (passed as props below)
+  // Client-side mode change that ALSO keeps the URL (?mode=) in sync.
+  // This makes header "Bonk Miner" / "Vibes Garden" navigation links (and the tabs)
+  // behave like real navigation: address bar updates, refresh stays on the right mode,
+  // browser back/forward works, and direct ?mode= links from other pages are consistent.
+  const handleModeChange = (newMode: GameMode) => {
+    setMode(newMode);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("mode", newMode);
+    router.replace(`/?${params.toString()}`, { scroll: false });
+  };
+
+  // Expose mode to header + tabs. handleModeChange keeps both the UI and the ?mode= URL in sync
+  // so navigation feels like real links (address bar, refresh, history, direct links all agree).
   const [muted, setMuted] = useState(false);
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
@@ -124,7 +136,7 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
         onWalletConnect={onWalletConnect} 
         soundSlot={soundControls} 
         currentMode={mode} 
-        onModeChange={setMode} 
+        onModeChange={handleModeChange} 
       />
 
       <main className="relative z-10 mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
@@ -158,7 +170,7 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
         </motion.div>
 
         <div className="mb-6">
-          <GameModeTabs mode={mode} onChange={setMode} />
+          <GameModeTabs mode={mode} onChange={handleModeChange} />
         </div>
 
         {connected && isHolder && !checking && (

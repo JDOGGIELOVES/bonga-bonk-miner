@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,10 +31,16 @@ export function NFTMintPanel() {
   const [myMints, setMyMints] = useState<MintedNFT[]>([]);
   const [mintStatus, setMintStatus] = useState<MintStatus | null>(null);
 
+  const walletRef = useRef<string | undefined>(undefined);
+  const adapterRef = useRef<any>(null);
+
   const wallet = publicKey?.toBase58();
   const isLive = mintStatus?.live === true;
   const isPreview =
     mintStatus === null ? MINT_CONFIG.simulated : !isLive;
+  // Only enable the primary mint action when we have a fully resolved connection + pubkey.
+  // This prevents showing "Mint" while wallet reports transient connected=true without address.
+  const hasConnectedWallet = connected && !!publicKey;
   const onChainPrice = mintStatus?.priceSol ?? MINT_CONFIG.priceSol;
   const price = getMintPrice(wallet, onChainPrice);
   const walletMinimum = getMintWalletMinimumSol(onChainPrice);
@@ -53,17 +59,41 @@ export function NFTMintPanel() {
     void refreshMints();
   }, [refreshMints]);
 
+  useEffect(() => {
+    walletRef.current = wallet;
+    adapterRef.current = walletAdapter;
+  }, [wallet, walletAdapter, connected]);
+
   const handleMint = async () => {
-    if (!wallet) {
+    // Prefer the values from the current render scope (fresh handler created when button rendered).
+    // Fall back to refs (kept in sync via effect) for extra safety against any edge timing.
+    const liveWallet = publicKey?.toBase58() ?? null;
+    const liveAdapter = walletAdapter;
+
+    let currentWallet = liveWallet ?? walletRef.current;
+    let currentAdapter: any = liveAdapter ?? adapterRef.current;
+
+    // Final guard using the adapter's own publicKey (most authoritative)
+    if (!currentWallet || !currentAdapter || !currentAdapter.publicKey) {
+      // Re-pull from refs as last chance
+      currentWallet = walletRef.current;
+      currentAdapter = adapterRef.current;
+    }
+
+    if (!currentWallet || !currentAdapter?.publicKey) {
       setVisible(true);
       return;
     }
+
+    // Ensure refs are up to date for this click
+    walletRef.current = currentWallet;
+    adapterRef.current = currentAdapter;
 
     setMinting(true);
     setError("");
     setLastMint(null);
 
-    const result = await mintBongaNFT(wallet, walletAdapter, mintStatus);
+    const result = await mintBongaNFT(currentWallet, currentAdapter, mintStatus);
 
     if (result.success && result.minted) {
       setLastMint(result.minted);
@@ -139,7 +169,7 @@ export function NFTMintPanel() {
               )}
             </div>
 
-            {connected ? (
+            {hasConnectedWallet ? (
               <Button
                 variant="peace"
                 size="lg"

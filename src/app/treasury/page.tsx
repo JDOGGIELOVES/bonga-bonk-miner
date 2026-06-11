@@ -154,6 +154,13 @@ export default async function TreasuryPage() {
             
             <div className="space-y-6 text-base leading-relaxed">
               <div>
+                <h3 className="font-semibold text-lg mb-2">Primary NFT Mint Proceeds</h3>
+                <p className="text-muted-foreground">
+                  100% of the proceeds from the initial mint of <Link href="/nft" className="text-bonga-orange hover:underline">Bonga NFTs</Link> go directly into this treasury wallet.
+                </p>
+              </div>
+
+              <div>
                 <h3 className="font-semibold text-lg mb-2">7% NFT Royalties</h3>
                 <p className="text-muted-foreground">
                   Every secondary market sale of a <Link href="/nft" className="text-bonga-orange hover:underline">Bonga NFT</Link> sends 7% of the sale price directly to this treasury. This is the primary ongoing funding source for the ecosystem.

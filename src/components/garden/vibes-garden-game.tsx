@@ -40,7 +40,6 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const [state, setState] = useState<GardenState | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
   const [shopMsg, setShopMsg] = useState("");
-  const [floatText, setFloatText] = useState<{ id: number; text: string } | null>(null);
   const [meditating, setMeditating] = useState(false);
   const floatId = useRef(0);
   const isHolderRef = useRef(isHolder);
@@ -51,6 +50,11 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const pendingActionsRef = useRef<GardenSyncAction[]>([]);
   const [syncRefreshKey, setSyncRefreshKey] = useState(0);
   const [gardenStatus, setGardenStatus] = useState<GardenEarnStatus | null>(null);
+
+  // Per-plant pop feedback for watering (localized, no layout shift on the game window).
+  // General feedback for quests/affirms etc. (will render inside the visual area).
+  const [plantPops, setPlantPops] = useState<Record<string, { id: number; text: string }>>({});
+  const [generalFeedback, setGeneralFeedback] = useState<{ id: number; text: string } | null>(null);
 
   useEffect(() => {
     isHolderRef.current = isHolder;
@@ -161,10 +165,22 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     };
   }, [connected, publicKey, syncRefreshKey]);
 
-  const showFloat = useCallback((text: string) => {
+  const showPlantPop = useCallback((instanceId: string, text: string) => {
     const id = ++floatId.current;
-    setFloatText({ id, text });
-    setTimeout(() => setFloatText((f) => (f?.id === id ? null : f)), 1200);
+    setPlantPops((prev) => ({ ...prev, [instanceId]: { id, text } }));
+    setTimeout(() => {
+      setPlantPops((prev) => {
+        const next = { ...prev };
+        if (next[instanceId]?.id === id) delete next[instanceId];
+        return next;
+      });
+    }, 1200);
+  }, []);
+
+  const showGeneralFeedback = useCallback((text: string) => {
+    const id = ++floatId.current;
+    setGeneralFeedback({ id, text });
+    setTimeout(() => setGeneralFeedback((f) => (f?.id === id ? null : f)), 1200);
   }, []);
 
   const handleWater = useCallback(
@@ -175,13 +191,13 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       setState(next);
       queueGardenSync({ type: "water", instanceId }, next);
       if (earned > 0) {
-        showFloat(`+${earned.toFixed(2)} $BONGA`);
+        showPlantPop(instanceId, `+${earned.toFixed(2)} $BONGA`);
         gameAudio.playCoinCollect();
       } else if (capped) {
-        showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
+        showPlantPop(instanceId, `Daily cap reached`);
       }
     },
-    [state, isHolder, showFloat, queueGardenSync]
+    [state, isHolder, showPlantPop, queueGardenSync]
   );
 
   const handleBuy = useCallback(
@@ -212,12 +228,12 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       if (result.ok && result.reward > 0) {
         setState(result.state);
         queueGardenSync({ type: "quest", questId }, result.state);
-        showFloat(`Quest +${result.reward} $BONGA`);
+        showGeneralFeedback(`Quest +${result.reward} $BONGA`);
       } else if (result.capped) {
-        showFloat(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
+        showGeneralFeedback(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
       }
     },
-    [state, showFloat, queueGardenSync]
+    [state, showGeneralFeedback, queueGardenSync]
   );
 
   const handleMeditate = useCallback(() => {
@@ -231,14 +247,14 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
   const handleAffirm = useCallback(() => {
     const affirmation = getTodaysAffirmation();
-    showFloat(affirmation.emoji);
+    showGeneralFeedback(affirmation.emoji);
     tryQuest("affirm");
-  }, [tryQuest, showFloat]);
+  }, [tryQuest, showGeneralFeedback]);
 
   const handleGoodDeed = useCallback(() => {
-    showFloat("Good vibes sent 🫶");
+    showGeneralFeedback("Good vibes sent 🫶");
     tryQuest("good-deed");
-  }, [tryQuest, showFloat]);
+  }, [tryQuest, showGeneralFeedback]);
 
   if (!state) {
     return (
@@ -264,13 +280,13 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       <div className="bonga-card grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-6">
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Garden $BONGA</p>
-          <p className="font-display text-xl font-bold text-bonga-orange">
+          <p className="font-display text-xl font-bold text-bonga-orange tabular-nums">
             {formatGardenBonga(state.gardenBonga)}
           </p>
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Farmed today</p>
-          <p className={`font-display text-xl font-bold ${capReached ? "text-amber-600" : "text-foreground"}`}>
+          <p className={`font-display text-xl font-bold tabular-nums ${capReached ? "text-amber-600" : "text-foreground"}`}>
             {formatGardenBonga(state.bongaFarmedToday)}
           </p>
           <p className="text-[10px] text-muted-foreground">/ {GARDEN_DAILY_EARN_CAP} cap</p>
@@ -281,7 +297,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Waters today</p>
-          <p className="font-display text-xl font-bold text-bonga-teal">{state.waterCountToday}</p>
+          <p className="font-display text-xl font-bold tabular-nums text-bonga-teal">{state.waterCountToday}</p>
         </div>
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Beauty</p>
@@ -378,20 +394,9 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
           plants={state.plants}
           onWater={handleWater}
           beautyLevel={beauty}
+          plantPops={plantPops}
+          generalFeedback={generalFeedback}
         />
-        <AnimatePresence>
-          {floatText && (
-            <motion.p
-              key={floatText.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: -24 }}
-              exit={{ opacity: 0 }}
-              className="pointer-events-none absolute left-1/2 top-1/3 z-10 max-w-[90%] -translate-x-1/2 text-center font-display text-base font-bold text-bonga-orange sm:text-lg"
-            >
-              {floatText.text}
-            </motion.p>
-          )}
-        </AnimatePresence>
         {meditating && (
           <div className="absolute inset-0 z-20 flex items-center justify-center rounded-bonga-lg bg-card/60 backdrop-blur-sm">
             <p className="font-display text-sm font-semibold text-bonga-teal">

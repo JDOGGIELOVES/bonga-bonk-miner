@@ -42,7 +42,7 @@ export async function mintBongaNFTOnChain(
   status?: MintStatus | null
 ): Promise<{ success: true; minted: MintedNFT } | { success: false; error: string }> {
   if (!wallet.publicKey) {
-    return { success: false, error: "Connect Phantom or Solflare to mint" };
+    return { success: false, error: "Wallet not connected. Connect Phantom or Solflare to mint." };
   }
   if (!wallet.signTransaction && !wallet.signAllTransactions) {
     return {

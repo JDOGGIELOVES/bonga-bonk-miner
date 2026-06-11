@@ -49,7 +49,7 @@ export async function fetchGardenEarnStatus(wallet: string): Promise<GardenEarnS
       farmedToday: 0,
       claimable: 0,
       claimed: 0,
-      dailyLimit: 250,
+      dailyLimit: 400,
       error: "Could not reach garden status API.",
     };
   }

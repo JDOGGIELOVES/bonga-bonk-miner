@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       !Number.isInteger(amount)
     ) {
       return NextResponse.json(
-        { error: `Amount must be a multiple of ${BONGA_CLAIM_BATCH} (10, 20, or 30) up to your daily limit of ${config.dailyLimit}.` },
+        { error: `Amount must be a multiple of ${BONGA_CLAIM_BATCH} (e.g. 10, 20, 30, ...) up to your daily limit of ${config.dailyLimit}.` },
         { status: 400 }
       );
     }
