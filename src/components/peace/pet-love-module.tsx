@@ -81,6 +81,9 @@ export function PetLoveModule() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [explorerUrl, setExplorerUrl] = useState<string | null>(null);
+  const [storageStatus, setStorageStatus] = useState<any>(null);
+
+  const storageReady = !storageStatus || storageStatus.storageReady || !storageStatus.vercel;
 
   const refreshGallery = useCallback(async () => {
     const items = await fetchPetGallery();
@@ -93,9 +96,21 @@ export function PetLoveModule() {
     return next;
   }, []);
 
+  const refreshStorageStatus = useCallback(async () => {
+    try {
+      const res = await fetch("/api/pet/storage-status", { cache: "no-store" });
+      if (res.ok) {
+        setStorageStatus(await res.json());
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   useEffect(() => {
     void refreshGallery();
-  }, [refreshGallery]);
+    void refreshStorageStatus();
+  }, [refreshGallery, refreshStorageStatus]);
 
   const refreshPastUploads = useCallback(async (wallet: string) => {
     const items = await fetchPetPastUploads(wallet);
@@ -549,6 +564,20 @@ export function PetLoveModule() {
           </div>
         ) : (
           <div className="space-y-5">
+            {storageStatus && storageStatus.vercel && !storageStatus.storageReady && (
+              <div className="rounded-2xl border border-amber-500/60 bg-amber-500/10 p-4 text-sm">
+                <p className="font-semibold text-amber-800 dark:text-amber-200">
+                  Pet Love storage is not configured on Vercel
+                </p>
+                <p className="mt-1 text-amber-700 dark:text-amber-300">
+                  In Dashboard → Storage → Blob, connect a store to this project (OIDC) or set the <code>BLOB_READ_WRITE_TOKEN</code> environment variable, then redeploy Production.
+                </p>
+                <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                  Uploads and claims will not work until this is set up.
+                </p>
+              </div>
+            )}
+
             <input
               ref={fileInputRef}
               type="file"
@@ -572,7 +601,8 @@ export function PetLoveModule() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-bonga-teal/30 bg-bonga-teal/5 px-6 py-12 transition-colors hover:border-bonga-teal/50 hover:bg-bonga-teal/10"
+                disabled={!storageReady}
+                className="flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-bonga-teal/30 bg-bonga-teal/5 px-6 py-12 transition-colors hover:border-bonga-teal/50 hover:bg-bonga-teal/10 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-8 w-8 text-bonga-teal" />
                 <span className="mt-3 font-display text-sm font-bold">
@@ -663,7 +693,7 @@ export function PetLoveModule() {
                 <Button
                   variant="peace"
                   className="flex-1"
-                  disabled={!petLabel || submitting}
+                  disabled={!petLabel || submitting || !storageReady}
                   onClick={() => void handleSubmit()}
                 >
                   {submitting ? (
@@ -682,7 +712,7 @@ export function PetLoveModule() {
               <Button
                 variant="peace"
                 className="flex-1"
-                disabled={verifyState !== "passed" || submitting}
+                disabled={verifyState !== "passed" || submitting || !storageReady}
                 onClick={() => void handleSubmit()}
               >
                 {submitting ? (
