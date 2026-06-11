@@ -59,12 +59,21 @@ export function BongaHeader({
           {currentMode === 'garden' && onModeChange ? (
             // Per user request (after repeated navigation issues): simplified nav on garden view.
             // Only keep the reliable back-to-miner link. Other links (Peace, NFTs, etc.) are removed from garden to avoid broken experience.
-            <button
-              onClick={() => onModeChange('miner')}
-              className="rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
-            >
-              ← Back to Bonk Miner
-            </button>
+            // Added small link to the how-to-connect info as requested.
+            <>
+              <button
+                onClick={() => onModeChange('miner')}
+                className="rounded-full border border-bonga-orange/40 bg-bonga-orange/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
+              >
+                ← Back to Bonk Miner
+              </button>
+              <Link
+                href="/how-to-connect"
+                className="rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-2.5 sm:py-1"
+              >
+                How to Connect Wallet
+              </Link>
+            </>
           ) : (
             <>
               {/* Full nav on miner/other views */}
