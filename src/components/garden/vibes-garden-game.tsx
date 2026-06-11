@@ -17,6 +17,7 @@ import {
   buyPlant,
   completeQuest,
   formatGardenBonga,
+  formatNextDailyReset,
   gardenBeautyLevel,
   getGardenIdleRate,
   getNftMultiplier,
@@ -317,6 +318,10 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         </p>
       )}
 
+      <p className="text-center text-[10px] text-muted-foreground mb-1">
+        Next daily reset: {formatNextDailyReset()}
+      </p>
+
       {capReached && (
         <p className="rounded-bonga-lg border border-amber-300/40 bg-amber-50/60 px-4 py-2 text-center text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
           Daily farm cap reached ({GARDEN_DAILY_EARN_CAP} garden $BONGA). Resets at midnight UTC.
@@ -341,7 +346,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
                 <span className="font-semibold text-foreground">Idle pacing</span> — plants grow
                 slowly in the background. Check back through the day; most gardens need several
                 hours to reach the {GARDEN_DAILY_EARN_CAP} garden $BONGA daily cap (idle + taps +
-                quests).
+                quests). Resets daily at midnight UTC (next: {formatNextDailyReset()}).
               </li>
               <li>
                 <span className="font-semibold text-foreground">Verified claims</span> — connect

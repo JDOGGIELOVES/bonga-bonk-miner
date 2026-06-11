@@ -5,6 +5,29 @@ export const MAX_OFFLINE_HOURS = 8;
 /** Max garden $BONGA credited per UTC day (idle + taps + quests). */
 export const GARDEN_DAILY_EARN_CAP = 400;
 
+/** Returns the next daily reset (UTC midnight). */
+export function getNextDailyResetDate(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate() + 1,
+    0, 0, 0, 0
+  ));
+}
+
+export function formatNextDailyReset(): string {
+  const reset = getNextDailyResetDate();
+  return reset.toLocaleString('en-US', {
+    timeZone: 'UTC',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }) + ' UTC';
+}
+
 export type PlantRarity = "common" | "rare" | "legendary" | "nft";
 export type GardenZone = "meadow" | "greenhouse" | "farm";
 
