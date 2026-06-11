@@ -332,8 +332,7 @@ export function PetLoveModule() {
     !alreadyClaimed &&
     !ipClaimCapReached &&
     !globalClaimCapReached &&
-    !claimsPaused &&
-    (status?.isNftHolder !== false); // backend will enforce, but UI hint
+    !claimsPaused;
 
   return (
     <div className="space-y-8">
@@ -350,7 +349,7 @@ export function PetLoveModule() {
             <p className="mt-2 text-sm text-muted-foreground">
               Share a photo of your hand petting any pet — cats, dogs, birds,
               horses, and more. Stay anonymous if you like; we only need the
-              gentle hand-and-pet moment, not your face. (Claiming rewards requires holding a Bonga NFT.)
+              gentle hand-and-pet moment, not your face.
             </p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
@@ -501,11 +500,7 @@ export function PetLoveModule() {
             <p className="text-sm font-medium text-bonga-teal">
               Your pet photo is in the gallery. One upload per wallet per UTC day.
             </p>
-            {hasSubmittedToday && status?.isNftHolder === false ? (
-              <p className="text-xs text-amber-700 dark:text-amber-300">
-                To claim Pet Love rewards you must hold at least one Bonga NFT. Mint or purchase one on secondary market (7% royalties support the treasury).
-              </p>
-            ) : canClaim ? (
+            {canClaim ? (
               <Button
                 variant="peace"
                 className="w-full max-w-sm"

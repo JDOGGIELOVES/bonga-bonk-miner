@@ -22,7 +22,6 @@ import { buildPetClaimMessage } from "@/lib/pet-love-messages";
 import { assertIpCanClaim, recordIpClaim } from "@/lib/claim-ip-store";
 import { requirePetClientIpKey } from "@/lib/request-ip";
 import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
-import { checkWalletIsBongaNftHolder } from "@/lib/nft-holder-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -109,15 +108,6 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Submit a verified pet photo today before claiming." },
         { status: 400 }
-      );
-    }
-
-    // Require Bonga NFT holder to claim Pet Love reward (prevents easy multi-account farming without skin in the game)
-    const isNftHolder = await checkWalletIsBongaNftHolder(wallet);
-    if (!isNftHolder) {
-      return NextResponse.json(
-        { error: "Pet Love rewards are limited to Bonga NFT holders. Hold or stake at least one Bonga NFT to claim." },
-        { status: 403 }
       );
     }
 
