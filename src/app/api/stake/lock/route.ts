@@ -25,10 +25,9 @@ export async function POST(request: Request) {
     const at = body.at?.trim();
     const signatureB58 = body.signature?.trim();
 
-    // Basic validation: at least one positive tier requested
-    const requestedTotal = Object.values(tiers).reduce((s, v) => s + Math.max(0, Math.floor(v || 0)), 0);
-    if (!wallet || !signatureB58 || !at || requestedTotal <= 0) {
-      return NextResponse.json({ error: "Invalid stake lock request. Provide tiers with positive counts." }, { status: 400 });
+    // Validation: tiers must be a valid object (can be all zeros to unstake/reduce via update)
+    if (!wallet || !signatureB58 || !at || typeof tiers !== "object" || tiers === null) {
+      return NextResponse.json({ error: "Invalid stake lock request. Provide a valid tiers object (e.g. { Common: 2, Rare: 0 })." }, { status: 400 });
     }
 
     // Block check
