@@ -1,6 +1,6 @@
 import bs58 from "bs58";
 import type { Wallet } from "@solana/wallet-adapter-react";
-import { buildClaimMessage } from "@/lib/treasury/messages";
+import { buildClaimMessage, buildStakeLockMessage, buildStakeUnlockMessage } from "@/lib/treasury/messages";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
 
 export interface ClaimStatus {
@@ -234,18 +234,11 @@ export async function requestStakeLock(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
-  // Must match server canonical tiers string
-  const tierStr = ["Common", "Rare", "Legendary", "Cosmic Bonga"]
-    .map((t) => `${t}=${Math.max(0, Math.floor(params.tiers[t] || 0))}`)
-    .join(";");
-  const message = [
-    "BONGA • Raise the Frequency",
-    "Stake Lock",
-    `Wallet: ${params.wallet}`,
-    `Tiers: ${tierStr}`,
-    `At: ${params.at}`,
-  ].join("\n");
-
+  const message = buildStakeLockMessage({
+    wallet: params.wallet,
+    tiers: params.tiers,
+    at: params.at,
+  });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
     wallet: params.connectedWallet,
@@ -279,13 +272,10 @@ export async function requestStakeUnlock(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
-  const message = [
-    "BONGA • Raise the Frequency",
-    "Stake Unlock",
-    `Wallet: ${params.wallet}`,
-    `At: ${params.at}`,
-  ].join("\n");
-
+  const message = buildStakeUnlockMessage({
+    wallet: params.wallet,
+    at: params.at,
+  });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
     wallet: params.connectedWallet,
