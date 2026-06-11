@@ -40,6 +40,7 @@ export interface PetStatus {
   dailyOnChainLimit?: number;
   ipLimits?: PetIpLimits | null;
   globalClaimCap?: PetGlobalClaimCap | null;
+  isNftHolder?: boolean;
 }
 
 export interface PetSubmitSuccess {

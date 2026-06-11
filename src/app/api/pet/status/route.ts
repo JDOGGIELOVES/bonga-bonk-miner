@@ -9,6 +9,7 @@ import {
 import { getIpPetStatus } from "@/lib/claim-ip-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { getClientIpKey } from "@/lib/request-ip";
+import { checkWalletIsBongaNftHolder } from "@/lib/nft-holder-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,6 +29,7 @@ export async function GET(request: Request) {
     const ipKey = getClientIpKey(request);
     const ipLimits = ipKey ? await getIpPetStatus(ipKey, todayKey()) : null;
     const globalClaimCap = await getPetDailyClaimCapStatus(todayKey());
+    const isNftHolder = await checkWalletIsBongaNftHolder(wallet);
 
     return NextResponse.json({
       submittedToday: submission != null,
@@ -55,6 +57,7 @@ export async function GET(request: Request) {
             capReached: globalClaimCap.capReached,
           }
         : null,
+      isNftHolder,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Status unavailable.";
