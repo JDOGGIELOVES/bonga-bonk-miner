@@ -8,9 +8,9 @@ export function isPetDuplicateCheckEnabled(): boolean {
 
 export function getPetPhashMaxDistance(): number {
   const raw = process.env.PET_PHASH_MAX_DISTANCE?.trim();
-  if (!raw) return 8;
+  if (!raw) return 5; // tightened from 8 to better catch stock/near-duplicate pet+hand photos
   const parsed = Number(raw);
-  if (!Number.isFinite(parsed) || parsed < 0) return 8;
+  if (!Number.isFinite(parsed) || parsed < 0) return 5;
   return Math.floor(parsed);
 }
 

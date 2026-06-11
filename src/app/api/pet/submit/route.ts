@@ -107,6 +107,21 @@ export async function POST(request: Request) {
           { status: 429 }
         );
       }
+
+      // Additional server-side check for stock / AI / old professional photos
+      try {
+        const { analyzeImageForStockishness } = await import("@/lib/pet-image-hash-server");
+        const stockAnalysis = await analyzeImageForStockishness(imageBuffer);
+        if (stockAnalysis.likelyStock && stockAnalysis.score >= 45) {
+          return NextResponse.json(
+            {
+              error:
+                "This photo looks like it may be from stock, a screen capture, or AI-generated. Please upload an original, casual photo of your own hand petting your pet.",
+            },
+            { status: 400 }
+          );
+        }
+      } catch {}
     }
 
     const message = buildPetSubmissionMessage({

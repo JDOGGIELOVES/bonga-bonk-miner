@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { PET_MAX_IMAGE_BYTES } from "@/lib/pet-love";
-import { computePerceptualHashFromBuffer } from "@/lib/pet-image-hash-server";
+import { computePerceptualHashFromBuffer, analyzeImageForStockishness } from "@/lib/pet-image-hash-server";
 import {
   checkImageDuplicate,
   hashImageBuffer,
@@ -57,6 +57,14 @@ export async function POST(request: Request) {
       perceptualHash: resolvedPhash || undefined,
     });
 
+    let stockAnalysis: any = null;
+    if (image instanceof File) {
+      const imageBuffer = Buffer.from(await image.arrayBuffer());
+      try {
+        stockAnalysis = await analyzeImageForStockishness(imageBuffer);
+      } catch {}
+    }
+
     return NextResponse.json({
       ok: !result.duplicate,
       duplicate: result.duplicate,
@@ -67,6 +75,13 @@ export async function POST(request: Request) {
       duplicateCheckEnabled: isPetDuplicateCheckEnabled(),
       imageHash: resolvedHash,
       perceptualHash: resolvedPhash || undefined,
+      stockAnalysis: stockAnalysis
+        ? {
+            likelyStock: stockAnalysis.likelyStock,
+            score: stockAnalysis.score,
+            reasons: stockAnalysis.reasons,
+          }
+        : null,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Image check failed.";
