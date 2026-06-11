@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { Connection, PublicKey } from "@solana/web3.js";
 import bs58 from "bs58";
 import { getCollectionAddress } from "@/lib/mint-config";
+import { getWalletBongaNftsWithRarity } from "@/lib/nft-holder-server";
+import type { RarityTier } from "@/lib/nft-collection";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,55 +27,28 @@ export async function GET(request: Request) {
   }
 
   try {
-    const owner = new PublicKey(wallet);
-    const connection = new Connection(getRpcUrl(), "confirmed");
-    const collection = getCollectionAddress();
+    // Use the rich holder function for accurate Bonga + Rarity data
+    const holdings = await getWalletBongaNftsWithRarity(wallet);
+    const isHolder = holdings.length > 0;
 
-    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(owner, {
-      programId: TOKEN_PROGRAM,
-    });
-
-    const nftMints: string[] = [];
-    for (const { account } of tokenAccounts.value) {
-      const info = account.data.parsed?.info;
-      const amount = Number(info?.tokenAmount?.amount ?? 0);
-      const decimals = Number(info?.tokenAmount?.decimals ?? 0);
-      if (amount >= 1 && decimals === 0 && info?.mint) {
-        nftMints.push(info.mint as string);
-      }
+    const heldByRarity: Record<RarityTier, number> = {
+      Common: 0,
+      Rare: 0,
+      Legendary: 0,
+      "Cosmic Bonga": 0,
+    };
+    for (const h of holdings) {
+      if (heldByRarity[h.rarity] !== undefined) heldByRarity[h.rarity] += 1;
     }
 
-    if (nftMints.length === 0) {
-      return NextResponse.json({ isHolder: false, count: 0 });
-    }
-
-    const collectionBytes = bs58.decode(collection);
-    let collectionMatches = 0;
-    for (const mint of nftMints.slice(0, 12)) {
-      try {
-        const mintKey = new PublicKey(mint);
-        const [metadataPda] = PublicKey.findProgramAddressSync(
-          [Buffer.from("metadata"), METADATA_PROGRAM.toBuffer(), mintKey.toBuffer()],
-          METADATA_PROGRAM
-        );
-        const accountInfo = await connection.getAccountInfo(metadataPda);
-        if (!accountInfo?.data) continue;
-        const data = accountInfo.data;
-        const hasCollectionKey = data.includes(Buffer.from(collectionBytes));
-        const collectionSlice = data.subarray(0, Math.min(data.length, 500)).toString("utf8");
-        if (hasCollectionKey || collectionSlice.toLowerCase().includes("bonga")) {
-          collectionMatches += 1;
-        }
-      } catch {
-        continue;
-      }
-    }
-
-    const isHolder = collectionMatches > 0;
+    // Backward compatible fields (count = total verified Bonga now)
     return NextResponse.json({
       isHolder,
-      count: nftMints.length,
-      collectionMatches,
+      count: holdings.length,
+      collectionMatches: holdings.length,
+      heldByRarity,
+      // also include detailed list for advanced clients (staking etc)
+      holdings: holdings.slice(0, 12), // cap for response size
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "holder check failed";

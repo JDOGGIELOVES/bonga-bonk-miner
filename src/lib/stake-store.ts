@@ -3,10 +3,10 @@ import os from "os";
 import path from "path";
 import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 import { withWalletClaimLock } from "./claim-lock";
+import { STAKE_RATES, type RarityTier } from "@/lib/nft-collection";
 
 const STAKES_BLOB_PATH = "bonga-stakes/active-stakes.json";
 
-export const DAILY_STAKE_REWARD_PER_NFT = 75; // generous "a lot of bonga" for locking up NFTs
 export const MIN_STAKE_CLAIM = 10; // smallest claimable chunk to keep txs reasonable
 
 function envFlag(name: string): boolean {
@@ -68,21 +68,33 @@ async function writeStakesRecord(body: string): Promise<void> {
 }
 
 export interface StakeRecord {
-  stakedCount: number;
+  // Tiered staking: number of each rarity locked. Keys are RarityTier.
+  staked: Record<string, number>;
   stakedAt: string; // ISO
   lastClaimedAt?: string; // ISO
 }
 
 export interface StakeStatus {
   record: StakeRecord | null;
-  heldCount: number; // current on-chain verified (best effort)
+  heldCount: number; // total current on-chain verified
+  heldByRarity: Record<string, number>;
+  stakedByRarity: Record<string, number>;
   pendingBonga: number;
   dailyRate: number;
   canClaim: boolean;
 }
 
 function emptyStake(): StakeRecord {
-  return { stakedCount: 0, stakedAt: new Date().toISOString() };
+  return { staked: {}, stakedAt: new Date().toISOString() };
+}
+
+export function getDailyStakeRate(staked: Record<string, number>): number {
+  let total = 0;
+  for (const [tier, count] of Object.entries(staked || {})) {
+    const rate = (STAKE_RATES as Record<RarityTier, number>)[tier as RarityTier] || 0;
+    total += Math.max(0, Math.floor(count || 0)) * rate;
+  }
+  return total;
 }
 
 function parseStakes(raw: string): Record<string, StakeRecord> {
@@ -104,17 +116,23 @@ export async function getAllStakes(): Promise<Record<string, StakeRecord>> {
 export async function getStakeRecord(wallet: string): Promise<StakeRecord | null> {
   const all = await getAllStakes();
   const rec = all[wallet];
-  if (!rec || !rec.stakedCount || rec.stakedCount <= 0) return null;
+  if (!rec || !rec.staked || Object.values(rec.staked).every((c) => (c || 0) <= 0)) return null;
   return rec;
 }
 
 export async function saveStakeRecord(wallet: string, record: StakeRecord | null): Promise<void> {
   const all = await getAllStakes();
-  if (record && record.stakedCount > 0) {
+  const hasStake = record && record.staked && Object.values(record.staked).some((c) => (c || 0) > 0);
+  if (hasStake) {
+    const clean: Record<string, number> = {};
+    for (const [tier, c] of Object.entries(record!.staked || {})) {
+      const num = Math.max(0, Math.floor(c || 0));
+      if (num > 0) clean[tier] = num;
+    }
     all[wallet] = {
-      stakedCount: Math.max(0, Math.floor(record.stakedCount)),
-      stakedAt: record.stakedAt,
-      lastClaimedAt: record.lastClaimedAt,
+      staked: clean,
+      stakedAt: record!.stakedAt,
+      lastClaimedAt: record!.lastClaimedAt,
     };
   } else {
     delete all[wallet];
@@ -124,47 +142,65 @@ export async function saveStakeRecord(wallet: string, record: StakeRecord | null
 
 /** Compute prorated pending rewards since last claim (or stake time). */
 export function computePendingStakeRewards(record: StakeRecord | null | undefined): number {
-  if (!record || !record.stakedCount || record.stakedCount <= 0) return 0;
+  if (!record || !record.staked) return 0;
+  const dailyRate = getDailyStakeRate(record.staked);
+  if (dailyRate <= 0) return 0;
   const now = Date.now();
   const start = record.lastClaimedAt ? Date.parse(record.lastClaimedAt) : Date.parse(record.stakedAt);
   if (!Number.isFinite(start)) return 0;
   const elapsedMs = Math.max(0, now - start);
   const days = elapsedMs / (24 * 60 * 60 * 1000);
-  const raw = days * DAILY_STAKE_REWARD_PER_NFT * record.stakedCount;
+  const raw = days * dailyRate;
   return Math.floor(raw);
 }
 
 export async function getStakeStatusForWallet(
   wallet: string,
-  currentHeldCount: number
+  currentHeldCount: number,
+  heldByRarity: Record<string, number> = {}
 ): Promise<StakeStatus> {
   const record = await getStakeRecord(wallet);
-  // Safety clamp: never stake more than they currently hold
+  // Safety clamp per tier
   let effectiveRecord = record;
-  if (record && currentHeldCount >= 0 && record.stakedCount > currentHeldCount) {
-    effectiveRecord = { ...record, stakedCount: currentHeldCount };
-    // persist the correction
-    await saveStakeRecord(wallet, effectiveRecord);
+  if (record) {
+    const clamped: Record<string, number> = {};
+    let needsSave = false;
+    for (const [tier, count] of Object.entries(record.staked || {})) {
+      const held = heldByRarity[tier] || 0;
+      const safe = Math.min(count || 0, held);
+      clamped[tier] = safe;
+      if (safe !== count) needsSave = true;
+    }
+    if (needsSave || Object.keys(clamped).length !== Object.keys(record.staked || {}).length) {
+      effectiveRecord = { ...record, staked: clamped };
+      await saveStakeRecord(wallet, effectiveRecord);
+    }
   }
+
+  const stakedByRarity = effectiveRecord?.staked || {};
   const pending = computePendingStakeRewards(effectiveRecord);
-  const dailyRate = (effectiveRecord?.stakedCount || 0) * DAILY_STAKE_REWARD_PER_NFT;
+  const dailyRate = getDailyStakeRate(stakedByRarity);
   const canClaim = pending >= MIN_STAKE_CLAIM;
+
+  const totalStaked = Object.values(stakedByRarity).reduce((s, c) => s + (c || 0), 0);
+
   return {
     record: effectiveRecord,
     heldCount: Math.max(0, currentHeldCount),
+    heldByRarity,
+    stakedByRarity,
     pendingBonga: pending,
     dailyRate,
     canClaim,
   };
 }
 
-/** Set or update stake under lock to avoid races. */
-export async function setStakedCount(
+/** Set or update stake tiers under lock. desiredTiers is { "Common": 2, "Rare": 1, ... } */
+export async function setStakedTiers(
   wallet: string,
-  newCount: number,
-  currentHeld: number
+  desiredTiers: Record<string, number>,
+  currentHeldByRarity: Record<string, number>
 ): Promise<StakeRecord | null> {
-  const safeCount = Math.max(0, Math.min(Math.floor(newCount), Math.max(0, currentHeld)));
   const nowIso = new Date().toISOString();
 
   return withWalletClaimLock(
@@ -172,18 +208,28 @@ export async function setStakedCount(
     "stake-lifetime",
     async () => {
       const existing = await getStakeRecord(wallet);
+
+      const nextStaked: Record<string, number> = {};
+      for (const tier of ["Common", "Rare", "Legendary", "Cosmic Bonga"] as const) {
+        const desired = Math.max(0, Math.floor(desiredTiers[tier] || 0));
+        const held = currentHeldByRarity[tier] || 0;
+        const safe = Math.min(desired, held);
+        if (safe > 0) nextStaked[tier] = safe;
+      }
+
       const next: StakeRecord = existing
         ? {
-            stakedCount: safeCount,
+            staked: nextStaked,
             stakedAt: existing.stakedAt,
             lastClaimedAt: existing.lastClaimedAt,
           }
         : {
-            stakedCount: safeCount,
+            staked: nextStaked,
             stakedAt: nowIso,
           };
 
-      if (safeCount <= 0) {
+      const hasAny = Object.keys(nextStaked).length > 0;
+      if (!hasAny) {
         await saveStakeRecord(wallet, null);
         return null;
       }
@@ -205,7 +251,8 @@ export async function recordStakeClaim(wallet: string, claimedAmount: number): P
     "stake-lifetime",
     async () => {
       const existing = await getStakeRecord(wallet);
-      if (!existing || existing.stakedCount <= 0) return existing;
+      const hasStake = existing && existing.staked && Object.values(existing.staked).some((c) => (c || 0) > 0);
+      if (!hasStake) return existing;
 
       const nowIso = new Date().toISOString();
       const updated: StakeRecord = {

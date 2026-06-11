@@ -17,6 +17,8 @@ import {
   requestStakeClaim,
   type StakeStatus,
 } from "@/lib/claim-client";
+import { STAKE_RATES } from "@/lib/nft-collection";
+import type { RarityTier } from "@/lib/nft-collection";
 import { Lock, Unlock, Coins, TrendingUp, Shield } from "lucide-react";
 
 export function StakingClient() {
@@ -29,7 +31,13 @@ export function StakingClient() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const [stakeAmount, setStakeAmount] = useState<number>(1);
+  // Per-tier target staked amounts (user editable targets)
+  const [tierTargets, setTierTargets] = useState<Record<string, number>>({
+    Common: 0,
+    Rare: 0,
+    Legendary: 0,
+    "Cosmic Bonga": 0,
+  });
 
   const walletAddress = publicKey?.toBase58() ?? null;
 
@@ -47,8 +55,14 @@ export function StakingClient() {
         const s = await fetchStakeStatus(walletAddress);
         if (!cancelled) {
           setStatus(s);
-          const avail = Math.max(0, (s.heldCount || 0) - (s.stakedCount || 0));
-          setStakeAmount(avail > 0 ? Math.min(avail, s.stakedCount > 0 ? 1 : avail) : 1);
+          // Initialize targets to current staked per tier
+          const currentStaked = s.stakedByRarity || {};
+          setTierTargets({
+            Common: currentStaked.Common || 0,
+            Rare: currentStaked.Rare || 0,
+            Legendary: currentStaked.Legendary || 0,
+            "Cosmic Bonga": currentStaked["Cosmic Bonga"] || 0,
+          });
         }
       } catch (e) {
         if (!cancelled) setError("Failed to load staking status.");
@@ -67,15 +81,24 @@ export function StakingClient() {
   const pending = status?.pendingBonga ?? 0;
   const dailyRate = status?.dailyRate ?? 0;
   const canClaim = status?.canClaim ?? false;
-  const ratePerNft = status?.ratePerNft ?? 75;
 
-  const availableToStake = Math.max(0, heldCount - stakedCount);
+  const heldByRarity = status?.heldByRarity || {};
+  const stakedByRarity = status?.stakedByRarity || {};
 
   const estimatedDaily = dailyRate;
   const projectedMonthly = Math.floor(estimatedDaily * 30);
 
-  const canIncreaseStake = availableToStake > 0;
   const isStaked = stakedCount > 0;
+
+  // Current targets from state (clamped to held)
+  const currentTargets = {
+    Common: Math.min(tierTargets.Common || 0, heldByRarity.Common || 0),
+    Rare: Math.min(tierTargets.Rare || 0, heldByRarity.Rare || 0),
+    Legendary: Math.min(tierTargets.Legendary || 0, heldByRarity.Legendary || 0),
+    "Cosmic Bonga": Math.min(tierTargets["Cosmic Bonga"] || 0, heldByRarity["Cosmic Bonga"] || 0),
+  };
+
+  const targetTotalStaked = Object.values(currentTargets).reduce((s, v) => s + v, 0);
 
   async function refreshStatus() {
     if (!walletAddress) return;
@@ -87,24 +110,31 @@ export function StakingClient() {
     }
   }
 
-  async function handleLock() {
+  async function handleUpdateStake() {
     if (!walletAddress || !connected) return;
     setError(null);
     setSuccess(null);
     setActionLoading("lock");
     try {
       const at = new Date().toISOString();
-      const countToLock = Math.max(1, Math.min(stakeAmount, availableToStake));
+      // Send the target staked per tier (absolute desired)
+      const tiers = {
+        Common: currentTargets.Common,
+        Rare: currentTargets.Rare,
+        Legendary: currentTargets.Legendary,
+        "Cosmic Bonga": currentTargets["Cosmic Bonga"],
+      };
       await requestStakeLock({
         wallet: walletAddress,
-        count: countToLock,
+        tiers,
         at,
         connectedWallet: wallet ?? null,
       });
-      setSuccess(`Locked ${countToLock} Bonga NFT(s) for staking. Enjoy the rewards!`);
+      const total = Object.values(tiers).reduce((s, v) => s + v, 0);
+      setSuccess(`Stake position updated to ${total} Bonga NFT(s) (tiered rates applied).`);
       await refreshStatus();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Lock failed";
+      const msg = e instanceof Error ? e.message : "Stake update failed";
       setError(msg);
     } finally {
       setActionLoading(null);
@@ -157,7 +187,8 @@ export function StakingClient() {
     }
   }
 
-  const lockDisabled = actionLoading !== null || !connected || availableToStake <= 0 || stakeAmount < 1;
+  const hasChanges = JSON.stringify(currentTargets) !== JSON.stringify(stakedByRarity);
+  const updateDisabled = actionLoading !== null || !connected || !hasChanges;
 
   return (
     <>
@@ -176,7 +207,7 @@ export function StakingClient() {
               Lock them up. Earn a lot of $BONGA. High-yield passive rewards from the community treasury while you keep custody of your NFTs.
             </p>
             <div className="mt-3 text-sm text-bonga-teal">
-              {ratePerNft} $BONGA per NFT per day • Prorated • Claim anytime (min {status?.minClaim ?? 10})
+              Tiered rewards: Common 100 • Rare 150 • Legendary 200 • Cosmic 350 $BONGA per day • Prorated • Claim anytime (min 10)
             </div>
           </div>
 
@@ -258,31 +289,50 @@ export function StakingClient() {
                   </p>
                 </div>
 
-                {/* Stake controls */}
+                {/* Per-tier stake controls */}
                 <div className="mt-8">
-                  <p className="font-semibold mb-2">Stake / Increase Lock</p>
-                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
-                    <div className="flex-1">
-                      <label className="text-xs text-muted-foreground">How many to lock (you keep the NFTs)</label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <input
-                          type="number"
-                          min={1}
-                          max={Math.max(1, availableToStake)}
-                          value={stakeAmount}
-                          onChange={(e) => setStakeAmount(Math.max(1, Math.min(availableToStake, parseInt(e.target.value || "1", 10))))}
-                          className="w-28 rounded-xl border border-border bg-background px-4 py-2 text-lg font-mono"
-                          disabled={!canIncreaseStake}
-                        />
-                        <span className="text-sm text-muted-foreground">of {availableToStake} available</span>
-                      </div>
-                    </div>
+                  <p className="font-semibold mb-3">Set your staked amounts per rarity (targets)</p>
+
+                  <div className="space-y-3">
+                    {(["Common", "Rare", "Legendary", "Cosmic Bonga"] as const).map((tier) => {
+                      const held = heldByRarity[tier] || 0;
+                      const currentlyStaked = stakedByRarity[tier] || 0;
+                      const target = tierTargets[tier] || 0;
+                      return (
+                        <div key={tier} className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-xl bg-muted/30 p-3">
+                          <div className="w-40 text-sm font-medium">
+                            {tier}
+                            <span className="ml-2 text-[10px] text-muted-foreground">({(STAKE_RATES as any)[tier] || 0}/day)</span>
+                          </div>
+                          <div className="flex-1 text-xs text-muted-foreground">
+                            Held: <span className="font-mono text-foreground">{held}</span> · Currently staked: <span className="font-mono text-foreground">{currentlyStaked}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Target staked:</span>
+                            <input
+                              type="number"
+                              min={0}
+                              max={held}
+                              value={target}
+                              onChange={(e) => {
+                                const val = Math.max(0, Math.min(held, parseInt(e.target.value || "0", 10)));
+                                setTierTargets((prev) => ({ ...prev, [tier]: val }));
+                              }}
+                              className="w-20 rounded-lg border border-border bg-background px-3 py-1 text-sm font-mono"
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-3">
                     <Button
-                      onClick={handleLock}
-                      disabled={lockDisabled}
+                      onClick={handleUpdateStake}
+                      disabled={updateDisabled}
                       className="bg-bonga-orange text-white hover:bg-bonga-orange/90 px-8"
                     >
-                      {actionLoading === "lock" ? "Locking..." : "Lock & Stake"}
+                      {actionLoading === "lock" ? "Updating..." : "Update Stake Targets"}
                     </Button>
                     <Button
                       onClick={handleUnlock}
@@ -293,8 +343,9 @@ export function StakingClient() {
                       <Unlock className="mr-2 h-4 w-4" /> Unstake All
                     </Button>
                   </div>
+
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Staking is a virtual lock tracked with your signature. You always retain full on-chain ownership of the NFTs.
+                    Set the exact number you want staked of each rarity. Signature proves the request. You keep custody of the NFTs at all times.
                   </p>
                 </div>
 
@@ -325,7 +376,7 @@ export function StakingClient() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Connect wallet holding Bonga NFTs</li>
                 <li>• Choose how many to stake and sign the lock message</li>
-                <li>• Earn ~{ratePerNft} $BONGA per NFT per day (prorated)</li>
+                <li>• Earn tiered $BONGA per day (Common 100 / Rare 150 / Legendary 200 / Cosmic 350) prorated</li>
                 <li>• Claim rewards anytime (min {status?.minClaim ?? 10}) — paid from treasury</li>
                 <li>• Unstake with a signature whenever you want</li>
                 <li>• Your NFTs never leave your wallet</li>
@@ -342,7 +393,7 @@ export function StakingClient() {
                 All payouts are transparent on-chain from the community treasury (funded by 7% royalties + love).
               </p>
               <p className="mt-3 text-xs text-bonga-teal">
-                Projected monthly on a single staked NFT: ~{Math.floor(ratePerNft * 30)} $BONGA
+                Example: 1 Cosmic = 350/day (~10,500/month). Rates are higher for rarer pieces.
               </p>
               <div className="mt-4 text-xs">
                 <Link href="/treasury" className="text-bonga-teal hover:underline">

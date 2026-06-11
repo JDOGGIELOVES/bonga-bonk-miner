@@ -198,7 +198,8 @@ export interface StakeStatus {
   pendingBonga: number;
   dailyRate: number;
   canClaim: boolean;
-  ratePerNft: number;
+  heldByRarity?: Record<string, number>;
+  stakedByRarity?: Record<string, number>;
   minClaim: number;
   error?: string;
 }
@@ -208,11 +209,11 @@ export async function fetchStakeStatus(wallet: string): Promise<StakeStatus> {
     const res = await fetch(`/api/stake/status?wallet=${encodeURIComponent(wallet)}`, { cache: "no-store" });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
-      return { ok: false, heldCount: 0, isHolder: false, stakedCount: 0, stakedAt: null, lastClaimedAt: null, pendingBonga: 0, dailyRate: 0, canClaim: false, ratePerNft: 75, minClaim: 10, error: j?.error || "Failed to load stake status" };
+      return { ok: false, heldCount: 0, isHolder: false, stakedCount: 0, stakedAt: null, lastClaimedAt: null, pendingBonga: 0, dailyRate: 0, canClaim: false, minClaim: 10, error: j?.error || "Failed to load stake status" };
     }
     return await res.json();
   } catch {
-    return { ok: false, heldCount: 0, isHolder: false, stakedCount: 0, stakedAt: null, lastClaimedAt: null, pendingBonga: 0, dailyRate: 0, canClaim: false, ratePerNft: 75, minClaim: 10, error: "Could not reach staking service." };
+    return { ok: false, heldCount: 0, isHolder: false, stakedCount: 0, stakedAt: null, lastClaimedAt: null, pendingBonga: 0, dailyRate: 0, canClaim: false, minClaim: 10, error: "Could not reach staking service." };
   }
 }
 
@@ -228,16 +229,20 @@ export interface StakeActionSuccess {
 
 export async function requestStakeLock(params: {
   wallet: string;
-  count: number;
+  tiers: Record<string, number>; // { Common: number, Rare: number, ... }
   at: string;
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
+  // Must match server canonical tiers string
+  const tierStr = ["Common", "Rare", "Legendary", "Cosmic Bonga"]
+    .map((t) => `${t}=${Math.max(0, Math.floor(params.tiers[t] || 0))}`)
+    .join(";");
   const message = [
     "BONGA • Raise the Frequency",
     "Stake Lock",
     `Wallet: ${params.wallet}`,
-    `Count: ${params.count}`,
+    `Tiers: ${tierStr}`,
     `At: ${params.at}`,
   ].join("\n");
 
@@ -251,7 +256,7 @@ export async function requestStakeLock(params: {
 
   const payload: any = {
     wallet: params.wallet,
-    count: params.count,
+    tiers: params.tiers,
     at: params.at,
     signature: bs58.encode(signature),
   };

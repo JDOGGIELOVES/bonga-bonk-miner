@@ -361,3 +361,11 @@ export const COMMUNITY_LINKS = [
   { label: "X / Twitter", href: "https://x.com/bongasolana", icon: "𝕏" },
   { label: "Telegram", href: "https://t.me/bonga_sol_community", icon: "✈️" },
 ];
+
+/** Staking reward rates per day by rarity (used by both client UI and server calc) */
+export const STAKE_RATES: Record<RarityTier, number> = {
+  Common: 100,
+  Rare: 150,
+  Legendary: 200,
+  "Cosmic Bonga": 350,
+};

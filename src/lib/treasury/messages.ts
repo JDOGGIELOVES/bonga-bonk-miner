@@ -117,29 +117,33 @@ export function verifyClaimSignature(params: {
 
 export function buildStakeLockMessage(params: {
   wallet: string;
-  count: number;
+  tiers: Record<string, number>; // e.g. { Common: 2, Rare: 1, ... }
   at: string; // ISO timestamp or nonce for the lock action
 }) {
-  const { wallet, count, at } = params;
+  const { wallet, tiers, at } = params;
+  // Canonical stable representation for signing
+  const tierStr = ["Common", "Rare", "Legendary", "Cosmic Bonga"]
+    .map((t) => `${t}=${Math.max(0, Math.floor(tiers[t] || 0))}`)
+    .join(";");
   return [
     TREASURY_CLAIM_DOMAIN,
     "Stake Lock",
     `Wallet: ${wallet}`,
-    `Count: ${count}`,
+    `Tiers: ${tierStr}`,
     `At: ${at}`,
   ].join("\n");
 }
 
 export function verifyStakeLockSignature(params: {
   wallet: string;
-  count: number;
+  tiers: Record<string, number>;
   at: string;
   signature: Uint8Array;
   signedMessage?: Uint8Array;
 }): boolean {
   const expected = {
     wallet: params.wallet,
-    count: params.count,
+    tiers: params.tiers,
     at: params.at,
   };
   const canonicalMessage = buildStakeLockMessage(expected);

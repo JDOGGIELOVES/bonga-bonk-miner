@@ -7,7 +7,7 @@ import { withWalletClaimLock } from "@/lib/claim-lock";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
 import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
-import { getStakeRecord, recordStakeClaim, computePendingStakeRewards, DAILY_STAKE_REWARD_PER_NFT, MIN_STAKE_CLAIM } from "@/lib/stake-store";
+import { getStakeRecord, recordStakeClaim, computePendingStakeRewards, MIN_STAKE_CLAIM } from "@/lib/stake-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -95,7 +95,8 @@ export async function POST(request: Request) {
       `stake-${date}`,
       async () => {
         const record = await getStakeRecord(wallet);
-        if (!record || record.stakedCount <= 0) {
+        const hasStake = record && record.staked && Object.values(record.staked).some((c) => (c || 0) > 0);
+        if (!hasStake) {
           throw new Error("No active stake found for this wallet.");
         }
 
