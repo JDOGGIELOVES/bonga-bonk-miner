@@ -387,3 +387,45 @@ export async function recordGlobalClaim(
     "tally"
   );
 }
+
+/** Manual flag for a wallet as exploit (e.g. for Pet Love abuse). */
+export async function manuallyFlagAsExploit(wallet: string, reason = "Manual flag for exploit") {
+  const normalized = wallet.toLowerCase().trim();
+  if (!normalized) return;
+
+  const flagged = await getFlaggedWallets();
+  if (!flagged[normalized]) flagged[normalized] = [];
+
+  const now = new Date().toISOString();
+  flagged[normalized].push({
+    flaggedAt: now,
+    reason,
+    amountInWindow: 0,
+    windowLabel: "manual",
+  });
+
+  const blocked = await getBlockedWallets();
+  const blockUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days for exploits
+  blocked[normalized] = {
+    blockedUntil: blockUntil,
+    reason,
+  };
+
+  await saveFlaggedWallets(flagged);
+  await saveBlockedWallets(blocked);
+}
+
+/** Flag the last N recent Pet Love submissions as exploits. */
+export async function flagLastPetLoveExploits(count = 8) {
+  const { getPetGallery } = await import("@/lib/pet-love-store");
+  const recent = await getPetGallery(count);
+  const wallets = [...new Set(recent.map((s: any) => (s.wallet || "").toLowerCase().trim()))]
+    .filter(Boolean)
+    .slice(0, count);
+
+  for (const wallet of wallets) {
+    await manuallyFlagAsExploit(wallet, "Pet Love exploit - scripted/multi-wallet abuse");
+  }
+
+  return wallets;
+}
