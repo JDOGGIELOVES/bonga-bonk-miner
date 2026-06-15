@@ -70,6 +70,12 @@ export function BongaHeader({
                 ← Back to Bonk Miner
               </button>
               <Link
+                href="/bonga-bank"
+                className="rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
+              >
+                Bonga Bank
+              </Link>
+              <Link
                 href="/how-to-connect"
                 className="rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-2.5 sm:py-1"
               >
@@ -159,6 +165,15 @@ export function BongaHeader({
                 )}
               >
                 Staking
+              </Link>
+              <Link
+                href="/bonga-bank"
+                className={getLinkClass(
+                  "/bonga-bank",
+                  "rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
+                )}
+              >
+                Bonga Bank
               </Link>
               <Link
                 href="/community"
