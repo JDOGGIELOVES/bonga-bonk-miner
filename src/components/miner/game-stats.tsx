@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import {
   DAILY_BONGA_LIMIT,
-  getClaimableBonga,
+  TAPS_PER_BONGA,
   progressToNextBonga,
   tapsUntilNextBonga,
   type GameState,
@@ -24,7 +24,6 @@ export function GameStats({ state, combo, connected, dailyLimitReached, nextDail
   const atLimit = state.bongaToday >= DAILY_BONGA_LIMIT;
   const progress = progressToNextBonga(state.tapsToday);
   const untilNext = tapsUntilNextBonga(state.tapsToday);
-  const claimable = getClaimableBonga(state);
 
   return (
     <div className="bonga-card p-5 sm:p-6">
@@ -40,12 +39,6 @@ export function GameStats({ state, combo, connected, dailyLimitReached, nextDail
         )}
       </div>
 
-      {claimable > 0 && (
-        <p className="mb-4 text-sm text-bonga-teal">
-          {claimable} $BONGA ready to claim
-        </p>
-      )}
-
       <div className="grid grid-cols-3 gap-4">
         <StatBox label="Taps today" value={state.tapsToday} />
         <StatBox
@@ -56,17 +49,25 @@ export function GameStats({ state, combo, connected, dailyLimitReached, nextDail
         <StatBox label="Session" value={state.sessionTaps} />
       </div>
 
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            {dailyLimitReached || atLimit 
-              ? (limitMessage || `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`) 
-              : `Next reward in ${untilNext} bonks`}
-          </span>
-          <span className="font-semibold text-bonga-orange">{Math.round(progress)}%</span>
+      {TAPS_PER_BONGA !== 1 && (
+        <div className="mt-5">
+          <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              {dailyLimitReached || atLimit 
+                ? (limitMessage || `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`) 
+                : `Next reward in ${untilNext} bonks`}
+            </span>
+            <span className="font-semibold text-bonga-orange">{Math.round(progress)}%</span>
+          </div>
+          <Progress value={atLimit ? 100 : progress} />
         </div>
-        <Progress value={atLimit ? 100 : progress} />
-      </div>
+      )}
+
+      {TAPS_PER_BONGA === 1 && (
+        <div className="mt-5 text-xs text-muted-foreground text-center">
+          1 tap = 1 $BONGA — automatically deposited to your Bonga Bank Vault
+        </div>
+      )}
 
       {(dailyLimitReached || atLimit) && nextDailyReset && (
         <p className="mt-2 text-xs text-center text-amber-600 font-medium">

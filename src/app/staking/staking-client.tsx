@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -43,6 +43,8 @@ export function StakingClient() {
   const [globalStakeTally, setGlobalStakeTally] = useState<{ bonga: number; claims: number } | null>(null);
 
   const walletAddress = publicKey?.toBase58() ?? null;
+
+  const lastAutoClaimRef = useRef(0);
 
   // Load stake status when wallet changes
   useEffect(() => {
@@ -93,6 +95,23 @@ export function StakingClient() {
     const id = setInterval(loadGlobalStakeTally, 60000);
     return () => clearInterval(id);
   }, []);
+
+  // Auto-deposit staking rewards to Bonga Bank Vault (no manual "claim" button)
+  // Triggers the signed deposit process automatically when pending rewards reach the min threshold
+  useEffect(() => {
+    if (
+      !walletAddress ||
+      !status?.canClaim ||
+      pending < (status?.minClaim ?? 10) ||
+      actionLoading !== null
+    ) {
+      return;
+    }
+    const now = Date.now();
+    if (now - lastAutoClaimRef.current < 10000) return; // simple debounce to avoid repeated prompts
+    lastAutoClaimRef.current = now;
+    void handleClaim().catch(() => {});
+  }, [walletAddress, pending, status?.canClaim, status?.minClaim, actionLoading]);
 
   const stakedCount = status?.stakedCount ?? 0;
   const heldCount = status?.heldCount ?? heldFromHook ?? 0;
@@ -195,7 +214,7 @@ export function StakingClient() {
         date,
         connectedWallet: wallet ?? null,
       });
-      setSuccess(`Claimed ${claimAmt} $BONGA from staking rewards! ${res.explorerUrl ? "View on Solscan." : ""}`);
+      setSuccess(`Staking rewards auto-deposited ${claimAmt} $BONGA to your Bonga Bank Vault! ${res.explorerUrl ? "View on Solscan." : ""}`);
       await refreshStatus();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Claim failed";
@@ -247,7 +266,7 @@ export function StakingClient() {
             </div>
             {!connected && (
               <p className="mt-4 text-sm text-muted-foreground">
-                Connect your Solana wallet that holds Bonga NFTs to stake and claim rewards.
+                Connect your Solana wallet that holds Bonga NFTs to stake — rewards automatically deposit to your Bonga Bank Vault.
               </p>
             )}
           </div>
@@ -285,28 +304,19 @@ export function StakingClient() {
                   </div>
                 </div>
 
-                {/* Pending rewards */}
+                {/* Pending rewards - auto to vault */}
                 <div className="mt-6 rounded-2xl border border-bonga-teal/30 bg-bonga-teal/5 p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <Coins className="h-4 w-4 text-bonga-teal" /> Unclaimed Staking Rewards
-                      </div>
-                      <div className="font-display text-5xl font-extrabold tracking-tighter mt-1 text-bonga-teal">
-                        {pending.toLocaleString()}
-                      </div>
-                      <div className="text-xs text-muted-foreground">prorated $BONGA</div>
+                  <div>
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <Coins className="h-4 w-4 text-bonga-teal" /> Staking Rewards (auto-deposited to Bonga Bank Vault)
                     </div>
-                    <Button
-                      onClick={handleClaim}
-                      disabled={!canClaim || actionLoading !== null}
-                      className="bg-bonga-teal text-white hover:bg-bonga-teal/90 px-6"
-                    >
-                      {actionLoading === "claim" ? "Claiming..." : canClaim ? `Claim ${Math.floor(pending)} $BONGA` : "Not enough yet"}
-                    </Button>
+                    <div className="font-display text-5xl font-extrabold tracking-tighter mt-1 text-bonga-teal">
+                      {pending.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">prorated $BONGA — will auto-deposit to your personal Bonga Bank Vault when ready (min {status?.minClaim ?? 10})</div>
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Rewards accrue the longer you keep your NFTs locked. Claim in chunks of {status?.minClaim ?? 10}+ to keep fees low.
+                    Rewards automatically deposit to your Bonga Bank Vault as they accrue (you may see a one-time wallet signature prompt when they reach the minimum). No manual claim needed here.
                   </p>
                 </div>
 
@@ -408,8 +418,8 @@ export function StakingClient() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Connect wallet holding Bonga NFTs</li>
                 <li>• Choose how many to stake and sign the lock message</li>
-                <li>• Earn tiered $BONGA per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500) prorated — all deposited to Bonga Bank Vault</li>
-                <li>• Claim rewards anytime (min {status?.minClaim ?? 10}) — paid from treasury</li>
+                <li>• Earn tiered $BONGA per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500) prorated — all auto-deposited to Bonga Bank Vault</li>
+                <li>• Rewards auto-deposit to vault (min {status?.minClaim ?? 10}) — no manual claim button needed</li>
                 <li>• Unstake with a signature whenever you want</li>
                 <li>• Your NFTs never leave your wallet</li>
               </ul>
@@ -425,7 +435,7 @@ export function StakingClient() {
                 All payouts are transparent on-chain from the community treasury (funded by 7% royalties + love).
               </p>
               <p className="mt-3 text-xs text-bonga-teal">
-                Example: 1 Cosmic = 3500/day (~105,000/month). All staking $BONGA is deposited directly to your Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Combined daily on-chain wallet cap also applies. Rates are higher for rarer pieces.
+                Example: 1 Cosmic = 3500/day (~105,000/month). All staking $BONGA auto-deposits directly to your Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Combined daily on-chain wallet cap also applies. Rates are higher for rarer pieces.
               </p>
               <div className="mt-4 text-xs">
                 <Link href="/treasury" className="text-bonga-teal hover:underline">
@@ -436,7 +446,7 @@ export function StakingClient() {
           </div>
 
           <div className="mt-8 text-center text-xs text-muted-foreground">
-            Rewards are subject to treasury balance and claim rules. High-velocity abuse will be auto-flagged and blocked (same system as game claims).
+            Staking rewards automatically deposit to your Bonga Bank Vault (no manual claim button). High-velocity abuse will be auto-flagged and blocked.
             Staking boosts are in addition to normal NFT holder game multipliers.
           </div>
 

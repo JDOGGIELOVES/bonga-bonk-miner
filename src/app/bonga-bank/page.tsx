@@ -53,6 +53,7 @@ export default function BongaBankPage() {
   useEffect(() => {
     if (walletAddress) {
       refreshStatus();
+      setVaultOpen(true); // Ensure vault opens and shows your personal Bonga balance when connected
     } else {
       setStatus(null);
       setVaultOpen(false);
@@ -109,6 +110,22 @@ export default function BongaBankPage() {
       setError(e?.message || "Bank withdraw failed. Make sure you have a pre-created $BONGA ATA and enough SOL for fees.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnterVault = () => {
+    if (!connected) {
+      setVisible(true);
+    }
+    // Trigger vault open animation and reveal your personal Bonga Bank balance
+    if (walletAddress) {
+      if (!status) {
+        refreshStatus();
+      }
+      setVaultOpen(true);
+    } else {
+      // Optimistic open; effect will finalize once wallet connects and fetch completes
+      setVaultOpen(true);
     }
   };
 
@@ -204,7 +221,7 @@ export default function BongaBankPage() {
                     <div className="font-display text-3xl font-bold tracking-tight text-white mb-1">VAULT SEALED</div>
                     <div className="text-sm text-zinc-400 mb-6">Connect wallet to open the Bonga Bank Vault</div>
                     <button
-                      onClick={() => setVisible(true)}
+                      onClick={handleEnterVault}
                       className="px-8 py-3 rounded-xl bg-bonga-orange text-black font-semibold text-sm tracking-wider hover:bg-amber-400 active:scale-[0.985] transition shadow-inner"
                     >
                       ENTER THE VAULT
@@ -228,18 +245,19 @@ export default function BongaBankPage() {
                 </div>
                 <p className="text-sm text-muted-foreground mb-6">All the $BONGA you've mined and saved in your personal off-chain Bonga Bank. This is your "mined savings" view — accumulate here to keep the game economics sustainable (fewer, larger on-chain withdrawals mean the treasury spends far less SOL than the value of $BONGA distributed to players).</p>
 
-                {!status && <p className="text-muted-foreground">Loading your mined savings…</p>}
+                {/* Big current balance - the clear mined savings amount */}
+                <div className="mb-6 text-center">
+                  <div className="text-sm uppercase tracking-[2px] text-muted-foreground mb-1">Current Savings Balance</div>
+                  <div className="text-7xl font-extrabold tabular-nums tracking-[-3px] text-bonga-orange">
+                    {(status?.bankedBonga ?? 0).toLocaleString()}
+                  </div>
+                  <div className="text-2xl text-muted-foreground">$BONGA in your Bonga Bank</div>
+                </div>
+
+                {!status && <p className="text-muted-foreground text-sm">Loading your personal deposits…</p>}
 
                 {status && (
                   <>
-                    {/* Big current balance - the clear mined savings amount */}
-                    <div className="mb-6 text-center">
-                      <div className="text-sm uppercase tracking-[2px] text-muted-foreground mb-1">Current Savings Balance</div>
-                      <div className="text-7xl font-extrabold tabular-nums tracking-[-3px] text-bonga-orange">
-                        {status.bankedBonga.toLocaleString()}
-                      </div>
-                      <div className="text-2xl text-muted-foreground">$BONGA in your Bonga Bank</div>
-                    </div>
 
                     {/* Progress toward withdrawable threshold for clear goal */}
                     <div className="mb-6">
@@ -371,7 +389,7 @@ export default function BongaBankPage() {
               <div className="bonga-card p-6 text-sm text-muted-foreground">
                 <p className="mb-2 font-medium text-foreground">How the Bonga Bank works</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Play the game (taps up to 1000/day, garden up to 1500/day, pets, staking) to earn $BONGA into daily pending buckets (auto to Bank for small claims).</li>
+                  <li>Play the game (taps up to 1000/day, garden up to 1500/day, pets, staking) to earn $BONGA into daily pending buckets (auto-deposit to Bank Vault for staking/miner/garden/pet rewards).</li>
                   <li>Use “Deposit” to move pending earnings into your permanent off-chain Bonga Bank for free.</li>
                   <li>Small direct claims on game pages are automatically deposited here (no Solana transaction fee for tiny amounts).</li>
                   <li><strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong> The combined daily on-chain wallet cap (miner + garden + pet) is an additional limit on how much can be withdrawn from the treasury per wallet per day.</li>

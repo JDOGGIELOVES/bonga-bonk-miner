@@ -6,7 +6,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { fetchClaimStatus } from "@/lib/claim-client";
 import { fetchMinerEarned, registerMinerTap } from "@/lib/miner-tap-client";
 import { Button } from "@/components/ui/button";
-import { ClaimBonga } from "@/components/miner/claim-bonga";
+import { depositPendingToBank } from "@/lib/claim-client";
 
 import { BongaBonkCharacter } from "@/components/miner/bonga-bonk-character";
 import { FloatingCoins, spawnCoins, type FloatingCoin } from "@/components/miner/floating-coins";
@@ -28,7 +28,6 @@ import {
   saveGameState,
   processTap,
   getShareText,
-  getClaimableBonga,
   DAILY_BONGA_LIMIT,
   TAPS_PER_BONGA,
   MEME_COINS,
@@ -225,6 +224,10 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             serverTapsRef.current = tapResult.taps;
             setServerEarnRefreshKey((key) => key + 1);
             onTallyRefresh?.();
+            // Auto deposit to personal Bonga Bank Vault (no claim button in miner anymore)
+            if (publicKey) {
+              depositPendingToBank({ wallet, source: "miner" }).catch(() => {});
+            }
             return;
           }
           if (tapResult.taps != null) {
@@ -317,17 +320,6 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
               nextDailyReset={serverEarned?.nextDailyReset}
               limitMessage={serverEarned?.limitMessage}
             />
-            <ClaimBonga
-              state={gameState}
-              onStateChange={setGameState}
-              onClaimSuccess={() => {
-                setInternalTallyRefreshKey((key) => key + 1);
-                onTallyRefresh?.();
-                setServerEarnRefreshKey((key) => key + 1);
-              }}
-              onChainEnabled={onChainClaims}
-              serverEarnRefreshKey={serverEarnRefreshKey}
-            />
           </div>
 
           {/* Game arena */}
@@ -359,9 +351,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <BongaBonkCharacter isBonking={isBonking} bonkAngle={bonkAngle} />
 
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
-              {connected && getClaimableBonga(gameState) > 0
-                ? "Claim your mined $BONGA above"
-                : `1 tap = 1 $BONGA  ·  ${DAILY_BONGA_LIMIT} max per day — deposited to your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.`}
+              1 tap = 1 $BONGA · {DAILY_BONGA_LIMIT} max per day — automatically deposited to your Bonga Bank Vault. View & manage in the <a href="/bonga-bank" className="underline">Bonga Bank Vault</a>. On-chain only at 10,000 $BONGA.
             </p>
           </div>
 
