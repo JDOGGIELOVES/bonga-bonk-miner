@@ -6,7 +6,7 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bonga NFT Collection — Mint Bonk's Sister on Solana",
   description:
-    "Mint Bonga NFTs on Solana — 2,000 unique Bonk's Sister warriors with hippie, cosmic, and bonk vibes. Join the Bonga fam at bongabonks.com/nft.",
+    "Mint Bonga NFTs on Solana. Stake to earn up to 3,500 $BONGA per day (Cosmic) — auto-deposited to your Bonga Bank Vault. 2,000 unique Bonk's Sister warriors. Join the fam.",
   path: "/nft",
   keywords: [
     "Bonga NFT",

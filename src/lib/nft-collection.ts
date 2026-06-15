@@ -341,7 +341,7 @@ export const UTILITY = [
   {
     icon: "💰",
     title: "NFT Staking — Lock to Earn",
-    description: "Lock Bonga NFTs on the staking page to earn tiered $BONGA per NFT per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500, prorated). All earnings auto-deposited to Bonga Bank Vault. On-chain at 10,000 bank cap. You keep custody.",
+    description: "Stake your Bonga NFT for daily $BONGA (up to 3,500 for Cosmic). All rewards auto-deposit to your Bonga Bank Vault. On-chain withdrawals unlock at 10,000 $BONGA. See the full rates on this page.",
   },
   {
     icon: "👕",
