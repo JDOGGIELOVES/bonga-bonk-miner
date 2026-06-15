@@ -30,6 +30,7 @@ import {
   getShareText,
   getClaimableBonga,
   DAILY_BONGA_LIMIT,
+  TAPS_PER_BONGA,
   MEME_COINS,
   type GameState,
 } from "@/lib/miner-game";
@@ -64,6 +65,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
   const tallyRefreshKey = externalTallyRefreshKey ?? internalTallyRefreshKey;
   const [onChainClaims, setOnChainClaims] = useState(false);
   const [serverEarnRefreshKey, setServerEarnRefreshKey] = useState(0);
+  const [serverEarned, setServerEarned] = useState<any>(null); // full MinerEarnedStatus for limit/reset info
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const comboTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const effectIdRef = useRef(0);
@@ -101,6 +103,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     void fetchMinerEarned(publicKey.toBase58()).then((earned) => {
       if (!cancelled && earned) {
         serverTapsRef.current = earned.taps;
+        setServerEarned(earned); // capture full for limit message + reset time
         setServerEarnRefreshKey((key) => key + 1);
       }
     });
@@ -227,6 +230,15 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
           if (tapResult.taps != null) {
             serverTapsRef.current = tapResult.taps;
           }
+          // Capture limit info from error response for immediate UI feedback
+          if (tapResult.dailyLimitReached) {
+            setServerEarned((prev: any) => ({
+              ...(prev || {}),
+              dailyLimitReached: true,
+              nextDailyReset: tapResult.nextDailyReset,
+              limitMessage: tapResult.limitMessage,
+            }));
+          }
         });
       }
     },
@@ -297,7 +309,14 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
         <>
           <div className="mt-4 space-y-4">
             <GlobalClaimTally refreshKey={tallyRefreshKey} />
-            <GameStats state={gameState} combo={combo} connected={connected} />
+            <GameStats 
+              state={gameState} 
+              combo={combo} 
+              connected={connected} 
+              dailyLimitReached={serverEarned?.dailyLimitReached}
+              nextDailyReset={serverEarned?.nextDailyReset}
+              limitMessage={serverEarned?.limitMessage}
+            />
             <ClaimBonga
               state={gameState}
               onStateChange={setGameState}
@@ -342,7 +361,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
               {connected && getClaimableBonga(gameState) > 0
                 ? "Claim your mined $BONGA above"
-                : `100 bonks = 1 $BONGA  ·  ${DAILY_BONGA_LIMIT} max per day (peace & love)`}
+                : `1 tap = 1 $BONGA  ·  ${DAILY_BONGA_LIMIT} max per day — deposited to your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.`}
             </p>
           </div>
 
@@ -410,7 +429,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     <div className="flex min-h-screen flex-col bg-bonga-page">
       <BongaHeader onWalletConnect={onWalletConnect} soundSlot={soundButton} />
 
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-[30px] py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}

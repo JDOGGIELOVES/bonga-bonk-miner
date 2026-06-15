@@ -7,6 +7,15 @@ import {
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
 
+/** High-entropy short nonce for pet actions. */
+function generateNonce(): string {
+  const rnd = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+  return `${Date.now().toString(36)}-${rnd}`;
+}
+function defaultClaimExpiresAt(date: string): string {
+  return new Date(`${date}T23:59:59.000Z`).toISOString().replace(/\.000Z$/, "Z");
+}
+
 export interface PetGalleryItem {
   id: string;
   date: string;
@@ -170,11 +179,15 @@ export async function claimPetReward(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<PetClaimSuccess> {
+  const nonce = generateNonce();
+  const expiresAt = defaultClaimExpiresAt(params.date);
   const message = buildPetClaimMessage({
     wallet: params.wallet,
     amount: PET_LOVE_REWARD,
     date: params.date,
     submissionId: params.submissionId,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -189,6 +202,8 @@ export async function claimPetReward(params: {
     amount: PET_LOVE_REWARD,
     date: params.date,
     submissionId: params.submissionId,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
 

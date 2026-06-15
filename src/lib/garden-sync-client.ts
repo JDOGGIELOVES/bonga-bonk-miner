@@ -3,6 +3,15 @@ import type { Wallet } from "@solana/wallet-adapter-react";
 import { buildGardenClaimMessage } from "@/lib/garden-claim-messages";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
 import type { GardenState } from "@/lib/vibes-garden";
+
+/** High-entropy short nonce (dupe of claim-client for independence; keep in sync). */
+function generateNonce(): string {
+  const rnd = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+  return `${Date.now().toString(36)}-${rnd}`;
+}
+function defaultClaimExpiresAt(date: string): string {
+  return new Date(`${date}T23:59:59.000Z`).toISOString().replace(/\.000Z$/, "Z");
+}
 import type { GardenSyncAction } from "@/lib/garden-sync-server";
 import { formatErrorMessage } from "@/lib/format-error";
 
@@ -100,10 +109,14 @@ export async function requestGardenOnChainClaim(params: {
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<{ signature: string; amount: number; explorerUrl: string }> {
   const date = todayKey();
+  const nonce = generateNonce();
+  const expiresAt = defaultClaimExpiresAt(date);
   const message = buildGardenClaimMessage({
     wallet: params.wallet,
     amount: params.amount,
     date,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -117,6 +130,8 @@ export async function requestGardenOnChainClaim(params: {
     wallet: params.wallet,
     amount: params.amount,
     date,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
 

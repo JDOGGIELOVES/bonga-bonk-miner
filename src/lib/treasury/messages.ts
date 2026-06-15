@@ -2,6 +2,19 @@ import bs58 from "bs58";
 import nacl from "tweetnacl";
 import { TREASURY_CLAIM_DOMAIN } from "@/lib/treasury/config";
 
+export const MESSAGE_VERSION = "v1";
+export const SIGNED_PAYLOAD_DOMAIN = `${TREASURY_CLAIM_DOMAIN} ${MESSAGE_VERSION}`;
+
+function buildVersionedHeader(action: string): string[] {
+  return [SIGNED_PAYLOAD_DOMAIN, `Action: ${action}`];
+}
+
+/** Helper to ensure stable number/string formatting in payloads (no locale, fixed decimals where needed). */
+function fmtAmount(n: number): string {
+  // Amounts are integers or small floats; keep simple and exact as provided by caller.
+  return String(n);
+}
+
 export function buildTapMessage(params: {
   wallet: string;
   date: string;
@@ -9,8 +22,8 @@ export function buildTapMessage(params: {
 }) {
   const { wallet, date, tapIndex } = params;
   return [
-    TREASURY_CLAIM_DOMAIN,
-    "Tap",
+    SIGNED_PAYLOAD_DOMAIN,
+    "Action: Tap",
     `Wallet: ${wallet}`,
     `Date: ${date}`,
     `TapIndex: ${tapIndex}`,
@@ -63,15 +76,19 @@ export function buildClaimMessage(params: {
   wallet: string;
   amount: number;
   date: string;
+  nonce?: string;
+  expiresAt?: string; // ISO or day-end for the claim window (recommended ~24h or end-of-UTC-day)
 }) {
-  const { wallet, amount, date } = params;
-  return [
-    TREASURY_CLAIM_DOMAIN,
-    "Claim Request",
+  const { wallet, amount, date, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("Claim"),
     `Wallet: ${wallet}`,
-    `Amount: ${amount}`,
+    `Amount: ${fmtAmount(amount)}`,
     `Date: ${date}`,
-  ].join("\n");
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
 }
 
 function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
@@ -82,14 +99,19 @@ export function verifyClaimSignature(params: {
   wallet: string;
   amount: number;
   date: string;
+  nonce?: string;
+  expiresAt?: string;
   signature: Uint8Array;
   signedMessage?: Uint8Array;
 }): boolean {
-  const expected = {
+  const expected: any = {
     wallet: params.wallet,
     amount: params.amount,
     date: params.date,
   };
+  if (params.nonce) expected.nonce = params.nonce;
+  if (params.expiresAt) expected.expiresAt = params.expiresAt;
+
   const canonicalMessage = buildClaimMessage(expected);
   const canonicalBytes = new TextEncoder().encode(canonicalMessage);
 
@@ -118,34 +140,43 @@ export function verifyClaimSignature(params: {
 export function buildStakeLockMessage(params: {
   wallet: string;
   tiers: Record<string, number>; // e.g. { Common: 2, Rare: 1, ... }
-  at: string; // ISO timestamp or nonce for the lock action
+  at: string; // ISO timestamp or nonce for the lock action (also serves replay protection)
+  nonce?: string;
+  expiresAt?: string;
 }) {
-  const { wallet, tiers, at } = params;
-  // Canonical stable representation for signing
+  const { wallet, tiers, at, nonce = "", expiresAt = "" } = params;
+  // Canonical stable representation for signing (sorted keys, integers)
   const tierStr = ["Common", "Rare", "Legendary", "Cosmic Bonga"]
     .map((t) => `${t}=${Math.max(0, Math.floor(tiers[t] || 0))}`)
     .join(";");
-  return [
-    TREASURY_CLAIM_DOMAIN,
-    "Stake Lock",
+  const lines = [
+    ...buildVersionedHeader("StakeLock"),
     `Wallet: ${wallet}`,
     `Tiers: ${tierStr}`,
     `At: ${at}`,
-  ].join("\n");
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
 }
 
 export function verifyStakeLockSignature(params: {
   wallet: string;
   tiers: Record<string, number>;
   at: string;
+  nonce?: string;
+  expiresAt?: string;
   signature: Uint8Array;
   signedMessage?: Uint8Array;
 }): boolean {
-  const expected = {
+  const expected: any = {
     wallet: params.wallet,
     tiers: params.tiers,
     at: params.at,
   };
+  if (params.nonce) expected.nonce = params.nonce;
+  if (params.expiresAt) expected.expiresAt = params.expiresAt;
+
   const canonicalMessage = buildStakeLockMessage(expected);
   const canonicalBytes = new TextEncoder().encode(canonicalMessage);
 
@@ -172,24 +203,94 @@ export function verifyStakeLockSignature(params: {
 export function buildStakeUnlockMessage(params: {
   wallet: string;
   at: string;
+  nonce?: string;
+  expiresAt?: string;
 }) {
-  const { wallet, at } = params;
-  return [
-    TREASURY_CLAIM_DOMAIN,
-    "Stake Unlock",
+  const { wallet, at, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("StakeUnlock"),
     `Wallet: ${wallet}`,
     `At: ${at}`,
-  ].join("\n");
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
 }
 
 export function verifyStakeUnlockSignature(params: {
   wallet: string;
   at: string;
+  nonce?: string;
+  expiresAt?: string;
   signature: Uint8Array;
   signedMessage?: Uint8Array;
 }): boolean {
-  const expected = { wallet: params.wallet, at: params.at };
+  const expected: any = { wallet: params.wallet, at: params.at };
+  if (params.nonce) expected.nonce = params.nonce;
+  if (params.expiresAt) expected.expiresAt = params.expiresAt;
+
   const canonicalMessage = buildStakeUnlockMessage(expected);
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}
+
+// --- Bonga Bank Withdraw (the >=10k on-chain claim / treasury spend) ---
+
+export function buildBankWithdrawMessage(params: {
+  wallet: string;
+  amount: number;
+  date: string;
+  nonce?: string;
+  expiresAt?: string;
+}) {
+  const { wallet, amount, date, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("BankWithdraw"),
+    `Wallet: ${wallet}`,
+    `Amount: ${fmtAmount(amount)}`,
+    `Date: ${date}`,
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
+}
+
+export function verifyBankWithdrawSignature(params: {
+  wallet: string;
+  amount: number;
+  date: string;
+  nonce?: string;
+  expiresAt?: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const expected: any = {
+    wallet: params.wallet,
+    amount: params.amount,
+    date: params.date,
+  };
+  if (params.nonce) expected.nonce = params.nonce;
+  if (params.expiresAt) expected.expiresAt = params.expiresAt;
+
+  const canonicalMessage = buildBankWithdrawMessage(expected);
   const canonicalBytes = new TextEncoder().encode(canonicalMessage);
 
   if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {

@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { withWalletClaimLock } from "./claim-lock";
 import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
+import { triggerAutoPause, recordPayoutVelocity } from "@/lib/treasury/payout-guard";
 
 const TALLY_BLOB_PATH = "bonga-claims/global-tally.json";
 const WALLET_CLAIM_LOGS_PATH = "bonga-claims/wallet-claim-logs.json";
@@ -251,7 +252,7 @@ export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
   }
 }
 
-export type ClaimCategory = 'miner' | 'garden' | 'pet' | 'stake';
+export type ClaimCategory = 'miner' | 'garden' | 'pet' | 'stake' | 'bank';
 
 export interface WalletClaimEntry {
   ts: number;
@@ -382,10 +383,91 @@ export async function recordGlobalClaim(
         await trackAndFlagWalletClaim(wallet, safeAmount, category);
       }
 
+      // Record for global velocity (5min burst limit + auto-pause on breach)
+      recordPayoutVelocity();
+
+      // Global anomaly / velocity detection (runs under the global lock)
+      try {
+        await detectGlobalAnomalyPatterns(safeAmount, wallet, category);
+      } catch (e) {
+        console.error("Anomaly detector error (non-fatal):", e);
+      }
+
       return next;
     },
     "tally"
   );
+}
+
+// ====================== GLOBAL ANOMALY + VELOCITY (stronger auto-pause) ======================
+
+const TINY_CLAIM_THRESHOLD = 50; // $BONGA
+const MANY_NEW_WALLETS_WINDOW_MS = 10 * 60 * 1000; // 10 min
+const MANY_NEW_WALLETS_THRESHOLD = 12; // >12 distinct "new-ish" wallets doing tiny claims in window -> pause
+
+/** Detect mass tiny claims from many low-history ("new") wallets in a short window.
+ *  This directly addresses the attack pattern: attacker created dozens of fresh wallets and drained treasury
+ *  with small per-wallet claims (rent + 0.13 SOL each).
+ */
+async function detectGlobalAnomalyPatterns(
+  justClaimedAmount: number,
+  justClaimedWallet: string | undefined,
+  category?: ClaimCategory
+) {
+  if (!justClaimedWallet) return;
+
+  const now = Date.now();
+  const logs = await getWalletClaimLogs();
+
+  // Collect recent claims in the anomaly window
+  const recentClaims: Array<{ wallet: string; ts: number; amount: number; isNewish: boolean }> = [];
+  let distinctRecent = new Set<string>();
+
+  for (const [w, entries] of Object.entries(logs)) {
+    for (const e of entries) {
+      if (now - e.ts > MANY_NEW_WALLETS_WINDOW_MS) continue;
+      const isNewish = entries.length <= 2; // first or second time we've seen this wallet claim at all (within 1h prune)
+      recentClaims.push({ wallet: w, ts: e.ts, amount: e.amount, isNewish });
+      distinctRecent.add(w.toLowerCase());
+    }
+  }
+
+  // Count tiny claims from new-ish wallets
+  const tinyNewClaims = recentClaims.filter(
+    (c) => c.amount > 0 && c.amount <= TINY_CLAIM_THRESHOLD && c.isNewish
+  );
+  const uniqueTinyNewWallets = new Set(tinyNewClaims.map((c) => c.wallet.toLowerCase()));
+
+  if (uniqueTinyNewWallets.size >= MANY_NEW_WALLETS_THRESHOLD) {
+    const reason = `Anomaly: ${uniqueTinyNewWallets.size} distinct low-history wallets claimed tiny amounts (<=${TINY_CLAIM_THRESHOLD}) in last ${Math.round(MANY_NEW_WALLETS_WINDOW_MS / 60000)}min. Auto-pausing treasury.`;
+    console.error("[TREASURY ANOMALY]", reason);
+    triggerAutoPause(45, reason);
+    // Also globally flag a sample of the offenders (best effort)
+    for (const w of Array.from(uniqueTinyNewWallets).slice(0, 20)) {
+      // mark as flagged via existing path (non-blocking)
+      try {
+        const flagged = await getFlaggedWallets();
+        if (!flagged[w]) flagged[w] = [];
+        flagged[w].push({
+          flaggedAt: new Date().toISOString(),
+          reason: "auto: many-new-tiny-wallets pattern",
+          amountInWindow: tinyNewClaims.filter((c) => c.wallet.toLowerCase() === w).reduce((s, c) => s + c.amount, 0),
+          windowLabel: "anomaly",
+        });
+        // persist is expensive here; the next record cycle or manual will save, but we can kick a write
+      } catch {}
+    }
+  }
+
+  // Extra: global velocity of distinct recipients (even non-tiny)
+  if (distinctRecent.size >= 25 && recentClaims.length >= 30) {
+    const vReason = `High distinct recipient velocity: ${distinctRecent.size} different wallets in ${Math.round(MANY_NEW_WALLETS_WINDOW_MS / 60000)}min window.`;
+    // Only pause if we also see a bunch of small payouts (defend the exact prior exploit)
+    const smallCount = recentClaims.filter((c) => c.amount <= 100).length;
+    if (smallCount >= 20) {
+      triggerAutoPause(30, vReason + " Combined with many small payouts — auto-paused.");
+    }
+  }
 }
 
 /** Manual flag for a wallet as exploit (e.g. for Pet Love abuse). */
@@ -417,8 +499,8 @@ export async function manuallyFlagAsExploit(wallet: string, reason = "Manual fla
 
 /** Flag the last N recent Pet Love submissions as exploits. */
 export async function flagLastPetLoveExploits(count = 8) {
-  const { getPetGallery } = await import("@/lib/pet-love-store");
-  const recent = await getPetGallery(count);
+  const { listGallery } = await import("@/lib/pet-love-store");
+  const recent = await listGallery(count);
   const wallets = [...new Set(recent.map((s: any) => (s.wallet || "").toLowerCase().trim()))]
     .filter(Boolean)
     .slice(0, count);

@@ -47,7 +47,7 @@ export default function CommunityPage() {
       <div className="min-h-screen bg-bonga-page">
         {/* Hero */}
         <section className="relative overflow-hidden bg-hero-gradient py-16 md:py-20">
-          <div className="mx-auto max-w-3xl px-4 text-center">
+          <div className="mx-auto max-w-3xl px-[30px] text-center">
             <h1 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
               Welcome to the <span className="text-gradient">Bonga Bonk&apos;s Sister</span> Community
             </h1>
@@ -73,7 +73,7 @@ export default function CommunityPage() {
 
         {/* What is the Bonga Bonk Community */}
         <section className="py-16">
-          <div className="mx-auto max-w-3xl px-4">
+          <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold">
               The <span className="text-gradient">Bonga Bonk&apos;s Sister</span> Fam
             </h2>
@@ -93,7 +93,7 @@ export default function CommunityPage() {
 
         {/* Connect with the Community */}
         <section className="bg-muted/20 py-16">
-          <div className="mx-auto max-w-3xl px-4">
+          <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold text-center">
               Connect with the <span className="text-gradient">Bonga Bonk&apos;s Sister Community</span>
             </h2>
@@ -162,7 +162,7 @@ export default function CommunityPage() {
 
         {/* Get Involved */}
         <section className="py-16">
-          <div className="mx-auto max-w-3xl px-4">
+          <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold">
               How to Get Involved with <span className="text-gradient">Bonk &amp; Bonga Bonk&apos;s Sister</span>
             </h2>
@@ -197,7 +197,7 @@ export default function CommunityPage() {
 
         {/* Values */}
         <section className="bg-muted/20 py-16">
-          <div className="mx-auto max-w-3xl px-4 text-center">
+          <div className="mx-auto max-w-3xl px-[30px] text-center">
             <h2 className="font-display text-3xl font-bold">Our Values as the Bonga Bonk&apos;s Sister Community</h2>
             <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">
               {[

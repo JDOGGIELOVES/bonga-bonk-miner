@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   GARDEN_DAILY_EARN_CAP,
-  GARDEN_ZONES,
   PLANT_CATALOG,
   countOwnedPlants,
   formatGardenBonga,
@@ -33,7 +32,8 @@ export function GardenShop({
   onBuy,
   message,
 }: GardenShopProps) {
-  const [plantZone, setPlantZone] = useState<GardenZone>("meadow");
+  // Unified garden — zone kept only for buyPlant data shape compatibility.
+  const plantZone: GardenZone = "meadow";
 
   if (!open) return null;
 
@@ -67,7 +67,7 @@ export function GardenShop({
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
           Daily farm cap: {formatGardenBonga(state.bongaFarmedToday)} / {GARDEN_DAILY_EARN_CAP}{" "}
-          ({formatGardenBonga(earnRemaining)} left today)
+          ({formatGardenBonga(earnRemaining)} left today) — goes to Bonga Bank Vault
         </p>
         <p className="text-[10px] text-muted-foreground">Next reset: {formatNextDailyReset()}</p>
         {message && (
@@ -77,34 +77,12 @@ export function GardenShop({
         <div className="mt-3 rounded-bonga-lg border border-bonga-teal/20 bg-bonga-teal/5 p-3 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">Shop tips</p>
           <p className="mt-1">
-            Pick a <strong className="text-foreground">zone</strong> (Meadow, Greenhouse, or Farm),
-            then plant. Duplicates stack idle + tap income. Progression is slower — max{" "}
-            {GARDEN_DAILY_EARN_CAP} garden $BONGA farmed per day.
+            Buy plants for your central garden. Duplicates stack full idle + tap income. Max{" "}
+            {GARDEN_DAILY_EARN_CAP} garden $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain at 10k).
           </p>
           <p className="mt-1.5">
-            <strong className="text-foreground">Bonga Kush 🌿</strong> requires a Bonga NFT.
-            Garden $BONGA is local only, not on-chain.
+            NFT holders get +25% yield on taps and idle. All progress saves locally.
           </p>
-        </div>
-
-        <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold text-foreground">Plant in zone</p>
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {GARDEN_ZONES.map((zone) => (
-              <button
-                key={zone.id}
-                type="button"
-                onClick={() => setPlantZone(zone.id)}
-                className={`min-h-[44px] shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition ${
-                  plantZone === zone.id
-                    ? "border-bonga-teal bg-bonga-teal/15"
-                    : "border-border bg-muted/40"
-                }`}
-              >
-                {zone.emoji} {zone.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         <ul className="mt-4 space-y-3">

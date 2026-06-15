@@ -13,12 +13,16 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       wallet?: string;
       at?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
 
     const wallet = body.wallet?.trim();
     const at = body.at?.trim();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
     if (!wallet || !signatureB58 || !at) {
@@ -47,7 +51,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const valid = verifyStakeUnlockSignature({ wallet, at, signature, signedMessage });
+    const valid = verifyStakeUnlockSignature({ wallet, at, nonce: nonce || undefined, expiresAt: expiresAt || undefined, signature, signedMessage });
     if (!valid) {
       return NextResponse.json({ error: "Wallet signature verification failed." }, { status: 401 });
     }

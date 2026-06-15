@@ -27,7 +27,7 @@ export default function HowToConnectPage() {
     <>
       <BongaHeader />
       <div className="min-h-screen bg-bonga-page">
-        <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mx-auto max-w-3xl px-[30px] py-12">
           {/* Hero */}
           <div className="text-center mb-12">
             <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight">

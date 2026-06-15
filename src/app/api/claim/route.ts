@@ -5,8 +5,10 @@ import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
-import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { getTodayClaimedFromTreasury, consumeNonceIfFresh } from "@/lib/treasury/daily-claims";
 import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
+import { getBongaBank, getBankMinWithdraw, depositToBank } from "@/lib/bonga-bank";
+import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import {
@@ -23,7 +25,6 @@ import {
   recordIpClaim,
 } from "@/lib/claim-ip-store";
 import { getClientIp } from "@/lib/request-ip";
-import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,6 +74,8 @@ export async function POST(request: Request) {
       wallet?: string;
       amount?: number;
       date?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
@@ -80,10 +83,12 @@ export async function POST(request: Request) {
     const wallet = body.wallet?.trim();
     const amount = Number(body.amount);
     const date = body.date?.trim() ?? todayKey();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
-    if (!wallet || !signatureB58 || !Number.isFinite(amount)) {
-      return NextResponse.json({ error: "Invalid claim request." }, { status: 400 });
+    if (!wallet || !signatureB58 || !Number.isFinite(amount) || !nonce) {
+      return NextResponse.json({ error: "Invalid claim request (wallet, amount, signature, and nonce required)." }, { status: 400 });
     }
 
     if (
@@ -100,6 +105,15 @@ export async function POST(request: Request) {
 
     if (date !== todayKey()) {
       return NextResponse.json({ error: "Claims are only valid for today (UTC)." }, { status: 400 });
+    }
+
+    // Basic expiration check (if provided): must be in the future and not wildly in the past/future
+    if (expiresAt) {
+      const expTs = Date.parse(expiresAt);
+      const now = Date.now();
+      if (!Number.isFinite(expTs) || expTs < now - 5 * 60 * 1000 || expTs > now + 48 * 60 * 60 * 1000) {
+        return NextResponse.json({ error: "Claim message expired or expiration invalid." }, { status: 400 });
+      }
     }
 
     // Auto-block check for flagged wallets (3 days)
@@ -133,6 +147,8 @@ export async function POST(request: Request) {
       wallet,
       amount,
       date,
+      nonce,
+      expiresAt: expiresAt || undefined,
       signature,
       signedMessage,
     });
@@ -182,7 +198,31 @@ export async function POST(request: Request) {
           );
         }
 
+        const minBank = getBankMinWithdraw();
+
         await recordMinerClaim(wallet, date, amount);
+
+        if (amount < minBank) {
+          // Auto-deposit small claims under the Bonga Bank threshold (no treasury tx cost)
+          await depositToBank(wallet, amount, { source: "miner", date });
+          if (ipKey) {
+            await recordIpClaim({ ipKey, wallet, amount, date, kind: "miner" });
+          }
+          const updatedBank = await getBongaBank(wallet);
+          return {
+            ok: true as const,
+            depositedToBank: amount,
+            amount,
+            newBankBalance: updatedBank.bankedBonga,
+            message: `Claim of ${amount} auto-deposited to your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches ${minBank} $BONGA.`,
+          };
+        }
+
+        // Replay protection for on-chain claims >= threshold
+        const nonceCheck = await consumeNonceIfFresh(wallet, "claim", date, nonce);
+        if (!nonceCheck.ok) {
+          throw new Error(nonceCheck.reason);
+        }
 
         try {
           const { signature: txSignature } = await transferBongaFromTreasury({
@@ -256,8 +296,9 @@ export async function GET(request: Request) {
       });
     }
 
+    const walletParam = url.searchParams.get("wallet")?.trim();
     const now = Date.now();
-    if (statusCache && now - statusCache.at < STATUS_CACHE_MS) {
+    if (!walletParam && statusCache && now - statusCache.at < STATUS_CACHE_MS) {
       return NextResponse.json(statusCache.payload);
     }
 
@@ -266,26 +307,61 @@ export async function GET(request: Request) {
       balances = await getTreasuryBalances(config);
     } catch (error) {
       if (isRpcRateLimitError(error)) {
-        return NextResponse.json({
+        const errPayload: any = {
           enabled: true,
           treasury: config.treasuryPublicKey.toBase58(),
           mint: config.mint.toBase58(),
           dailyLimit: config.dailyLimit,
           balancesUnavailable: true,
           hint: rpcRateLimitMessage(),
-        });
+        };
+        if (walletParam) {
+          try {
+            const bank = await getBongaBank(walletParam);
+            const min = getBankMinWithdraw();
+            errPayload.bank = {
+              bankedBonga: bank.bankedBonga,
+              minWithdraw: min,
+              canWithdraw: bank.bankedBonga >= min,
+            };
+            errPayload.note = "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.";
+          } catch {}
+        }
+        return NextResponse.json(errPayload);
       }
       throw error;
     }
 
-    const payload = {
+    const payload: any = {
       enabled: true,
       treasury: config.treasuryPublicKey.toBase58(),
       mint: config.mint.toBase58(),
       dailyLimit: config.dailyLimit,
       balances,
+      dailyOnChainWalletCap: walletMaxOnChainBongaPerDay(),
+      note: "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA (getBankMinWithdraw). All smaller claims auto-deposit to the vault.",
     };
-    statusCache = { at: now, payload };
+
+    if (walletParam) {
+      try {
+        const bank = await getBongaBank(walletParam);
+        const min = getBankMinWithdraw();
+        payload.bank = {
+          bankedBonga: bank.bankedBonga,
+          minWithdraw: min,
+          canWithdraw: bank.bankedBonga >= min,
+          lifetimeBanked: bank.lifetimeBanked || 0,
+          lifetimeWithdrawn: bank.lifetimeWithdrawn || 0,
+          lastActivity: bank.lastWithdrawAt || bank.lastDepositAt || bank.updatedAt,
+        };
+      } catch (e) {
+        payload.bank = { error: "Unable to load Bonga Bank" };
+      }
+    }
+
+    if (!walletParam) {
+      statusCache = { at: now, payload };
+    }
 
     return NextResponse.json(payload);
   } catch (error) {

@@ -31,7 +31,7 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function maxWalletsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_WALLETS_PER_IP_DAY", 3);
+  return envInt("CLAIM_MAX_WALLETS_PER_IP_DAY", 10);
 }
 
 /** Legacy global IP cap — prefer per-kind limits below. */
@@ -42,7 +42,7 @@ export function maxBongaPerIpPerDay(): number {
   );
 }
 
-export function maxBongaPerIpForKind(kind: "miner" | "pet" | "garden"): number {
+export function maxBongaPerIpForKind(kind: "miner" | "pet" | "garden" | "bank" | "bank"): number {
   if (kind === "garden") return gardenDailyClaimLimit();
   if (kind === "pet") return PET_LOVE_REWARD;
   return minerDailyClaimLimit();
@@ -50,7 +50,7 @@ export function maxBongaPerIpForKind(kind: "miner" | "pet" | "garden"): number {
 
 function ipKindBongaSpent(
   record: IpDailyRecord,
-  kind: "miner" | "pet" | "garden"
+  kind: "miner" | "pet" | "garden" | "bank" | "bank"
 ): number {
   if (kind === "garden") return Math.max(0, Number(record.gardenBongaTotal) || 0);
   if (kind === "pet") return Math.max(0, Number(record.petBongaTotal) || 0);
@@ -75,23 +75,30 @@ export function isPetClientIpRequired(): boolean {
 }
 
 export function maxMinerClaimsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_MINER_CLAIMS_PER_IP_DAY", 3);
+  return envInt("CLAIM_MAX_MINER_CLAIMS_PER_IP_DAY", 20);
 }
 
 export function maxGardenClaimsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_GARDEN_CLAIMS_PER_IP_DAY", 3);
+  return envInt("CLAIM_MAX_GARDEN_CLAIMS_PER_IP_DAY", 20);
 }
 
 export function minMsBetweenIpClaims(): number {
-  return envInt("CLAIM_MIN_MS_BETWEEN_IP", 30_000);
+  return envInt("CLAIM_MIN_MS_BETWEEN_IP", 5_000);
 }
 
 export function maxTapsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_TAPS_PER_IP_DAY", 3_500);
+  return envInt("CLAIM_MAX_TAPS_PER_IP_DAY", 15_000);
 }
 
 export function isIpClaimLimitsEnabled(): boolean {
-  return process.env.CLAIM_IP_LIMITS_ENABLED !== "false";
+  if (process.env.CLAIM_IP_LIMITS_ENABLED === "false") return false;
+  if (process.env.CLAIM_IP_LIMITS_ENABLED === "true") return true;
+  // Relax IP rate limiting / blocking entirely for local development and testing.
+  // Only enforce in production (Vercel) unless explicitly forced on.
+  if (process.env.NODE_ENV !== "production" && process.env.VERCEL !== "1") {
+    return false;
+  }
+  return true;
 }
 
 /** Hash IP before persisting — blob records are public. */
@@ -174,7 +181,7 @@ function emptyRecord(ipKey: string, date: string): IpDailyRecord {
   };
 }
 
-function maxWalletsForKind(kind: "miner" | "pet" | "garden"): number {
+function maxWalletsForKind(kind: "miner" | "pet" | "garden" | "bank"): number {
   if (kind === "pet") return maxPetWalletsPerIpPerDay();
   return maxWalletsPerIpPerDay();
 }
@@ -280,7 +287,7 @@ export async function assertIpCanClaim(params: {
   wallet: string;
   amount: number;
   date: string;
-  kind: "miner" | "pet" | "garden";
+  kind: "miner" | "pet" | "garden" | "bank" | "bank";
   boundIpKey?: string;
 }): Promise<{ ok: true } | { ok: false; reason: string }> {
   if (!isIpClaimLimitsEnabled()) return { ok: true };
@@ -423,7 +430,7 @@ export async function recordIpClaim(params: {
   wallet: string;
   amount: number;
   date: string;
-  kind: "miner" | "pet" | "garden";
+  kind: "miner" | "pet" | "garden" | "bank" | "bank";
 }): Promise<void> {
   if (!isIpClaimLimitsEnabled()) return;
 

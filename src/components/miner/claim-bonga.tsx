@@ -17,6 +17,7 @@ import { gameAudio } from "@/lib/audio/audio-manager";
 import {
   fetchClaimStatus,
   requestOnChainClaim,
+  depositPendingToBank,
   type ClaimStatus,
 } from "@/lib/claim-client";
 import { fetchMinerEarned, type MinerEarnedStatus } from "@/lib/miner-tap-client";
@@ -60,12 +61,12 @@ export function ClaimBonga({
   const claimable =
     onChainEnabled && serverClaimable !== null ? serverClaimable : localClaimable;
 
-  // Only claim in batches of BONGA_CLAIM_BATCH (e.g. 10) to keep tx fees reasonable.
-  // We send the largest multiple of the batch that is <= claimable.
-  const claimBatchAmount = Math.max(
-    0,
-    Math.floor(claimable / BONGA_CLAIM_BATCH) * BONGA_CLAIM_BATCH
-  );
+  // For on-chain, claim in batches (now 5 for easier testing). For local/sim, allow any positive amount.
+  const isOnChain = onChainEnabled && connected;
+  const claimBatchAmount = isOnChain
+    ? Math.max(0, Math.floor(claimable / BONGA_CLAIM_BATCH) * BONGA_CLAIM_BATCH)
+    : Math.max(0, Math.floor(claimable));  // easier: claim everything possible locally/sim
+
 
   useEffect(() => {
     let cancelled = false;
@@ -101,7 +102,7 @@ export function ClaimBonga({
   }, [onChainEnabled, publicKey, serverEarnRefreshKey]);
 
   const handleClaim = async () => {
-    if (!connected || !publicKey || claimBatchAmount < BONGA_CLAIM_BATCH) return;
+    if (!connected || !publicKey || claimBatchAmount <= 0) return;
 
     setClaiming(true);
     setErrorMsg("");
@@ -110,48 +111,41 @@ export function ClaimBonga({
     try {
       const wallet = publicKey.toBase58();
 
-      if (onChainEnabled) {
-        // Always claim in batch increments server-side too
-        const amountToClaim = claimBatchAmount;
-        if (amountToClaim < BONGA_CLAIM_BATCH) return;
+      // For the tap miner game: daily mined Bonga (max 1000) goes right into the BONGA BANK
+      // Use the bank deposit (no signature needed for verified miner earnings; server uses the earn record)
+      const amountToDeposit = Math.max(0, serverEarned?.claimable ?? claimable);
+      if (amountToDeposit <= 0) return;
 
-        const result = await requestOnChainClaim({
-          wallet,
-          amount: amountToClaim,
-          date: todayKey(),
-          connectedWallet,
-          signMessage,
-        });
+      const depositRes = await depositPendingToBank({
+        wallet,
+        source: "miner",
+      });
 
-        const next = processClaim(state, wallet, amountToClaim);
-        onStateChange(next);
-        setServerEarned((prev) =>
-          prev
-            ? {
-                ...prev,
-                claimed: prev.claimed + amountToClaim,
-                claimable: Math.max(0, (prev.claimable ?? 0) - amountToClaim),
-              }
-            : prev
-        );
-        gameAudio.playCoinCollect();
+      const next = processClaim(state, wallet, amountToDeposit);
+      onStateChange(next);
+      setServerEarned((prev) =>
+        prev
+          ? {
+              ...prev,
+              claimed: prev.claimed + amountToDeposit,
+              claimable: Math.max(0, (prev.claimable ?? 0) - amountToDeposit),
+            }
+          : prev
+      );
+      gameAudio.playCoinCollect();
+
+      if (depositRes.ok) {
         setSuccessMsg(
-          `Sent ${amountToClaim} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`
+          `Deposited ${amountToDeposit} $BONGA directly into your Bonga Bank! (Total banked now: ${depositRes.newBankBalance ?? "?"} )`
         );
-        setExplorerUrl(result.explorerUrl);
-        onClaimSuccess?.();
       } else {
-        await new Promise((r) => setTimeout(r, 1200));
-        const amountToClaim = claimBatchAmount || claimable;
-        const next = processClaim(state, wallet, amountToClaim);
-        onStateChange(next);
-        gameAudio.playCoinCollect();
-        setSuccessMsg(
-          `Claimed ${amountToClaim} $BONGA (simulated). Enable on-chain claims in production.`
-        );
+        setSuccessMsg(`Mined ${amountToDeposit} $BONGA recorded for bank deposit.`);
       }
+      onClaimSuccess?.();
+
+      // Note: $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. On-chain withdrawal from bank is done via the Bonga Bank page.
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Claim failed.");
+      setErrorMsg(err instanceof Error ? err.message : "Deposit to Bank failed.");
     } finally {
       setClaiming(false);
       setTimeout(() => {
@@ -173,7 +167,7 @@ export function ClaimBonga({
     onChainEnabled &&
     connected &&
     !waitingForServer &&
-    claimBatchAmount < BONGA_CLAIM_BATCH &&
+    claimBatchAmount <= 0 &&
     !successMsg &&
     !errorMsg;
 
@@ -189,7 +183,7 @@ export function ClaimBonga({
     !errorMsg &&
     !waitingForServer &&
     !showOnChainStatus &&
-    claimBatchAmount < BONGA_CLAIM_BATCH &&
+    claimBatchAmount <= 0 &&
     !(onChainEnabled && !connected && localClaimable > 0);
 
   if (hideClaimCard) return null;
@@ -234,19 +228,19 @@ export function ClaimBonga({
           className="bonga-card border-amber-300/40 bg-amber-50/50 p-5 dark:bg-amber-950/20"
         >
           <Badge variant="default" className="mb-3">
-            On-chain claims live
+            Bonga Bank deposits live
           </Badge>
           <p className="font-display text-lg font-bold tracking-tight">
             {serverEarned && serverEarned.claimed > 0
-              ? "Today\u2019s on-chain reward claimed"
-              : "Keep bonking to unlock claim"}
+              ? "Today\u2019s mined $BONGA deposited to Bank"
+              : "Keep bonking to mine more for the Bank"}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {serverEarned && serverEarned.claimed > 0
-              ? "You already received today\u2019s verified $BONGA from the treasury. Come back tomorrow UTC."
+              ? "Today\u2019s verified taps have been deposited to your Bonga Bank. Come back tomorrow UTC for more."
               : localClaimable > 0
-                ? "Local progress doesn\u2019t count for payouts anymore. With your wallet connected, keep tapping — 100 verified bonks = 1 $BONGA on-chain."
-                : `With your wallet connected, tap coins in the game. 100 verified bonks = 1 $BONGA on-chain (up to ${DAILY_BONGA_LIMIT}/day in ${BONGA_CLAIM_BATCH} $BONGA batches).`}
+                ? "Local progress doesn\u2019t count. With your wallet connected, keep tapping — 1 tap = 1 $BONGA mined directly into your Bonga Bank (up to 1000/day)."
+                : `With your wallet connected, tap to mine. 1 tap = 1 $BONGA mined (up to ${DAILY_BONGA_LIMIT}/day) — goes directly into your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.`}
           </p>
           {serverEarned && (
             <p className="mt-2 text-xs text-muted-foreground">
@@ -254,6 +248,18 @@ export function ClaimBonga({
               {serverEarned.earned > 0 ? ` · ${serverEarned.earned} $BONGA earned` : ""}
               {tapsToNextBonga > 0 ? ` · ${tapsToNextBonga} bonks until next $BONGA` : ""}
             </p>
+          )}
+
+          {serverEarned?.dailyLimitReached && serverEarned.nextDailyReset && (
+            <div className="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              <p className="font-medium">
+                {serverEarned.limitMessage || `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`}
+              </p>
+              <p className="text-xs mt-1 text-amber-600">
+                The daily timer resets at{" "}
+                {new Date(serverEarned.nextDailyReset).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} UTC tomorrow.
+              </p>
+            </div>
           )}
         </motion.div>
       ) : (
@@ -294,18 +300,14 @@ export function ClaimBonga({
                 claiming ||
                 claimStatus === null ||
                 waitingForServer ||
-                claimBatchAmount < BONGA_CLAIM_BATCH
+                claimBatchAmount <= 0
               }
             >
               {claiming
-                ? onChainEnabled
-                  ? "Sending on-chain..."
-                  : "Claiming..."
+                ? "Depositing to Bonga Bank..."
                 : claimStatus === null
                   ? "Loading..."
-                  : onChainEnabled
-                    ? `Claim ${claimBatchAmount} $BONGA On-Chain`
-                    : `Claim Mined $BONGA`}
+                  : `Deposit ${claimBatchAmount || claimable} $BONGA to Bank`}
             </Button>
           ) : (
             <Button

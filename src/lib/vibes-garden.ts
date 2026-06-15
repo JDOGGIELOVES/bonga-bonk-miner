@@ -2,8 +2,11 @@
 
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
-/** Max garden $BONGA credited per UTC day (idle + taps + quests). */
-export const GARDEN_DAILY_EARN_CAP = 400;
+/** Max garden $BONGA credited per UTC day (idle + taps + quests). 
+ * $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.
+ * All earnings auto-deposit to the vault below the threshold.
+ */
+export const GARDEN_DAILY_EARN_CAP = 1500;
 
 /** Returns the next daily reset (UTC midnight). */
 export function getNextDailyResetDate(): Date {
@@ -75,7 +78,7 @@ export const PLANT_CATALOG: PlantType[] = [
     name: "Love Lotus",
     emoji: "💗",
     description: "Opens hearts on every water.",
-    cost: 65,
+    cost: 48,
     tapBonga: 0.08,
     idleBongaPerSec: 0.016,
     rarity: "common",
@@ -86,8 +89,8 @@ export const PLANT_CATALOG: PlantType[] = [
     id: "frequency-crystal",
     name: "Frequency Crystal",
     emoji: "🔮",
-    description: "Amplifies meadow energy.",
-    cost: 180,
+    description: "Amplifies gentle energy.",
+    cost: 145,
     tapBonga: 0.12,
     idleBongaPerSec: 0.025,
     rarity: "rare",
@@ -99,51 +102,12 @@ export const PLANT_CATALOG: PlantType[] = [
     name: "Affirmation Tree",
     emoji: "🌳",
     description: "Leaves whisper good bonks.",
-    cost: 380,
+    cost: 310,
     tapBonga: 0.20,
     idleBongaPerSec: 0.04,
     rarity: "rare",
     glow: "#4ADE80",
     defaultZone: "farm",
-  },
-  {
-    id: "bonga-kush",
-    name: "Bonga Kush",
-    emoji: "🌿",
-    description: "Sacred herb for NFT fam — greenhouse royalty.",
-    cost: 420,
-    tapBonga: 0.25,
-    idleBongaPerSec: 0.05,
-    rarity: "nft",
-    nftOnly: true,
-    glow: "#22C55E",
-    defaultZone: "greenhouse",
-  },
-  {
-    id: "cosmic-sunflower",
-    name: "Cosmic Sunflower",
-    emoji: "🌻",
-    description: "NFT fam exclusive bloom.",
-    cost: 520,
-    tapBonga: 0.30,
-    idleBongaPerSec: 0.06,
-    rarity: "nft",
-    nftOnly: true,
-    glow: "#FF8533",
-    defaultZone: "farm",
-  },
-  {
-    id: "bonk-bloom",
-    name: "Bonk Bloom",
-    emoji: "✨",
-    description: "Legendary holder decoration.",
-    cost: 880,
-    tapBonga: 0.40,
-    idleBongaPerSec: 0.08,
-    rarity: "legendary",
-    nftOnly: true,
-    glow: "#9B5DE5",
-    defaultZone: "meadow",
   },
 ];
 
@@ -291,9 +255,9 @@ export function getNftMultiplier(isHolder: boolean): {
     return { tap: 1, idle: 1, label: "" };
   }
   return {
-    tap: 2,
-    idle: 2,
-    label: "NFT holder · 2× tap · 2× idle · Bonga Kush unlocked",
+    tap: 1.25,
+    idle: 1.25,
+    label: "NFT holder · +25% yield",
   };
 }
 
@@ -357,6 +321,17 @@ export function applyIdleEarnings(
   const rawEarned = idleRate(state, mult) * cappedSec;
 
   return applyCappedEarnings(state, rawEarned, { lastTickAt: now }).state;
+}
+
+/** Compute how much would be earned from idle since lastTick (capped), without mutating. Useful for welcome-back message. */
+export function computeOfflineEarnings(state: GardenState, isNftHolder: boolean, now = Date.now()): number {
+  if (isDailyEarnCapReached(state)) return 0;
+  const elapsedSec = Math.max(0, (now - state.lastTickAt) / 1000);
+  const cappedSec = Math.min(elapsedSec, MAX_OFFLINE_HOURS * 3600);
+  const mult = getNftMultiplier(isNftHolder).idle;
+  const raw = idleRate(state, mult) * cappedSec;
+  const room = getDailyEarnRemaining(state);
+  return Math.min(Math.max(0, raw), room);
 }
 
 export function waterPlant(

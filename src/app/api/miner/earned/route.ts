@@ -5,6 +5,8 @@ import {
   earnedBongaFromTaps,
   getMinerEarnRecord,
 } from "@/lib/miner-earn-store";
+import { getBongaBank, getBankMinWithdraw } from "@/lib/bonga-bank";
+import { DAILY_BONGA_LIMIT } from "@/lib/miner-game";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -29,12 +31,28 @@ export async function GET(request: Request) {
   }
 
   const record = await getMinerEarnRecord(wallet, date);
+  const bank = await getBongaBank(wallet);
+  const earned = earnedBongaFromTaps(record.taps);
+  const dailyLimitReached = earned >= DAILY_BONGA_LIMIT;
+
+  // Calculate next UTC midnight reset time
+  const now = new Date();
+  const nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+  const nextDailyReset = nextReset.toISOString();
+
   return NextResponse.json({
     wallet,
     date,
     taps: record.taps,
-    earned: earnedBongaFromTaps(record.taps),
+    earned,
     claimed: record.claimed,
     claimable: claimableFromRecord(record),
+    bankedBonga: bank.bankedBonga,
+    bankMinWithdraw: getBankMinWithdraw(),
+    dailyLimitReached,
+    nextDailyReset,
+    limitMessage: dailyLimitReached 
+      ? `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!` 
+      : null,
   });
 }

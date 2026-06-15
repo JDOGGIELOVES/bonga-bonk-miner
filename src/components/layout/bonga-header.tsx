@@ -40,13 +40,15 @@ export function BongaHeader({
   };
 
   return (
-    <header className="sticky top-0 z-[60] border-b border-border/40 bg-card/70 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-2xl flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-4">
-        <Link href="/" className="group min-w-0 flex-1">
-          <p className="font-display text-2xl font-extrabold tracking-tight text-bonga-orange sm:text-2xl">
+    <header className="sticky top-0 z-[60] w-full border-b border-border/40 bg-card/70 backdrop-blur-xl">
+      {/* Full-width header with exactly 30px left/right padding. No max-width constraint on the header bar itself. */}
+      <div className="w-full px-[30px] py-4 flex items-center justify-between gap-4">
+        {/* Brand / Logo - left side, shrink-protected so text never gets overlapped by nav buttons */}
+        <Link href="/" className="group flex-shrink-0 min-w-[140px]">
+          <p className="font-display text-2xl font-extrabold tracking-tight text-bonga-orange">
             BONGA
           </p>
-          <p className="truncate text-sm font-medium text-foreground/80 sm:text-sm">
+          <p className="truncate text-sm font-medium text-foreground/80">
             Bonk&apos;s Sister
           </p>
           <p className="hidden text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground sm:block">
@@ -54,8 +56,8 @@ export function BongaHeader({
           </p>
         </Link>
 
-        {/* Nav links + controls wrapped to support two rows on mobile, preventing horizontal overflow */}
-        <div className="flex flex-wrap items-center gap-1.5">
+        {/* Nav links + controls - right side. flex-wrap allows clean stacking on very narrow screens without overlapping logo text. */}
+        <div className="flex flex-wrap items-center gap-1.5 justify-end flex-1 min-w-0">
           {currentMode === 'garden' && onModeChange ? (
             // Per user request (after repeated navigation issues): simplified nav on garden view.
             // Only keep the reliable back-to-miner link. Other links (Peace, NFTs, etc.) are removed from garden to avoid broken experience.

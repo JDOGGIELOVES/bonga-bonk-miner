@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
-import { getTreasuryConfig } from "@/lib/treasury/config";
 import {
   earnedBongaFromTaps,
   getMinerEarnRecord,
   isMinerEarnStorageReady,
   registerServerTap,
 } from "@/lib/miner-earn-store";
+import { DAILY_BONGA_LIMIT } from "@/lib/miner-game";
 import {
   assertIpCanTap,
   ipStorageKey,
@@ -23,14 +23,8 @@ function todayKey() {
 
 export async function POST(request: Request) {
   try {
-    const config = getTreasuryConfig();
-    if (!config) {
-      return NextResponse.json(
-        { error: "Server taps only required when on-chain claims are enabled." },
-        { status: 503 }
-      );
-    }
-
+    // Server tap recording is always available to track verified progress (even for local/sim claims).
+    // On-chain payout config is only required at claim time.
     if (process.env.CLAIMS_PAUSED === "true") {
       return NextResponse.json({ error: "Claims are temporarily paused." }, { status: 503 });
     }
@@ -83,12 +77,24 @@ export async function POST(request: Request) {
     }
 
     const result = await registerServerTap({ wallet, date, tapIndex, ipKey });
+    const earned = earnedBongaFromTaps(result.record.taps);
+    const dailyLimitReached = earned >= DAILY_BONGA_LIMIT;
+
+    // Compute next UTC midnight reset
+    const now = new Date();
+    const nextReset = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+
     if (!result.ok) {
       return NextResponse.json(
         {
           error: result.reason,
           taps: result.record.taps,
-          earned: earnedBongaFromTaps(result.record.taps),
+          earned,
+          dailyLimitReached,
+          nextDailyReset: nextReset.toISOString(),
+          limitMessage: dailyLimitReached 
+            ? `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!` 
+            : null,
         },
         { status: result.reason === "Tap too fast." ? 429 : 400 }
       );
@@ -101,7 +107,12 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       taps: result.record.taps,
-      earned: earnedBongaFromTaps(result.record.taps),
+      earned,
+      dailyLimitReached,
+      nextDailyReset: nextReset.toISOString(),
+      limitMessage: dailyLimitReached 
+        ? `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!` 
+        : null,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Tap registration failed.";

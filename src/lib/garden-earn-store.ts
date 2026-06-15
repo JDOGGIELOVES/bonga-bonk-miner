@@ -8,6 +8,12 @@ import {
   type PlantedCrop,
 } from "@/lib/vibes-garden";
 
+/**
+ * Garden daily earn/claim cap (1500).
+ * $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.
+ * Earnings below the min auto-deposit to the player's vault.
+ */
+
 export interface GardenEarnRecord extends GardenState {
   wallet: string;
   /** On-chain $BONGA already claimed from today's garden earnings. */
@@ -31,6 +37,7 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function gardenDailyClaimLimit(): number {
+  // Defaults to the shared GARDEN_DAILY_EARN_CAP (1500). All small claims auto-deposit to Bonga Bank Vault.
   return envInt("GARDEN_DAILY_CLAIM_LIMIT", GARDEN_DAILY_EARN_CAP);
 }
 

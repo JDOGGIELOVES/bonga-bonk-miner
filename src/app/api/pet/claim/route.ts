@@ -15,7 +15,8 @@ import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
-import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { getTodayClaimedFromTreasury, consumeNonceIfFresh } from "@/lib/treasury/daily-claims";
+import { getBankMinWithdraw, depositToBank, getBongaBank } from "@/lib/bonga-bank";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
 import { buildPetClaimMessage } from "@/lib/pet-love-messages";
@@ -52,6 +53,8 @@ export async function POST(request: Request) {
       amount?: number;
       date?: string;
       submissionId?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
@@ -60,10 +63,12 @@ export async function POST(request: Request) {
     const amount = Number(body.amount);
     const date = body.date?.trim() ?? todayKey();
     const submissionId = body.submissionId?.trim();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
-    if (!wallet || !signatureB58 || !submissionId || !Number.isFinite(amount)) {
-      return NextResponse.json({ error: "Invalid claim request." }, { status: 400 });
+    if (!wallet || !signatureB58 || !submissionId || !Number.isFinite(amount) || !nonce) {
+      return NextResponse.json({ error: "Invalid claim request (nonce required for replay protection)." }, { status: 400 });
     }
 
     if (amount !== PET_LOVE_REWARD) {
@@ -191,6 +196,28 @@ export async function POST(request: Request) {
           throw new Error(
             `Daily on-chain wallet limit reached (${walletCap} $BONGA/day across miner, garden, and pet).`
           );
+        }
+
+        const nonceCheck = await consumeNonceIfFresh(wallet, "pet", date, nonce);
+        if (!nonceCheck.ok) {
+          throw new Error(nonceCheck.reason);
+        }
+
+        const minBank = getBankMinWithdraw();
+        if (amount < minBank) {
+          // Auto-deposit small pet rewards to Bonga Bank
+          await recordPetClaim(wallet, date, submissionId);
+          await recordPetDailyGlobalClaim(date);
+          await recordIpClaim({ ipKey, wallet, amount, date, kind: "pet" });
+          await depositToBank(wallet, amount, { source: "pet", date });
+          const updatedBank = await getBongaBank(wallet);
+          return {
+            ok: true as const,
+            depositedToBank: amount,
+            amount,
+            newBankBalance: updatedBank.bankedBonga,
+            message: `Pet reward auto-deposited to Bonga Bank (on-chain min ${minBank}).`,
+          };
         }
 
         const { signature: txSignature } = await transferBongaFromTreasury({

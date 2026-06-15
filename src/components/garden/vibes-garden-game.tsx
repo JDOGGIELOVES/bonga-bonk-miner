@@ -16,6 +16,7 @@ import {
   applyIdleEarnings,
   buyPlant,
   completeQuest,
+  computeOfflineEarnings,
   formatGardenBonga,
   formatNextDailyReset,
   gardenBeautyLevel,
@@ -42,6 +43,8 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const [shopOpen, setShopOpen] = useState(false);
   const [shopMsg, setShopMsg] = useState("");
   const [meditating, setMeditating] = useState(false);
+  const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
+  const [musicEnabled, setMusicEnabled] = useState(true);
   const floatId = useRef(0);
   const isHolderRef = useRef(isHolder);
   const catchupDoneRef = useRef(false);
@@ -74,6 +77,15 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   useEffect(() => {
     if (!state || catchupDoneRef.current || checking) return;
     catchupDoneRef.current = true;
+
+    // Compute & surface a friendly "welcome back" offline earnings notice
+    const offline = computeOfflineEarnings(state, isHolder);
+    if (offline > 0.01) {
+      setOfflineNotice(`Welcome back — your garden grew +${offline.toFixed(2)} $BONGA while you were away 🌱`);
+      // Auto-hide after a nice readable moment
+      setTimeout(() => setOfflineNotice((cur) => (cur ? null : cur)), 5200);
+    }
+
     setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
   }, [state, isHolder, checking]);
 
@@ -151,6 +163,15 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     }, 10000);
     return () => clearInterval(tick);
   }, [state, queueGardenSync]);
+
+  // Sync music state for the inline garden toggle (global audio controls also available)
+  useEffect(() => {
+    const s = gameAudio.getSettings();
+    setMusicEnabled((s as any).musicEnabled ?? true);
+    return gameAudio.subscribe((settings) => {
+      setMusicEnabled((settings as any).musicEnabled ?? true);
+    });
+  }, []);
 
   useEffect(() => {
     if (!connected || !publicKey) {
@@ -231,7 +252,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         queueGardenSync({ type: "quest", questId }, result.state);
         showGeneralFeedback(`Quest +${result.reward} $BONGA`);
       } else if (result.capped) {
-        showGeneralFeedback(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached`);
+        showGeneralFeedback(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached — earnings go to Bonga Bank`);
       }
     },
     [state, showGeneralFeedback, queueGardenSync]
@@ -312,9 +333,37 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         </div>
       </div>
 
+      {/* Clear daily limit progress bar + label */}
+      {(() => {
+        const farmed = state.bongaFarmedToday;
+        const cap = GARDEN_DAILY_EARN_CAP;
+        const pct = Math.min(100, Math.max(0, (farmed / cap) * 100));
+        return (
+          <div className="bonga-card px-4 py-3">
+            <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
+              <span>Daily garden cap (to Bonga Bank)</span>
+              <span className={capReached ? "text-amber-600 font-semibold" : "font-medium"}>
+                {formatGardenBonga(farmed)} / {cap} $BONGA
+              </span>
+            </div>
+            <div className="h-2.5 w-full rounded-full bg-muted/60 overflow-hidden">
+              <motion.div
+                className={`h-full rounded-full transition-all ${capReached ? "bg-amber-500" : "bg-gradient-to-r from-bonga-teal via-bonga-green to-bonga-teal"}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1 text-right">
+              {capReached ? "Cap reached — resets at midnight UTC" : `${(100 - pct).toFixed(0)}% remaining today`}
+            </p>
+          </div>
+        );
+      })()}
+
       {gardenStatus && (
         <p className="text-center text-[10px] text-muted-foreground -mt-1 mb-1">
-          Verified today: {gardenStatus.farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} (claimable from server)
+          Verified today: {gardenStatus.farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} (to Bonga Bank Vault)
         </p>
       )}
 
@@ -325,9 +374,23 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       {capReached && (
         <p className="rounded-bonga-lg border border-amber-300/40 bg-amber-50/60 px-4 py-2 text-center text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
           Daily farm cap reached ({GARDEN_DAILY_EARN_CAP} garden $BONGA). Resets at midnight UTC.
-          You can still explore zones — taps and idle pause until tomorrow.
+          All earnings go to Bonga Bank Vault. Idle and taps pause until tomorrow.
         </p>
       )}
+
+      {/* Friendly offline earnings notice — shows once on return */}
+      <AnimatePresence>
+        {offlineNotice && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="rounded-bonga-lg border border-bonga-teal/40 bg-bonga-teal/10 px-4 py-2.5 text-center text-sm font-medium text-bonga-teal"
+          >
+            {offlineNotice}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <GardenClaimBonga refreshKey={syncRefreshKey} onClaimSuccess={onClaimSuccess} />
 
@@ -338,28 +401,22 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
             <p className="font-display font-bold text-foreground">How the garden works</p>
             <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
               <li>
-                <span className="font-semibold text-foreground">Three zones</span> — Meadow 🌾,
-                Greenhouse 🪴, and Farm 🚜. Plant in any zone from the shop; switch tabs to water
-                each area.
+                <span className="font-semibold text-foreground">One beautiful garden</span> — plant Peace Lily, Love Lotus, Frequency Crystal, or Affirmation Tree. The central garden grows visibly more lush the more friends you add.
               </li>
               <li>
-                <span className="font-semibold text-foreground">Idle pacing</span> — plants grow
-                slowly in the background. Check back through the day; most gardens need several
-                hours to reach the {GARDEN_DAILY_EARN_CAP} garden $BONGA daily cap (idle + taps +
-                quests). Resets daily at midnight UTC (next: {formatNextDailyReset()}).
+                Tap any plant to water and earn instantly. Plants earn idle $BONGA in the background even when closed.
               </li>
               <li>
-                <span className="font-semibold text-foreground">Verified claims</span> — connect
-                wallet to sync progress server-side. Only verified idle + taps count toward on-chain
-                payouts (local numbers are for play).
+                Daily cap {GARDEN_DAILY_EARN_CAP} garden $BONGA total (idle + taps + quests). All earnings auto-deposit to your Bonga Bank Vault. Resets at midnight UTC.
               </li>
               <li>
-                <span className="font-semibold text-foreground">Duplicates stack</span> — another
-                of the same plant adds full idle + tap again.
+                <strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong> Small verified claims go straight to bank (no SOL cost).
               </li>
               <li>
-                <span className="font-semibold text-foreground">Bonga Kush 🌿</span> — NFT holders
-                only. Connect wallet & hold a Bonga NFT to plant it in the Greenhouse.
+                <span className="font-semibold text-foreground">NFT holders</span> get +25% yield on everything. Connect wallet to activate.
+              </li>
+              <li>
+                Local progress saved automatically. Connect wallet to verify earnings for on-chain claims.
               </li>
             </ul>
           </div>
@@ -375,7 +432,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
       {connected && !checking && !isHolder && (
         <p className="text-center text-xs text-muted-foreground">
-          Hold a Bonga NFT for 2× garden earnings, Bonga Kush & exclusive plants.{" "}
+          Hold a Bonga NFT for +25% garden yield.{" "}
           <Link href="/nft" className="font-semibold text-bonga-teal hover:underline">
             Mint one
           </Link>
@@ -390,7 +447,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
           onClick={() => setVisible(true)}
         >
           <Wallet className="h-4 w-4" />
-          Connect wallet for 2× earnings & Bonga Kush
+          Connect wallet for +25% yield
         </Button>
       )}
 
@@ -411,19 +468,38 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         )}
       </div>
 
+      {/* Prominent daily affirmation — one tap peace moment + music (peaceful ambient) */}
+      <div className="flex flex-wrap justify-center gap-2 px-2">
+        <Button
+          variant="peace"
+          size="lg"
+          className="h-12 flex-1 max-w-md gap-2 rounded-full text-base shadow-sm sm:w-auto sm:px-10"
+          onClick={handleAffirm}
+        >
+          🌼 Daily Affirmation
+        </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="h-12 gap-2 rounded-full px-5 text-sm"
+          onClick={() => gameAudio.toggleMusic()}
+          title={musicEnabled ? "Music on — toggle ambient vibes" : "Music off"}
+        >
+          {musicEnabled ? "♪" : "♩"} Music
+        </Button>
+      </div>
+
       <div className="flex justify-center px-2">
         <Button
           variant="secondary"
           size="lg"
-          className="h-12 w-full max-w-md gap-2 rounded-full text-base sm:w-auto sm:px-8"
+          className="h-11 w-full max-w-md gap-2 rounded-full text-base sm:w-auto sm:px-8"
           onClick={() => setShopOpen(true)}
         >
           <ShoppingBag className="h-5 w-5" />
           Plant Shop
         </Button>
       </div>
-
-
 
       <GardenQuests
         state={state}
@@ -434,8 +510,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       />
 
       <p className="text-center text-xs text-muted-foreground">
-        Garden $BONGA saved locally · {GARDEN_DAILY_EARN_CAP}/day cap · check back for idle gains ·{" "}
-        {state.lifetimeWaters} lifetime waters
+        Saved in your browser · {GARDEN_DAILY_EARN_CAP} $BONGA daily cap (to Bonga Bank) · idle keeps running · {state.lifetimeWaters} waters
       </p>
 
       <GardenShop

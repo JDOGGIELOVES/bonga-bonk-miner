@@ -4,7 +4,8 @@ import bs58 from "bs58";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
-import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { getTodayClaimedFromTreasury, consumeNonceIfFresh } from "@/lib/treasury/daily-claims";
+import { getBankMinWithdraw, depositToBank, getBongaBank } from "@/lib/bonga-bank";
 import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
 import { transferBongaFromTreasury } from "@/lib/treasury/transfer";
 import { isRpcRateLimitError } from "@/lib/treasury/rpc";
@@ -70,6 +71,8 @@ export async function POST(request: Request) {
       wallet?: string;
       amount?: number;
       date?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
@@ -77,10 +80,12 @@ export async function POST(request: Request) {
     const wallet = body.wallet?.trim();
     const amount = Number(body.amount);
     const date = body.date?.trim() ?? todayKey();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
-    if (!wallet || !signatureB58 || !Number.isFinite(amount)) {
-      return NextResponse.json({ error: "Invalid garden claim request." }, { status: 400 });
+    if (!wallet || !signatureB58 || !Number.isFinite(amount) || !nonce) {
+      return NextResponse.json({ error: "Invalid garden claim request (nonce required)." }, { status: 400 });
     }
 
     const dailyLimit = gardenDailyClaimLimit();
@@ -125,6 +130,8 @@ export async function POST(request: Request) {
       wallet,
       amount,
       date,
+      nonce,
+      expiresAt: expiresAt || undefined,
       signature: bs58.decode(signatureB58),
       signedMessage,
     });
@@ -186,7 +193,29 @@ export async function POST(request: Request) {
           );
         }
 
+        const nonceCheck = await consumeNonceIfFresh(wallet, "garden", date, nonce);
+        if (!nonceCheck.ok) {
+          throw new Error(nonceCheck.reason);
+        }
+
         await recordGardenClaim(wallet, date, amount);
+
+        const minBank = getBankMinWithdraw();
+        if (amount < minBank) {
+          // Auto-deposit anything under threshold to Bonga Bank (no on-chain treasury cost)
+          await depositToBank(wallet, amount, { source: "garden", date });
+          if (ipKey) {
+            await recordIpClaim({ ipKey, wallet, amount, date, kind: "garden" });
+          }
+          const updatedBank = await getBongaBank(wallet);
+          return {
+            ok: true as const,
+            depositedToBank: amount,
+            amount,
+            newBankBalance: updatedBank.bankedBonga,
+            message: `Garden claim auto-deposited to your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches ${minBank} $BONGA.`,
+          };
+        }
 
         try {
           const { signature: txSignature } = await transferBongaFromTreasury({
@@ -239,7 +268,9 @@ export async function GET() {
   return NextResponse.json({
     paused: isGardenClaimsPaused(),
     dailyLimit: gardenDailyClaimLimit(),
+    earnCap: gardenDailyClaimLimit(),
     maxClaimsPerIp: maxGardenClaimsPerIpPerDay(),
     walletOnChainCap: walletMaxOnChainBongaPerDay(),
+    note: "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Garden earnings (up to daily cap) auto-deposit to Bonga Bank Vault for amounts below the threshold.",
   });
 }

@@ -341,7 +341,7 @@ export const UTILITY = [
   {
     icon: "💰",
     title: "NFT Staking — Lock to Earn",
-    description: "Lock Bonga NFTs on the staking page to earn ~75 $BONGA per NFT per day (prorated, claimable from treasury). You keep custody.",
+    description: "Lock Bonga NFTs on the staking page to earn tiered $BONGA per NFT per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500, prorated). All earnings auto-deposited to Bonga Bank Vault. On-chain at 10,000 bank cap. You keep custody.",
   },
   {
     icon: "👕",
@@ -364,8 +364,8 @@ export const COMMUNITY_LINKS = [
 
 /** Staking reward rates per day by rarity (used by both client UI and server calc) */
 export const STAKE_RATES: Record<RarityTier, number> = {
-  Common: 100,
-  Rare: 150,
-  Legendary: 200,
-  "Cosmic Bonga": 350,
+  Common: 1000,
+  Rare: 1500,
+  Legendary: 2000,
+  "Cosmic Bonga": 3500,
 };

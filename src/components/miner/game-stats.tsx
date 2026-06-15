@@ -15,9 +15,12 @@ interface GameStatsProps {
   state: GameState;
   combo: number;
   connected?: boolean;
+  dailyLimitReached?: boolean;
+  nextDailyReset?: string;
+  limitMessage?: string | null;
 }
 
-export function GameStats({ state, combo, connected }: GameStatsProps) {
+export function GameStats({ state, combo, connected, dailyLimitReached, nextDailyReset, limitMessage }: GameStatsProps) {
   const atLimit = state.bongaToday >= DAILY_BONGA_LIMIT;
   const progress = progressToNextBonga(state.tapsToday);
   const untilNext = tapsUntilNextBonga(state.tapsToday);
@@ -56,12 +59,20 @@ export function GameStats({ state, combo, connected }: GameStatsProps) {
       <div className="mt-5">
         <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {atLimit ? "Daily limit reached" : `Next reward in ${untilNext} bonks`}
+            {dailyLimitReached || atLimit 
+              ? (limitMessage || `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`) 
+              : `Next reward in ${untilNext} bonks`}
           </span>
           <span className="font-semibold text-bonga-orange">{Math.round(progress)}%</span>
         </div>
         <Progress value={atLimit ? 100 : progress} />
       </div>
+
+      {(dailyLimitReached || atLimit) && nextDailyReset && (
+        <p className="mt-2 text-xs text-center text-amber-600 font-medium">
+          The daily timer resets at {new Date(nextDailyReset).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} UTC tomorrow.
+        </p>
+      )}
 
       <AnimatePresence>
         {combo >= 3 && (

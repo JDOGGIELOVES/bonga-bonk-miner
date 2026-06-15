@@ -7,7 +7,7 @@ import {
   TAPS_PER_BONGA,
 } from "@/lib/miner-game";
 
-const MIN_TAP_INTERVAL_MS = 45;
+const MIN_TAP_INTERVAL_MS = process.env.NODE_ENV === "production" ? 45 : 5;
 const MAX_TAPS_PER_DAY = TAPS_PER_BONGA * DAILY_BONGA_LIMIT;
 
 export interface MinerEarnRecord {

@@ -139,7 +139,7 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
         onModeChange={handleModeChange} 
       />
 
-      <main className="relative z-10 mx-auto w-full max-w-2xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main className="relative z-10 mx-auto w-full max-w-2xl flex-1 px-[30px] py-6 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -185,10 +185,10 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
         <AnimatePresence mode="wait">
           <motion.div
             key={mode}
-            initial={{ opacity: 0, x: mode === "miner" ? -12 : 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: mode === "miner" ? 12 : -12 }}
-            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, y: 8, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.99 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="mt-4"
           >
             {mode === "miner" ? (

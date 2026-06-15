@@ -1,6 +1,6 @@
-export const TAPS_PER_BONGA = 100;
-export const DAILY_BONGA_LIMIT = 50;
-export const BONGA_CLAIM_BATCH = 10;
+export const TAPS_PER_BONGA = 1;
+export const DAILY_BONGA_LIMIT = 1000;
+export const BONGA_CLAIM_BATCH = 1; // now 1:1 with bank deposits, no small batches needed
 export const STORAGE_KEY = "bonga-bonk-miner";
 
 export const MEME_COINS = [

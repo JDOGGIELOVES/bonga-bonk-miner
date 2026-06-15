@@ -90,7 +90,7 @@ export default async function TreasuryPage() {
     <>
       <BongaHeader />
       <div className="min-h-screen bg-bonga-page">
-        <div className="mx-auto max-w-4xl px-4 py-12">
+        <div className="mx-auto max-w-4xl px-[30px] py-12">
           {/* Hero */}
           <div className="text-center mb-12">
             <h1 className="font-display text-4xl md:text-5xl font-extrabold tracking-tight">
@@ -286,6 +286,18 @@ export default async function TreasuryPage() {
 
           <div className="mt-12">
             <BongaCaBanner />
+          </div>
+
+          {/* Sustainability note + link to clear personal mined savings view */}
+          <div className="mt-10 text-center text-sm text-muted-foreground max-w-prose mx-auto">
+            <p className="mb-2">
+              <strong className="text-foreground">Sustainable economics:</strong> Players accumulate mined $BONGA in a personal off-chain <strong>Bonga Bank</strong>. 
+              Small claims auto-deposit there. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. 
+              This keeps Solana fees paid by the treasury much lower than the value of $BONGA distributed to the community.
+            </p>
+            <Link href="/bonga-bank" className="inline-flex items-center gap-1 text-bonga-teal hover:underline font-medium">
+              View your personal mined savings (connect wallet) →
+            </Link>
           </div>
         </div>
       </div>

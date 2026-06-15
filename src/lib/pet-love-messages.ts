@@ -2,23 +2,38 @@ import bs58 from "bs58";
 import nacl from "tweetnacl";
 import { PET_LOVE_DOMAIN } from "@/lib/pet-love";
 
+export const MESSAGE_VERSION = "v1";
+export const SIGNED_PAYLOAD_DOMAIN = `${PET_LOVE_DOMAIN} ${MESSAGE_VERSION}`;
+
+function buildVersionedHeader(action: string): string[] {
+  return [SIGNED_PAYLOAD_DOMAIN, `Action: ${action}`];
+}
+
+function fmtAmount(n: number): string {
+  return String(n);
+}
+
 export function buildPetSubmissionMessage(params: {
   wallet: string;
   date: string;
   imageHash: string;
   petLabel: string;
   confidence: number;
+  nonce?: string;
+  expiresAt?: string;
 }) {
-  const { wallet, date, imageHash, petLabel, confidence } = params;
-  return [
-    PET_LOVE_DOMAIN,
-    "Pet Submission",
+  const { wallet, date, imageHash, petLabel, confidence, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("PetSubmission"),
     `Wallet: ${wallet}`,
     `Date: ${date}`,
     `ImageHash: ${imageHash}`,
     `Pet: ${petLabel}`,
     `Confidence: ${confidence.toFixed(3)}`,
-  ].join("\n");
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
 }
 
 export function buildPetClaimMessage(params: {
@@ -26,16 +41,20 @@ export function buildPetClaimMessage(params: {
   amount: number;
   date: string;
   submissionId: string;
+  nonce?: string;
+  expiresAt?: string;
 }) {
-  const { wallet, amount, date, submissionId } = params;
-  return [
-    PET_LOVE_DOMAIN,
-    "Daily Pet Reward",
+  const { wallet, amount, date, submissionId, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("PetReward"),
     `Wallet: ${wallet}`,
-    `Amount: ${amount}`,
+    `Amount: ${fmtAmount(amount)}`,
     `Date: ${date}`,
     `Submission: ${submissionId}`,
-  ].join("\n");
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
 }
 
 export function verifyPetSignature(params: {

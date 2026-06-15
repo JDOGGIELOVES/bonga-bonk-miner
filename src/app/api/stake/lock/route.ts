@@ -16,6 +16,8 @@ export async function POST(request: Request) {
       wallet?: string;
       tiers?: Record<string, number>; // { Common: 2, Rare: 0, ... }
       at?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
@@ -23,6 +25,8 @@ export async function POST(request: Request) {
     const wallet = body.wallet?.trim();
     const tiers = body.tiers || {};
     const at = body.at?.trim();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
     // Validation: tiers must be a valid object (can be all zeros to unstake/reduce via update)
@@ -60,6 +64,8 @@ export async function POST(request: Request) {
       wallet,
       tiers,
       at,
+      nonce: nonce || undefined,
+      expiresAt: expiresAt || undefined,
       signature,
       signedMessage,
     });

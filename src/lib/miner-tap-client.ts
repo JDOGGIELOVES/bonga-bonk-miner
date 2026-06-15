@@ -5,18 +5,29 @@ export interface MinerEarnedStatus {
   earned: number;
   claimed: number;
   claimable: number;
+  bankedBonga?: number;
+  bankMinWithdraw?: number;
+  dailyLimitReached?: boolean;
+  nextDailyReset?: string;
+  limitMessage?: string | null;
 }
 
 export interface MinerTapSuccess {
   ok: true;
   taps: number;
   earned: number;
+  dailyLimitReached?: boolean;
+  nextDailyReset?: string;
+  limitMessage?: string | null;
 }
 
 export interface MinerTapError {
   error: string;
   taps?: number;
   earned?: number;
+  dailyLimitReached?: boolean;
+  nextDailyReset?: string;
+  limitMessage?: string | null;
 }
 
 function todayKey() {
@@ -53,10 +64,14 @@ export async function registerMinerTap(params: {
 
   const data = (await response.json()) as MinerTapSuccess | MinerTapError;
   if (!response.ok) {
+    const errData = data as any;
     return {
-      error: "error" in data ? data.error : "Tap registration failed.",
-      taps: "taps" in data ? data.taps : undefined,
-      earned: "earned" in data ? data.earned : undefined,
+      error: "error" in errData ? errData.error : "Tap registration failed.",
+      taps: "taps" in errData ? errData.taps : undefined,
+      earned: "earned" in errData ? errData.earned : undefined,
+      dailyLimitReached: errData.dailyLimitReached,
+      nextDailyReset: errData.nextDailyReset,
+      limitMessage: errData.limitMessage,
     };
   }
 

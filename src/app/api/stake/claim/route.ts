@@ -5,9 +5,10 @@ import { getTreasuryConfig } from "@/lib/treasury/config";
 import { treasuryPayoutsBlockedReason } from "@/lib/treasury/payout-guard";
 import { withWalletClaimLock } from "@/lib/claim-lock";
 import { verifyClaimSignature } from "@/lib/treasury/messages";
-import { recordGlobalClaim, isWalletBlocked } from "@/lib/claim-tally-store";
-import { getTreasuryBalances, transferBongaFromTreasury } from "@/lib/treasury/transfer";
+import { isWalletBlocked } from "@/lib/claim-tally-store";
 import { getStakeRecord, recordStakeClaim, computePendingStakeRewards, MIN_STAKE_CLAIM } from "@/lib/stake-store";
+import { consumeNonceIfFresh } from "@/lib/treasury/daily-claims";
+import { getBankMinWithdraw, depositToBank, getBongaBank } from "@/lib/bonga-bank";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
       wallet?: string;
       amount?: number;
       date?: string;
+      nonce?: string;
+      expiresAt?: string;
       signature?: string;
       signedMessage?: string;
     };
@@ -38,15 +41,17 @@ export async function POST(request: Request) {
     const wallet = body.wallet?.trim();
     const amount = Number(body.amount);
     const date = body.date?.trim() ?? todayKey();
+    const nonce = (body.nonce || "").trim();
+    const expiresAt = (body.expiresAt || "").trim();
     const signatureB58 = body.signature?.trim();
 
-    if (!wallet || !signatureB58 || !Number.isFinite(amount)) {
-      return NextResponse.json({ error: "Invalid stake claim request." }, { status: 400 });
+    if (!wallet || !signatureB58 || !Number.isFinite(amount) || !nonce) {
+      return NextResponse.json({ error: "Invalid stake claim request (nonce required for replay protection)." }, { status: 400 });
     }
 
-    if (amount < MIN_STAKE_CLAIM || amount > 10000 || !Number.isInteger(amount)) {
+    if (amount < MIN_STAKE_CLAIM || amount > 1000000 || !Number.isInteger(amount)) {
       return NextResponse.json(
-        { error: `Stake reward claims must be at least ${MIN_STAKE_CLAIM} and reasonable.` },
+        { error: `Stake reward claims must be at least ${MIN_STAKE_CLAIM} and reasonable (up to 1M to bank).` },
         { status: 400 }
       );
     }
@@ -82,6 +87,8 @@ export async function POST(request: Request) {
       wallet,
       amount,
       date,
+      nonce,
+      expiresAt: expiresAt || undefined,
       signature,
       signedMessage,
     });
@@ -106,37 +113,34 @@ export async function POST(request: Request) {
           throw new Error(`Requested amount ${amount} exceeds current pending ${pending}.`);
         }
         if (amount < MIN_STAKE_CLAIM) {
-          throw new Error(`Minimum stake claim is ${MIN_STAKE_CLAIM}.`);
+          throw new Error(`Minimum stake claim is ${MIN_STAKE_CLAIM} (deposited to bank).`);
         }
 
-        // Perform the on-chain transfer
-        const { signature: txSig } = await transferBongaFromTreasury({
-          config,
-          recipientWallet: recipient,
-          amount,
-        });
+        // Replay protection
+        const nonceCheck = await consumeNonceIfFresh(wallet, "stake", date, nonce);
+        if (!nonceCheck.ok) {
+          throw new Error(nonceCheck.reason);
+        }
 
-        // Advance the stake timer
+        // All staking rewards are deposited directly into the BONGA BANK VAULT.
+        // On-chain withdrawals from the bank only at the 10,000 $BONGA cap.
         await recordStakeClaim(wallet, amount);
+        await depositToBank(wallet, amount, { source: "stake" });
+        const updatedBank = await getBongaBank(wallet);
 
-        // Record to lifetime community tally under "stake" category
-        // Wrapped in try/catch so that a tally update failure doesn't prevent the user from receiving their payout
-        try {
-          await recordGlobalClaim(amount, "stake", wallet);
-        } catch (e) {
-          console.error("Failed to record global stake claim to tally (payout already succeeded):", e);
-        }
-
+        const minBank = getBankMinWithdraw();
         return {
-          signature: txSig,
+          ok: true,
+          depositedToBank: amount,
           amount,
-          explorerUrl: `https://solscan.io/tx/${txSig}`,
+          newBankBalance: updatedBank.bankedBonga,
+          message: `Stake reward deposited to Bonga Bank Vault. On-chain withdrawal available at ${minBank} $BONGA bank cap.`,
         };
       },
       "stake"
     );
 
-    return NextResponse.json({ ok: true, ...result });
+    return NextResponse.json(result);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Stake claim failed.";
     const status = /blocked|paused|treasury/i.test(message) ? 503 : 500;

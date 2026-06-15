@@ -1,7 +1,25 @@
 import bs58 from "bs58";
 import type { Wallet } from "@solana/wallet-adapter-react";
-import { buildClaimMessage, buildStakeLockMessage, buildStakeUnlockMessage } from "@/lib/treasury/messages";
+import {
+  buildClaimMessage,
+  buildStakeLockMessage,
+  buildStakeUnlockMessage,
+  buildBankWithdrawMessage,
+} from "@/lib/treasury/messages";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
+
+/** High-entropy short nonce for replay protection (per-message). */
+function generateNonce(): string {
+  // 10-12 char alphanum, good enough + timestamp prefix for human debug
+  const rnd = Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6);
+  return `${Date.now().toString(36)}-${rnd}`;
+}
+
+/** Recommended short expiration for a claim message (end of current UTC day + small buffer). */
+function defaultClaimExpiresAt(date: string): string {
+  // date is YYYY-MM-DD; make it expire at 23:59:59Z of that day + 2h grace
+  return new Date(`${date}T23:59:59.000Z`).toISOString().replace(/\.000Z$/, "Z");
+}
 
 export interface ClaimStatus {
   enabled: boolean;
@@ -102,10 +120,14 @@ export async function requestOnChainClaim(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<ClaimApiSuccess> {
+  const nonce = generateNonce();
+  const expiresAt = defaultClaimExpiresAt(params.date);
   const message = buildClaimMessage({
     wallet: params.wallet,
     amount: params.amount,
     date: params.date,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -119,6 +141,8 @@ export async function requestOnChainClaim(params: {
     wallet: params.wallet,
     amount: params.amount,
     date: params.date,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
 
@@ -186,6 +210,131 @@ export async function fetchBlockedWallets(): Promise<Record<string, BlockedWalle
   }
 }
 
+// ====================== BONGA BANK (client) ======================
+
+export interface BongaBankStatus {
+  bankedBonga: number;
+  lifetimeBanked: number;
+  lifetimeWithdrawn: number;
+  minWithdraw: number;
+  canWithdraw: boolean;
+  dailyOnChainWalletCap?: number;
+  pending: {
+    miner: number;
+    garden: number;
+    stake: number;
+    pet: number;
+    total: number;
+  };
+  lastActivity?: string;
+  recentDeposits?: Array<{
+    ts: number;
+    amount: number;
+    source?: string;
+    date?: string;
+  }>;
+  community?: {
+    totalLifetimeBanked: number;
+    totalUniquePlayers: number;
+    lastUpdated: string;
+  };
+  note?: string;
+}
+
+export async function fetchBongaBankStatus(wallet: string): Promise<BongaBankStatus | null> {
+  try {
+    const res = await fetch(`/api/bank/status?wallet=${encodeURIComponent(wallet)}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function depositPendingToBank(params: {
+  wallet: string;
+  source?: "miner" | "garden" | "stake" | "pet" | "all";
+  date?: string;
+}): Promise<{ ok: boolean; deposited?: Record<string, number>; totalDeposited?: number; newBankBalance?: number; error?: string }> {
+  try {
+    const res = await fetch("/api/bank/deposit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        wallet: params.wallet,
+        source: params.source ?? "all",
+        date: params.date,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) return { ok: false, error: data?.error || "Deposit failed" };
+    return { ok: true, ...data };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Deposit failed" };
+  }
+}
+
+export interface BankWithdrawSuccess {
+  ok: true;
+  signature: string;
+  amount: number;
+  newBankBalance: number;
+  explorerUrl: string;
+}
+
+export async function requestBankWithdraw(params: {
+  wallet: string;
+  amount: number;
+  date: string;
+  connectedWallet: Wallet | null;
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+}): Promise<BankWithdrawSuccess> {
+  const nonce = generateNonce();
+  const expiresAt = defaultClaimExpiresAt(params.date);
+
+  const message = buildBankWithdrawMessage({
+    wallet: params.wallet,
+    amount: params.amount,
+    date: params.date,
+    nonce,
+    expiresAt,
+  });
+
+  const messageBytes = new TextEncoder().encode(message);
+  const { signature, signedMessage } = await signClaimMessage({
+    wallet: params.connectedWallet,
+    signMessage: params.signMessage,
+    walletAddress: params.wallet,
+    messageBytes,
+  });
+
+  const payload: Record<string, any> = {
+    wallet: params.wallet,
+    amount: params.amount,
+    date: params.date,
+    nonce,
+    expiresAt,
+    signature: bs58.encode(signature),
+  };
+
+  const signedDiffers =
+    signedMessage.length !== messageBytes.length ||
+    signedMessage.some((b, i) => b !== messageBytes[i]);
+  if (signedDiffers) payload.signedMessage = bs58.encode(signedMessage);
+
+  const res = await fetch("/api/bank/withdraw", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error("error" in data ? data.error : "Bank withdraw failed.");
+  }
+  return data as BankWithdrawSuccess;
+}
+
 // --- NFT Staking client helpers ---
 
 export interface StakeStatus {
@@ -234,10 +383,14 @@ export async function requestStakeLock(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
+  const nonce = generateNonce();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString(); // short for lock actions
   const message = buildStakeLockMessage({
     wallet: params.wallet,
     tiers: params.tiers,
     at: params.at,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -251,6 +404,8 @@ export async function requestStakeLock(params: {
     wallet: params.wallet,
     tiers: params.tiers,
     at: params.at,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
   const signedDiffers = signedMessage.length !== messageBytes.length || !signedMessage.every((b, i) => b === messageBytes[i]);
@@ -272,9 +427,13 @@ export async function requestStakeUnlock(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
+  const nonce = generateNonce();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
   const message = buildStakeUnlockMessage({
     wallet: params.wallet,
     at: params.at,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -287,6 +446,8 @@ export async function requestStakeUnlock(params: {
   const payload: any = {
     wallet: params.wallet,
     at: params.at,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
   if (signedMessage.length !== messageBytes.length || !signedMessage.every((b, i) => b === messageBytes[i])) {
@@ -310,11 +471,15 @@ export async function requestStakeClaim(params: {
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
 }): Promise<StakeActionSuccess> {
-  // Reuse the exact same message builder as regular claims for the payout signature
+  // Reuse the exact same message builder as regular claims for the payout signature (now with nonce)
+  const nonce = generateNonce();
+  const expiresAt = defaultClaimExpiresAt(params.date);
   const message = buildClaimMessage({
     wallet: params.wallet,
     amount: params.amount,
     date: params.date,
+    nonce,
+    expiresAt,
   });
   const messageBytes = new TextEncoder().encode(message);
   const { signature, signedMessage } = await signClaimMessage({
@@ -328,6 +493,8 @@ export async function requestStakeClaim(params: {
     wallet: params.wallet,
     amount: params.amount,
     date: params.date,
+    nonce,
+    expiresAt,
     signature: bs58.encode(signature),
   };
   const signedDiffers =

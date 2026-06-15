@@ -212,7 +212,7 @@ export function StakingClient() {
     <>
       <BongaHeader />
       <div className="min-h-screen bg-bonga-page">
-        <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="mx-auto max-w-3xl px-[30px] py-12">
           {/* Hero */}
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-bonga-orange/30 bg-bonga-orange/5 px-4 py-1 text-xs font-semibold tracking-[0.12em] text-bonga-orange mb-4">
@@ -225,7 +225,7 @@ export function StakingClient() {
               Lock them up. Earn a lot of $BONGA. High-yield passive rewards from the community treasury while you keep custody of your NFTs.
             </p>
             <div className="mt-3 text-sm text-bonga-teal">
-              Tiered rewards: Common 100 • Rare 150 • Legendary 200 • Cosmic 350 $BONGA per day • Prorated • Claim anytime (min 10)
+              Tiered rewards: Common 1000 • Rare 1500 • Legendary 2000 • Cosmic 3500 $BONGA per day • Prorated • All earnings auto-deposited to Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA (combined daily on-chain wallet cap also applies).
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
               Community has claimed <span className="font-medium text-foreground">{globalStakeTally ? globalStakeTally.bonga.toLocaleString() : '—'} $BONGA</span> from NFT staking across {globalStakeTally ? globalStakeTally.claims.toLocaleString() : '—'} claims.
@@ -408,7 +408,7 @@ export function StakingClient() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Connect wallet holding Bonga NFTs</li>
                 <li>• Choose how many to stake and sign the lock message</li>
-                <li>• Earn tiered $BONGA per day (Common 100 / Rare 150 / Legendary 200 / Cosmic 350) prorated</li>
+                <li>• Earn tiered $BONGA per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500) prorated — all deposited to Bonga Bank Vault</li>
                 <li>• Claim rewards anytime (min {status?.minClaim ?? 10}) — paid from treasury</li>
                 <li>• Unstake with a signature whenever you want</li>
                 <li>• Your NFTs never leave your wallet</li>
@@ -425,7 +425,7 @@ export function StakingClient() {
                 All payouts are transparent on-chain from the community treasury (funded by 7% royalties + love).
               </p>
               <p className="mt-3 text-xs text-bonga-teal">
-                Example: 1 Cosmic = 350/day (~10,500/month). Rates are higher for rarer pieces.
+                Example: 1 Cosmic = 3500/day (~105,000/month). All staking $BONGA is deposited directly to your Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Combined daily on-chain wallet cap also applies. Rates are higher for rarer pieces.
               </p>
               <div className="mt-4 text-xs">
                 <Link href="/treasury" className="text-bonga-teal hover:underline">
