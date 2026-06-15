@@ -237,9 +237,11 @@ export function NFTMintPanel() {
                       : "Welcome to the fam — check your wallet"}
                   </p>
                   <div className="mt-4 flex justify-center">
-                    <BongaNFTArt nft={lastMint.nft} size="sm" />
+                    <div className="mb-1">
+                      <BongaNFTArt nft={lastMint.nft} size="sm" />
+                    </div>
                   </div>
-                  <p className="mt-3 font-bold">{lastMint.nft.name}</p>
+                  <p className="mt-2 font-bold">{lastMint.nft.name}</p>
                   <Badge variant="purple" className="mt-1">
                     {lastMint.nft.rarity}
                   </Badge>
@@ -302,16 +304,18 @@ export function NFTMintPanel() {
             {myMints.length > 0 && (
               <div className="bonga-card p-4">
                 <h4 className="font-semibold">Your Bongas ({myMints.length})</h4>
-                <div className="mt-3 grid grid-cols-3 gap-2">
+                <div className="mt-3 grid grid-cols-3 gap-3">
                   {myMints.map((m) => (
                     <div key={m.mint} className="text-center">
-                      <BongaNFTArt
-                        nft={m.nft}
-                        size="xs"
-                        fillContainer
-                        className="rounded-xl shadow-none"
-                      />
-                      <p className="mt-1 truncate text-[10px] font-medium">
+                      <div className="mb-2">
+                        <BongaNFTArt
+                          nft={m.nft}
+                          size="xs"
+                          fillContainer
+                          className="rounded-xl shadow-none"
+                        />
+                      </div>
+                      <p className="truncate text-[10px] font-medium">
                         {m.nft.name}
                       </p>
                     </div>

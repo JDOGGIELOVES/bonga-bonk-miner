@@ -65,6 +65,12 @@ export function PeaceHeader() {
             Treasury
           </Link>
           <Link
+            href="/bonga-bank"
+            className="text-sm font-medium text-bonga-orange hover:underline"
+          >
+            Bonga Bank
+          </Link>
+          <Link
             href="/pet-love"
             className="text-sm font-medium text-bonga-orange hover:underline"
           >

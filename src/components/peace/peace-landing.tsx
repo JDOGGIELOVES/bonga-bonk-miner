@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { PeaceHeader } from "@/components/peace/peace-header";
+import { BongaHeader } from "@/components/layout/bonga-header";
 import { PeaceHero } from "@/components/peace/peace-hero";
 import { BreathingModule } from "@/components/peace/breathing-module";
 import { TaiChiModule } from "@/components/peace/tai-chi-module";
@@ -15,7 +15,7 @@ import { TranscendentalMeditationModule } from "@/components/peace/transcendenta
 export function PeaceLanding() {
   return (
     <div className="min-h-screen bg-bonga-page">
-      <PeaceHeader />
+      <BongaHeader />
       <PeaceHero />
 
       <section id="breathe" className="section-anchor py-16">

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { NFTHeader } from "@/components/nft/nft-header";
+import { BongaHeader } from "@/components/layout/bonga-header";
 import { NFTHero } from "@/components/nft/nft-hero";
 import { NFTGallery } from "@/components/nft/nft-gallery";
 import { NFTMintPanel } from "@/components/nft/nft-mint-panel";
@@ -16,7 +16,7 @@ import { STAKE_RATES, RARITY_COLORS, type RarityTier } from "@/lib/nft-collectio
 export function NFTLanding() {
   return (
     <div className="min-h-screen bg-bonga-page">
-      <NFTHeader />
+      <BongaHeader />
       <NFTHero />
       <NFTGallery />
       <NFTMintPanel />

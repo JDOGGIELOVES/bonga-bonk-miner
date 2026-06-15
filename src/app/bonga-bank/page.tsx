@@ -6,6 +6,7 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 import { BongaHeader } from "@/components/layout/bonga-header";
 import { BongaFooter } from "@/components/layout/bonga-footer";
+import { SolanaProvider } from "@/components/solana/solana-provider";
 import {
   fetchBongaBankStatus,
   depositPendingToBank,
@@ -112,7 +113,7 @@ export default function BongaBankPage() {
   };
 
   return (
-    <>
+    <SolanaProvider>
       <BongaHeader />
       <div className="min-h-screen bg-bonga-page">
         {/* BANK VAULT OPENING DESIGN */}
@@ -206,7 +207,7 @@ export default function BongaBankPage() {
                       onClick={() => setVisible(true)}
                       className="px-8 py-3 rounded-xl bg-bonga-orange text-black font-semibold text-sm tracking-wider hover:bg-amber-400 active:scale-[0.985] transition shadow-inner"
                     >
-                      INSERT WALLET KEY
+                      ENTER THE VAULT
                     </button>
                   </div>
                 </div>
@@ -392,6 +393,6 @@ export default function BongaBankPage() {
         </div>
       </div>
       <BongaFooter />
-    </>
+    </SolanaProvider>
   );
 }
