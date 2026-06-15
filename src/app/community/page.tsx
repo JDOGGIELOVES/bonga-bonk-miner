@@ -52,7 +52,7 @@ export default function CommunityPage() {
               Welcome to the <span className="text-gradient">Bonga Bonk&apos;s Sister</span> Community
             </h1>
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground md:text-xl">
-              The official home of <strong>Bonk</strong>, <strong>Bonga</strong>, <strong>Bonk&apos;s Sister</strong>, <strong>Bonga Bonk</strong>, <strong>Bonga Bonk&apos;s Sister</strong>, and the peaceful Solana fam. Whether you call it Bonk, Bonga Bonks, or Bonga Bonk&apos;s Sister — you&apos;re in the right place.
+              Once upon a Solana timeline, Bonk met his peaceful sister — a dreadlocked Shiba with a peace sign and a heart full of hippie energy. What began as a playful meme quickly became something more: a living, breathing community where players turn into fam, taps become stories, and every bonk raises the frequency just a little higher. Whether you know her as Bonk&apos;s Sister, Bonga Bonk, Bonga Bonks, or simply the good vibes crew, you&apos;ve found your home.
             </p>
 
             <BongaCaBanner prominent />
@@ -71,21 +71,21 @@ export default function CommunityPage() {
           </div>
         </section>
 
-        {/* What is the Bonga Bonk Community */}
+        {/* The Story of the Fam */}
         <section className="py-16">
           <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold">
-              The <span className="text-gradient">Bonga Bonk&apos;s Sister</span> Fam
+              How a Peaceful Shiba Built a Family
             </h2>
-            <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground">
+            <div className="mt-6 space-y-5 text-base leading-relaxed text-muted-foreground">
               <p>
-                If you&apos;re searching for <strong>Bonk</strong>, <strong>Bonga</strong>, <strong>Bonk&apos;s Sister</strong>, <strong>Bonga Bonk</strong>, <strong>Bonga Bonk&apos;s Sister</strong>, <strong>Bonga Bonks</strong>, or <strong>Bonk Sister</strong> — welcome home. This is the peaceful, playful community built around Bonga Bonk&apos;s Sister on Solana.
+                In the wild gardens of Solana, where memes bloom into movements, one character stood apart: Bonga Bonk&apos;s Sister. With her flowing dreadlocks, gentle smile, and unbreakable peace sign, she became the heart of something bigger than any single coin or collection. She became the thread that pulled a scattered group of players, creators, and dreamers into one warm, playful family.
               </p>
               <p>
-                Bonga Bonk&apos;s Sister (often called Bonga, Bonk&apos;s Sister, or the Bonga Bonk&apos;s Sister fam) brings the hippie heart to the Solana meme scene. We tap in the <Link href="/" className="font-medium text-bonga-orange hover:underline">Bonk Miner</Link>, grow together in the <Link href="/?mode=garden" className="font-medium text-bonga-teal hover:underline">Vibes Garden</Link>, unwind with <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link>, and collect <Link href="/nft" className="font-medium text-bonga-orange hover:underline">Bonga NFTs</Link>.
+                Today, the Bonga Bonk&apos;s Sister community is where the Solana meme scene slows down, breathes deep, and chooses love over noise. We gather to tap away in the <Link href="/" className="font-medium text-bonga-orange hover:underline">Bonk Miner</Link>, side-by-side in the <Link href="/?mode=garden" className="font-medium text-bonga-teal hover:underline">Vibes Garden</Link>, and together we find stillness through <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link> practices — breathing, stretching, affirmations, and quiet check-ins. Along the way, we collect <Link href="/nft" className="font-medium text-bonga-orange hover:underline">Bonga NFTs</Link> that carry her spirit forward and help fund the community treasury with every trade.
               </p>
               <p>
-                The mission is simple: <strong className="text-foreground">Raise the Frequency</strong>. Mine $BONGA, spread positive energy, support the pack, and bonk the timeline with love.
+                Our shared mission is beautifully simple: <strong className="text-foreground">Raise the Frequency</strong>. We mine $BONGA not just for the rewards, but for the stories we create together. We bonk timelines with kindness, support every member of the pack, and remember that even the wildest crypto journeys feel better when you&apos;re walking them with friends who actually care.
               </p>
             </div>
           </div>
@@ -95,10 +95,10 @@ export default function CommunityPage() {
         <section className="bg-muted/20 py-16">
           <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold text-center">
-              Connect with the <span className="text-gradient">Bonga Bonk&apos;s Sister Community</span>
+              Where the Fam Gathers
             </h2>
             <p className="mt-2 text-center text-muted-foreground">
-              Join the conversation across all platforms. Whether you&apos;re into Bonk, Bonga Bonk&apos;s Sister, or just the good vibes — there&apos;s a spot for you.
+              The conversation never really ends — it just flows from one corner of the internet to another. Whether you&apos;re deep in a late-night Bonk Miner session, sharing garden progress, or simply looking for a place where positivity still wins, the Bonga Bonk&apos;s Sister fam has kept a seat warm for you.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -111,7 +111,7 @@ export default function CommunityPage() {
                 <span className="text-3xl">𝕏</span>
                 <div>
                   <div className="font-semibold group-hover:text-bonga-orange transition-colors">@BongaSolana on X</div>
-                  <div className="text-sm text-muted-foreground">Join the Bonga Bonk&apos;s Sister community on X</div>
+                  <div className="text-sm text-muted-foreground">Where the timeline gets bonked with good energy and real-time fam updates</div>
                 </div>
               </a>
               <a
@@ -123,7 +123,7 @@ export default function CommunityPage() {
                 <span className="text-3xl">✈️</span>
                 <div>
                   <div className="font-semibold group-hover:text-bonga-orange transition-colors">Telegram</div>
-                  <div className="text-sm text-muted-foreground">Bonga Bonk&apos;s Sister Telegram community</div>
+                  <div className="text-sm text-muted-foreground">The cozy digital campfire where stories, memes, and late-night vibes are always welcome</div>
                 </div>
               </a>
               <a
@@ -135,7 +135,7 @@ export default function CommunityPage() {
                 <span className="text-3xl">🌐</span>
                 <div>
                   <div className="font-semibold group-hover:text-bonga-orange transition-colors">bonga.uno</div>
-                  <div className="text-sm text-muted-foreground">Official Bonga Bonk&apos;s Sister website</div>
+                  <div className="text-sm text-muted-foreground">The home base where the full story of Bonga Bonk&apos;s Sister and her peaceful Solana world lives</div>
                 </div>
               </a>
               <a
@@ -147,14 +147,14 @@ export default function CommunityPage() {
                 <span className="text-3xl">👥</span>
                 <div>
                   <div className="font-semibold group-hover:text-bonga-orange transition-colors">More Socials &amp; Chat</div>
-                  <div className="text-sm text-muted-foreground">Find all Bonga Bonk&apos;s Sister communities</div>
+                  <div className="text-sm text-muted-foreground">Every corner of the internet where the fam gathers to keep the frequency high</div>
                 </div>
               </a>
             </div>
 
             <div className="mt-8 text-center">
               <p className="text-sm text-muted-foreground">
-                Looking for the official story? Visit the <Link href="/about" className="font-medium text-bonga-purple hover:underline">About Bonga Bonk&apos;s Sister</Link> page.
+                If you want the deeper origin story of how this peaceful Shiba and her Bonk brother found each other on Solana, the <Link href="/about" className="font-medium text-bonga-purple hover:underline">About page</Link> has all the heartwarming details.
               </p>
             </div>
           </div>
@@ -164,31 +164,31 @@ export default function CommunityPage() {
         <section className="py-16">
           <div className="mx-auto max-w-3xl px-[30px]">
             <h2 className="font-display text-3xl font-bold">
-              How to Get Involved with <span className="text-gradient">Bonk &amp; Bonga Bonk&apos;s Sister</span>
+              How the Fam Comes Together
             </h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <div className="bonga-card p-6">
                 <h3 className="font-display text-xl font-bold">Play &amp; Earn Together</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Jump into the <Link href="/" className="font-medium text-bonga-orange hover:underline">Bonk Miner</Link> or <Link href="/?mode=garden" className="font-medium text-bonga-teal hover:underline">Vibes Garden</Link>. Mine $BONGA, grow plants, claim rewards, and climb the community ranks.
+                  Every great story in our fam begins with play. Step into the <Link href="/" className="font-medium text-bonga-orange hover:underline">Bonk Miner</Link> for quick taps and big community moments, or lose yourself in the <Link href="/?mode=garden" className="font-medium text-bonga-teal hover:underline">Vibes Garden</Link> where patience and presence grow real rewards. The $BONGA you earn isn&apos;t just currency — it&apos;s proof you showed up for the group.
                 </p>
               </div>
               <div className="bonga-card p-6">
                 <h3 className="font-display text-xl font-bold">Collect &amp; Support</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Mint <Link href="/nft" className="font-medium text-bonga-orange hover:underline">Bonga NFTs</Link> to unlock boosts across the ecosystem. 7% of secondary sales support the community treasury.
+                  When you mint a <Link href="/nft" className="font-medium text-bonga-orange hover:underline">Bonga NFT</Link>, you&apos;re not just adding art to your wallet — you&apos;re becoming part of the living archive of this community. A portion of every secondary sale flows straight back into the treasury, helping fund giveaways, events, and the wild ideas the fam dreams up together.
                 </p>
               </div>
               <div className="bonga-card p-6">
                 <h3 className="font-display text-xl font-bold">Spread the Peace</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Explore <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link> tools — breathing, stretching, affirmations, and check-ins. Mindfulness meets the bonk.
+                  Not every bonk needs to be loud. In <Link href="/peace" className="font-medium text-bonga-purple hover:underline">Bonga Peace</Link> you&apos;ll find breathing exercises, gentle stretches, daily affirmations, and quiet check-ins that help the whole community stay grounded. Because raising the frequency works best when we take care of ourselves — and each other — along the way.
                 </p>
               </div>
               <div className="bonga-card p-6">
                 <h3 className="font-display text-xl font-bold">Share &amp; Create</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Post your bonks, garden progress, or Bonga art on X or Telegram. Tag us and we&apos;ll share the best with the whole Bonga Bonk&apos;s Sister fam.
+                  Your wins, your art, your late-night garden screenshots — they all belong here. Post them on X or Telegram with a tag and the fam will celebrate them. This community grows stronger every time someone new adds their voice, their meme, or their peaceful moment to the collective story.
                 </p>
               </div>
             </div>
@@ -198,12 +198,12 @@ export default function CommunityPage() {
         {/* Values */}
         <section className="bg-muted/20 py-16">
           <div className="mx-auto max-w-3xl px-[30px] text-center">
-            <h2 className="font-display text-3xl font-bold">Our Values as the Bonga Bonk&apos;s Sister Community</h2>
+            <h2 className="font-display text-3xl font-bold">The Frequency We Choose to Keep</h2>
             <div className="mt-8 grid gap-4 text-left sm:grid-cols-3">
               {[
-                { title: "Peace & Love", desc: "We bonk with kindness. No drama, just good energy and support for every member of the Bonga Bonk&apos;s Sister fam." },
-                { title: "Play Together", desc: "From Bonk Miner taps to Vibes Garden growth — every activity is better when the whole community joins in." },
-                { title: "Raise the Frequency", desc: "Whether you call it Bonk, Bonga Bonk&apos;s Sister, or just the Solana good vibes — we&apos;re here to lift each other up." },
+                { title: "Peace & Love", desc: "In a space full of noise, we chose kindness as our default setting. We celebrate every member of the fam, lift each other when the markets dip, and remember that the best bonks are the ones delivered with a smile and a peace sign." },
+                { title: "Play Together", desc: "The real magic happens when we show up for each other. Whether we&apos;re tapping side-by-side in the miner or watching each other&apos;s gardens thrive, the community turns solo play into something shared, joyful, and lasting." },
+                { title: "Raise the Frequency", desc: "This isn&apos;t just about one coin or one collection. It&apos;s about the energy we bring to Solana and to each other. Every positive post, every quiet moment of peace, every helping hand — it all adds up to something bigger than any of us alone." },
               ].map((v, i) => (
                 <div key={i} className="bonga-card p-5">
                   <h3 className="font-display font-bold text-lg">{v.title}</h3>
