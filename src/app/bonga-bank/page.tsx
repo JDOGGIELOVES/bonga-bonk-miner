@@ -40,8 +40,21 @@ export default function BongaBankPage() {
       return;
     }
     try {
-      const s = await fetchBongaBankStatus(walletAddress);
+      let s = await fetchBongaBankStatus(walletAddress);
       setStatus(s);
+
+      // Automatically deposit any pending earnings from miner/garden/staking/pet into your personal vault.
+      // No manual "move" or deposit button needed — it happens as you earn (or on vault entry).
+      if (s && s.pending && s.pending.total > 0) {
+        try {
+          await depositPendingToBank({ wallet: walletAddress, source: "all" });
+          s = await fetchBongaBankStatus(walletAddress); // refresh to show updated banked balance
+          setStatus(s);
+        } catch (e) {
+          // non-fatal
+        }
+      }
+
       // Dramatic vault opening animation when data arrives
       setTimeout(() => setVaultOpen(true), 180);
     } catch (e) {
@@ -325,14 +338,6 @@ export default function BongaBankPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={handleDeposit}
-                        disabled={loading}
-                        className="rounded-lg border border-bonga-teal/60 px-5 py-2.5 font-medium text-bonga-teal hover:bg-bonga-teal/10 disabled:opacity-50"
-                      >
-                        {loading ? "Working..." : "Deposit Pending Earnings to Bank (free)"}
-                      </button>
-
                       {status.canWithdraw && (
                         <button
                           onClick={handleWithdraw}
@@ -360,8 +365,7 @@ export default function BongaBankPage() {
 
                     {status.pending && (status.pending.total || 0) > 0 && (
                       <div className="mt-4 rounded bg-muted/40 p-3 text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Ready to bank (pending from game):</span> miner {status.pending.miner} + garden {status.pending.garden} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
-                        <div className="mt-1">Use the Deposit button above to move these into your permanent mined savings.</div>
+                        <span className="font-medium text-foreground">Pending from games (auto-depositing to your vault on load):</span> miner {status.pending.miner} + garden {status.pending.garden} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
                       </div>
                     )}
 

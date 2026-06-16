@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { GardenVisual } from "@/components/garden/garden-visual";
 import { GardenShop } from "@/components/garden/garden-shop";
 import { GardenQuests } from "@/components/garden/garden-quests";
-import { GardenClaimBonga } from "@/components/garden/garden-claim-bonga";
+import { depositPendingToBank } from "@/lib/claim-client";
 import { buildBootstrapAction, syncGardenActions, fetchGardenEarnStatus, type GardenEarnStatus } from "@/lib/garden-sync-client";
 import type { GardenSyncAction } from "@/lib/garden-sync-server";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
@@ -223,6 +223,11 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       } else if (capped) {
         showPlantPop(instanceId, `Daily cap reached`);
       }
+
+      // Auto deposit to personal Bonga Bank Vault as mined (no manual move/claim in game)
+      if (connected && walletAddress) {
+        depositPendingToBank({ wallet: walletAddress, source: "garden" }).catch(() => {});
+      }
     },
     [state, isHolder, showPlantPop, queueGardenSync]
   );
@@ -258,6 +263,11 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         showGeneralFeedback(`Quest +${result.reward} $BONGA`);
       } else if (result.capped) {
         showGeneralFeedback(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached — earnings go to Bonga Bank`);
+      }
+
+      // Auto deposit to personal Bonga Bank Vault as earned
+      if (connected && walletAddress) {
+        depositPendingToBank({ wallet: walletAddress, source: "garden" }).catch(() => {});
       }
     },
     [state, showGeneralFeedback, queueGardenSync]
@@ -397,7 +407,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         )}
       </AnimatePresence>
 
-      <GardenClaimBonga refreshKey={syncRefreshKey} onClaimSuccess={onClaimSuccess} />
+
 
       <div className="bonga-card border-bonga-teal/20 bg-gradient-to-br from-bonga-teal/5 to-bonga-purple/5 p-4">
         <div className="flex items-start gap-2">

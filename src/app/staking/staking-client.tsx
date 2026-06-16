@@ -99,10 +99,11 @@ export function StakingClient() {
   // Auto-deposit staking rewards to Bonga Bank Vault (no manual "claim" button)
   // Triggers the signed deposit process automatically when pending rewards reach the min threshold
   useEffect(() => {
+    const currentPending = status?.pendingBonga ?? 0;
     if (
       !walletAddress ||
       !status?.canClaim ||
-      pending < (status?.minClaim ?? 10) ||
+      currentPending < (status?.minClaim ?? 10) ||
       actionLoading !== null
     ) {
       return;
@@ -111,7 +112,7 @@ export function StakingClient() {
     if (now - lastAutoClaimRef.current < 10000) return; // simple debounce to avoid repeated prompts
     lastAutoClaimRef.current = now;
     void handleClaim().catch(() => {});
-  }, [walletAddress, pending, status?.canClaim, status?.minClaim, actionLoading]);
+  }, [walletAddress, status?.pendingBonga, status?.canClaim, status?.minClaim, actionLoading]);
 
   const stakedCount = status?.stakedCount ?? 0;
   const heldCount = status?.heldCount ?? heldFromHook ?? 0;
