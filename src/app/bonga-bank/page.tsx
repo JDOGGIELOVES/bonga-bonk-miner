@@ -52,8 +52,8 @@ export default function BongaBankPage() {
 
   useEffect(() => {
     if (walletAddress) {
-      refreshStatus();
-      setVaultOpen(true); // Ensure vault opens and shows your personal Bonga balance when connected
+      refreshStatus(); // fetch latest balance
+      setVaultOpen(true); // auto open vault to show balance on connect
     } else {
       setStatus(null);
       setVaultOpen(false);
@@ -117,16 +117,9 @@ export default function BongaBankPage() {
     if (!connected) {
       setVisible(true);
     }
-    // Trigger vault open animation and reveal your personal Bonga Bank balance
-    if (walletAddress) {
-      if (!status) {
-        refreshStatus();
-      }
-      setVaultOpen(true);
-    } else {
-      // Optimistic open; effect will finalize once wallet connects and fetch completes
-      setVaultOpen(true);
-    }
+    // Always refresh latest balance from your deposits, then open the vault to reveal it
+    refreshStatus();
+    setVaultOpen(true);
   };
 
   return (
@@ -185,13 +178,26 @@ export default function BongaBankPage() {
             <div className={`vault-door relative mx-auto w-full aspect-[16/5] rounded-2xl border-[10px] border-zinc-700 bg-[linear-gradient(135deg,#3f3f46,#27272a,#18181b)] flex items-center justify-center overflow-hidden shadow-2xl transition-all duration-700 ${vaultOpen ? 'door-open' : ''}`} style={{ transform: vaultOpen ? 'rotateY(-55deg) translateX(-30px)' : 'rotateY(0deg)', transformOrigin: 'left center' }}>
               {/* Door surface details */}
               <div className="absolute inset-0 bg-[repeating-linear-gradient(120deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_3px,transparent_4px,transparent_18px)]" />
-              {/* Large lock wheel */}
-              <div className="relative z-10 flex flex-col items-center">
-                <div className="h-16 w-16 rounded-full border-8 border-zinc-300/80 bg-zinc-950 flex items-center justify-center mb-2 shadow-inner">
-                  <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
-                </div>
-                <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
-                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • 10,000 BANK CAP</div>
+              {/* Large lock wheel or revealed balance */}
+              <div className="relative z-10 flex flex-col items-center text-center">
+                {!vaultOpen ? (
+                  <>
+                    <div className="h-16 w-16 rounded-full border-8 border-zinc-300/80 bg-zinc-950 flex items-center justify-center mb-2 shadow-inner">
+                      <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
+                    </div>
+                    <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
+                    <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • 10,000 BANK CAP</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-[10px] uppercase tracking-[2px] text-white/60 mb-1">YOUR PERSONAL BALANCE</div>
+                    <div className="font-display text-4xl md:text-5xl font-black text-bonga-orange tabular-nums">
+                      {(status?.bankedBonga ?? 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-white/70 mt-1">$BONGA in your Bonga Bank Vault</div>
+                    <div className="text-[10px] text-white/50 mt-1">See full details &amp; options below</div>
+                  </>
+                )}
               </div>
 
               {/* Hinge and rivets */}
