@@ -208,7 +208,12 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const handleWater = useCallback(
     (instanceId: string) => {
       if (!state) return;
-      void gameAudio.resume();
+      void gameAudio.resume().then(() => {
+        const s = gameAudio.getSettings();
+        if (s.musicEnabled && !s.muted) {
+          gameAudio.updateSettings({ musicEnabled: true });
+        }
+      });
       const { state: next, earned, capped } = waterPlant(state, instanceId, isHolder);
       setState(next);
       queueGardenSync({ type: "water", instanceId }, next);

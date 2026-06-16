@@ -25,6 +25,7 @@ class GameAudioManager {
   private sparkleBuffer: AudioBuffer | null = null;
   private bgmBuffer: AudioBuffer | null = null;
   private bgmSource: AudioBufferSourceNode | null = null;
+  private bgmAudio: HTMLAudioElement | null = null;
   private proceduralBgm: BgmHandle | null = null;
   private bonkVariant = 0;
   private initialized = false;
@@ -74,6 +75,9 @@ class GameAudioManager {
     this.masterGain.gain.value = this.settings.muted ? 0 : this.settings.masterVolume;
     this.sfxGain.gain.value = this.settings.sfxVolume;
     this.musicGain.gain.value = this.settings.musicVolume;
+    if (this.bgmAudio) {
+      this.bgmAudio.volume = this.settings.musicVolume;
+    }
   }
 
   private async fetchBuffer(url: string): Promise<AudioBuffer | null> {
@@ -102,8 +106,8 @@ class GameAudioManager {
     const sparkleUrl = SOUND_URLS.sparkle || SOUND_PATHS.sparkle;
     this.sparkleBuffer = await this.fetchBuffer(sparkleUrl);
 
-    const bgmUrl = SOUND_URLS.bgm || SOUND_PATHS.bgm;
-    this.bgmBuffer = await this.fetchBuffer(bgmUrl);
+    // Note: bgm (reggae) is now loaded via HTMLAudioElement in startMusic for faster playback start.
+    // No need to pre-decode as buffer (avoids the slow lo-fi procedural fallback).
   }
 
   private playBuffer(buffer: AudioBuffer, dest: AudioNode, volume: number, playbackRate = 1) {
@@ -163,22 +167,38 @@ class GameAudioManager {
       this.proceduralBgm.stop();
       this.proceduralBgm = null;
     }
+    if (this.bgmAudio) {
+      try {
+        this.bgmAudio.pause();
+        this.bgmAudio.currentTime = 0;
+      } catch {
+        /* */
+      }
+      this.bgmAudio = null;
+    }
   }
 
   startMusic() {
-    if (!this.ctx || !this.musicGain || this.settings.muted) return;
+    if (!this.ctx || !this.musicGain || this.settings.muted || !this.settings.musicEnabled) return;
     this.stopMusicPlayback();
 
-    if (this.bgmBuffer) {
-      const src = this.ctx.createBufferSource();
-      src.buffer = this.bgmBuffer;
-      src.loop = true;
-      const g = this.ctx.createGain();
-      g.gain.value = 1;
-      src.connect(g);
-      g.connect(this.musicGain);
-      src.start();
-      this.bgmSource = src;
+    const bgmUrl = SOUND_URLS.bgm || SOUND_PATHS.bgm;
+    if (bgmUrl) {
+      // Use HTMLAudioElement for the reggae track (faster start than full buffer decode + procedural fallback)
+      // This replaces the slow lo-fi procedural fallback with the reggae track mentioned previously.
+      const audio = new Audio(bgmUrl);
+      audio.loop = true;
+      audio.volume = this.settings.musicVolume;
+      audio.preload = 'auto';
+      // Play as soon as possible (after user gesture via resume)
+      const playPromise = audio.play();
+      if (playPromise) {
+        playPromise.catch((err) => {
+          // Autoplay policy or network — will retry on next user interaction or toggle
+          console.warn('BGM reggae play deferred:', err);
+        });
+      }
+      this.bgmAudio = audio;
     } else {
       this.proceduralBgm = startProceduralBgm(
         this.ctx,
@@ -191,8 +211,11 @@ class GameAudioManager {
   setMuted(muted: boolean) {
     this.settings.muted = muted;
     this.applyGainValues();
-    if (muted) this.stopMusicPlayback();
-    else if (this.settings.musicEnabled) this.startMusic();
+    if (muted) {
+      this.stopMusicPlayback();
+    } else if (this.settings.musicEnabled) {
+      void this.resume().then(() => this.startMusic());
+    }
     this.notify();
   }
 
@@ -226,9 +249,14 @@ class GameAudioManager {
       }
     }
 
-    if (partial.musicVolume !== undefined && this.proceduralBgm && !this.bgmBuffer) {
-      this.stopMusicPlayback();
-      if (this.settings.musicEnabled && !this.settings.muted) this.startMusic();
+    if (partial.musicVolume !== undefined) {
+      if (this.bgmAudio) {
+        this.bgmAudio.volume = this.settings.musicVolume;
+      }
+      if (this.proceduralBgm && !this.bgmBuffer && !this.bgmAudio) {
+        this.stopMusicPlayback();
+        if (this.settings.musicEnabled && !this.settings.muted) this.startMusic();
+      }
     }
 
     this.notify();

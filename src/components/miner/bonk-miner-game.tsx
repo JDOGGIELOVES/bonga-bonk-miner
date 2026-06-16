@@ -167,7 +167,13 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     (clientX: number, clientY: number) => {
       if (!gameState || !gameAreaRef.current) return;
 
-      void gameAudio.resume();
+      void gameAudio.resume().then(() => {
+        // Start reggae BGM on first user gesture for fast perceived playback (replaces delayed lo-fi procedural)
+        const s = gameAudio.getSettings();
+        if (s.musicEnabled && !s.muted) {
+          gameAudio.updateSettings({ musicEnabled: true }); // triggers startMusic with the reggae track
+        }
+      });
 
       const rect = gameAreaRef.current.getBoundingClientRect();
       const x = clientX - rect.left;
