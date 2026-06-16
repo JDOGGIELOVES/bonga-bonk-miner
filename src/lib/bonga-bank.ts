@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { readBlobText, writeBlobText } from "@/lib/blob-json-store";
 import { withWalletClaimLock } from "@/lib/claim-lock";
+import { recordGlobalClaim } from "@/lib/claim-tally-store";
 
 const BANK_BLOB_DIR = "bonga-bank";
 const MIN_BANK_WITHDRAW = envInt("BONGA_BANK_MIN_WITHDRAW", 10000);
@@ -164,6 +165,14 @@ export async function depositToBank(
       await updateGlobalBankStatsOnDeposit(safeAmount, isNewPlayer);
     } catch (e) {
       console.error("Failed to update global bank stats (non-fatal):", e);
+    }
+
+    // Record to the global claim tally so "Community Claimed" / total paid out stats show the earnings
+    // (even for off-chain bank deposits; unifies the community numbers across sources)
+    try {
+      await recordGlobalClaim(safeAmount, (meta?.source as any) || 'other', wallet);
+    } catch (e) {
+      console.error("Failed to record global claim to tally for deposit (non-fatal):", e);
     }
 
     return bank;
