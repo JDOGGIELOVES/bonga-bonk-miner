@@ -193,26 +193,13 @@ export default function BongaBankPage() {
             <div className={`vault-door relative mx-auto w-full aspect-[16/5] rounded-2xl border-[10px] border-zinc-700 bg-[linear-gradient(135deg,#3f3f46,#27272a,#18181b)] flex items-center justify-center overflow-hidden shadow-2xl transition-all duration-700 ${vaultOpen ? 'door-open' : ''}`} style={{ transform: vaultOpen ? 'rotateY(-55deg) translateX(-30px)' : 'rotateY(0deg)', transformOrigin: 'left center' }}>
               {/* Door surface details */}
               <div className="absolute inset-0 bg-[repeating-linear-gradient(120deg,rgba(255,255,255,0.03)_0px,rgba(255,255,255,0.03)_3px,transparent_4px,transparent_18px)]" />
-              {/* Large lock wheel or revealed balance */}
-              <div className="relative z-10 flex flex-col items-center text-center">
-                {!vaultOpen ? (
-                  <>
-                    <div className="h-16 w-16 rounded-full border-8 border-zinc-300/80 bg-zinc-950 flex items-center justify-center mb-2 shadow-inner">
-                      <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
-                    </div>
-                    <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
-                    <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • 10,000 BANK CAP</div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-[10px] uppercase tracking-[2px] text-white/60 mb-1">YOUR PERSONAL BALANCE</div>
-                    <div className="font-display text-4xl md:text-5xl font-black text-bonga-orange tabular-nums">
-                      {(status?.bankedBonga ?? 0).toLocaleString()}
-                    </div>
-                    <div className="text-sm text-white/70 mt-1">$BONGA in your Bonga Bank Vault</div>
-                    <div className="text-[10px] text-white/50 mt-1">See full details &amp; options below</div>
-                  </>
-                )}
+              {/* Large lock wheel - always on the door face */}
+              <div className="relative z-10 flex flex-col items-center">
+                <div className="h-16 w-16 rounded-full border-8 border-zinc-300/80 bg-zinc-950 flex items-center justify-center mb-2 shadow-inner">
+                  <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
+                </div>
+                <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
+                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • 10,000 BANK CAP</div>
               </div>
 
               {/* Hinge and rivets */}
@@ -226,15 +213,17 @@ export default function BongaBankPage() {
             <div className={`absolute -inset-1 rounded-3xl bg-gradient-to-r from-bonga-orange/10 via-transparent to-transparent transition-opacity ${vaultOpen ? 'opacity-70' : 'opacity-0'}`} style={{ filter: 'blur(20px)' }} />
           </div>
 
-          {/* Revealed vault interior balance display - shows the number immediately when door opens */}
+          {/* Revealed vault interior - the blank area is now filled with this when door opens */}
           {connected && walletAddress && (
-            <div className={`vault-interior mx-auto max-w-[820px] mt-4 mb-8 p-8 bg-zinc-950 border-2 border-zinc-600 rounded-3xl text-center shadow-[inset_0_0_60px_rgba(0,0,0,0.6)] transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-4'}`}>
-              <div className="text-[10px] uppercase tracking-[3px] text-bonga-orange/60 mb-2">YOUR PERSONAL BONGA BANK VAULT</div>
-              <div className="font-mono text-[4.5rem] md:text-[5.5rem] leading-none font-black tabular-nums tracking-[-3px] text-bonga-orange">
-                {((status?.bankedBonga ?? 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            <div className={`vault-interior mx-auto max-w-[820px] mt-2 mb-8 p-6 bg-zinc-900 border-4 border-zinc-500 rounded-3xl text-center shadow-inner transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-2'}`}>
+              <div className="text-[10px] uppercase tracking-[2px] text-bonga-orange/70 mb-1">YOUR PERSONAL BONGA BANK VAULT</div>
+              <div className="mx-auto inline-block bg-black border-2 border-bonga-orange/70 p-4 rounded-xl min-w-[280px]">
+                <div className="font-mono text-[3.5rem] md:text-[4rem] leading-none font-black tabular-nums tracking-[-2px] text-bonga-orange">
+                  {((status?.bankedBonga ?? 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </div>
               </div>
-              <div className="text-2xl text-white/70 mt-1">$BONGA</div>
-              <div className="text-xs text-white/50 mt-3">This is your current off-chain balance. Deposits from Miner, Garden, Staking etc. appear here automatically.</div>
+              <div className="text-xl text-white/70 mt-2">$BONGA</div>
+              <div className="text-xs text-white/60 mt-2">Your mined $BONGA auto-deposits here. 0.00 shows until first deposit loads.</div>
             </div>
           )}
 
