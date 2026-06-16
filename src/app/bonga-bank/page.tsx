@@ -143,10 +143,12 @@ export default function BongaBankPage() {
           }
           .vault-interior {
             transition: opacity 650ms ease, transform 650ms cubic-bezier(0.23,1,0.32,1);
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
           }
           .vault-interior.revealed {
             opacity: 1 !important;
-            transform: translateZ(0) scale(1);
+            transform: translateY(0) scale(1);
           }
           .vault-rivet {
             box-shadow: 0 0 0 1px #3f3f46, inset 0 1px 0 #52525b;
@@ -210,6 +212,18 @@ export default function BongaBankPage() {
             {/* The "opened" interior glow / light from inside the vault */}
             <div className={`absolute -inset-1 rounded-3xl bg-gradient-to-r from-bonga-orange/10 via-transparent to-transparent transition-opacity ${vaultOpen ? 'opacity-70' : 'opacity-0'}`} style={{ filter: 'blur(20px)' }} />
           </div>
+
+          {/* Revealed vault interior balance display - shows the number immediately when door opens */}
+          {connected && walletAddress && (
+            <div className={`vault-interior mx-auto max-w-[820px] -mt-10 mb-8 p-8 bg-zinc-950 border-2 border-zinc-600 rounded-3xl text-center shadow-[inset_0_0_60px_rgba(0,0,0,0.6)] transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-4'}`}>
+              <div className="text-[10px] uppercase tracking-[3px] text-bonga-orange/60 mb-2">YOUR PERSONAL BONGA BANK VAULT</div>
+              <div className="font-mono text-[4.5rem] md:text-[5.5rem] leading-none font-black tabular-nums tracking-[-3px] text-bonga-orange">
+                {((status?.bankedBonga ?? 0)).toLocaleString()}.00
+              </div>
+              <div className="text-2xl text-white/70 mt-1">$BONGA</div>
+              <div className="text-xs text-white/50 mt-3">This is your current off-chain balance. Deposits from Miner, Garden, Staking etc. appear here automatically.</div>
+            </div>
+          )}
 
           {!connected && (
             <div className="max-w-md mx-auto">
