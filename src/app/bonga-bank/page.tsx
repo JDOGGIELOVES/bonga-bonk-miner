@@ -228,10 +228,10 @@ export default function BongaBankPage() {
 
           {/* Revealed vault interior balance display - shows the number immediately when door opens */}
           {connected && walletAddress && (
-            <div className={`vault-interior mx-auto max-w-[820px] -mt-10 mb-8 p-8 bg-zinc-950 border-2 border-zinc-600 rounded-3xl text-center shadow-[inset_0_0_60px_rgba(0,0,0,0.6)] transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-4'}`}>
+            <div className={`vault-interior mx-auto max-w-[820px] mt-4 mb-8 p-8 bg-zinc-950 border-2 border-zinc-600 rounded-3xl text-center shadow-[inset_0_0_60px_rgba(0,0,0,0.6)] transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-4'}`}>
               <div className="text-[10px] uppercase tracking-[3px] text-bonga-orange/60 mb-2">YOUR PERSONAL BONGA BANK VAULT</div>
               <div className="font-mono text-[4.5rem] md:text-[5.5rem] leading-none font-black tabular-nums tracking-[-3px] text-bonga-orange">
-                {((status?.bankedBonga ?? 0)).toLocaleString()}.00
+                {((status?.bankedBonga ?? 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </div>
               <div className="text-2xl text-white/70 mt-1">$BONGA</div>
               <div className="text-xs text-white/50 mt-3">This is your current off-chain balance. Deposits from Miner, Garden, Staking etc. appear here automatically.</div>
@@ -282,7 +282,7 @@ export default function BongaBankPage() {
                 <div className="mb-6 text-center">
                   <div className="text-sm uppercase tracking-[2px] text-muted-foreground mb-1">Current Savings Balance</div>
                   <div className="text-7xl font-extrabold tabular-nums tracking-[-3px] text-bonga-orange">
-                    {(status?.bankedBonga ?? 0).toLocaleString()}
+                    {((status?.bankedBonga ?? 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                   <div className="text-2xl text-muted-foreground">$BONGA in your Bonga Bank</div>
                 </div>
@@ -332,7 +332,7 @@ export default function BongaBankPage() {
                       </div>
                       <div className="rounded-lg border border-border/50 bg-background/50 p-4">
                         <div className="text-muted-foreground text-xs">Current Bank Balance</div>
-                        <div className="font-semibold text-2xl tabular-nums">{status.bankedBonga.toLocaleString()}</div>
+                        <div className="font-semibold text-2xl tabular-nums">{((status?.bankedBonga ?? 0)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
                         <div className="text-[10px] text-muted-foreground mt-0.5">Your active mined savings</div>
                       </div>
                     </div>
