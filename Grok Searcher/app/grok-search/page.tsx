@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function GrokSearchGuide() {
   const prompts = [
-    "Find the most interesting conversations on X right now about [topic]. Summarize the top 5 unique angles.",
-    "What are emerging trends in [industry] based on recent posts from influential accounts?",
-    "Give me 8 fresh content ideas for [niche] pulled from the last 48 hours of X discussion."
+    { text: "Find the most interesting conversations on X right now about [topic]. Summarize the top 5 unique angles.", guidance: "One of the best grok search prompts for real-time research. Surfaces what people are actually talking about right now instead of outdated search results." },
+    { text: "What are emerging trends in [industry] based on recent posts from influential accounts?", guidance: "Use this grok prompt for market research and trend spotting. Pulls fresh signals from X that traditional tools miss." },
+    { text: "Give me 8 fresh content ideas for [niche] pulled from the last 48 hours of X discussion.", guidance: "Excellent grok prompt for content creators and social media managers. Generates timely ideas tied to current conversations." }
   ];
 
   return (
@@ -22,7 +22,7 @@ export default function GrokSearchGuide() {
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Powerful Search Prompts</h2>
         <div className="space-y-4">
-          {prompts.map((p, i) => <PromptCard key={i} text={p} />)}
+          {prompts.map((p, i) => <PromptCard key={i} text={p.text} guidance={p.guidance} />)}
         </div>
       </div>
     </div>

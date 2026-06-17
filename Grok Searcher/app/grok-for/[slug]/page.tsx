@@ -34,31 +34,59 @@ export default function GrokForCategory({ params }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
-      <div className="max-w-3xl mb-8">
+      <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-5xl font-bold mb-4">{cat.title}</h1>
         <p className="text-xl text-gray-600">{cat.description}</p>
-        <p className="mt-4 text-gray-700">{content.intro}</p>
       </div>
 
-      {content.useCases && content.useCases.length > 0 && (
-        <div className="mb-10">
-          <h2 className="text-2xl font-semibold mb-3">High-Impact Use Cases</h2>
-          <ul className="grid md:grid-cols-2 gap-2 text-sm">
-            {content.useCases.map((uc, i) => (
-              <li key={i} className="bg-white p-3 rounded-xl border">• {uc}</li>
+      {(content.whyTitle || content.whyItems) && (
+        <div className="bg-white p-8 rounded-3xl border mb-12">
+          <h2 className="text-2xl font-semibold mb-4">{content.whyTitle || `Why ${cat.title.replace('Grok for ', '')} Are Using Grok in 2026`}</h2>
+          {content.useCasesIntro && <p className="mb-4 text-sm text-gray-600">{content.useCasesIntro}</p>}
+          <div className="grid md:grid-cols-3 gap-6 text-sm">
+            {(content.whyItems || []).length > 0 ? content.whyItems.map((item, i) => (
+              <div key={i}>
+                <strong>{item.title}</strong><br />
+                {item.desc}
+              </div>
+            )) : content.useCases.slice(0, 3).map((uc, i) => (
+              <div key={i}>
+                <strong>{uc}</strong><br />
+                Real-time insights and fast execution with Grok.
+              </div>
             ))}
-          </ul>
+          </div>
+          <p className="mt-6 text-sm text-gray-600">Grok’s real-time X access + strong reasoning makes it especially useful for fast-moving {cat.title.toLowerCase().replace('grok for ', '')} work where traditional search or other AIs lag behind.</p>
+        </div>
+      )}
+
+      {content.useCases && content.useCases.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-3xl font-bold mb-6">High-Impact Use Cases</h2>
+          {content.useCasesIntro && <p className="text-gray-600 mb-4">{content.useCasesIntro}</p>}
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {content.useCases.map((uc, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl border">
+                <h3 className="font-semibold mb-3">{uc}</h3>
+                <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                  <li>Real-time signals and fast drafting</li>
+                  <li>Actionable outputs you can use immediately</li>
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       <div className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Ready-to-Use Prompts</h2>
+        <h2 className="text-3xl font-bold mb-6">Top Copy-Paste Prompts</h2>
+        {content.promptsGuidance && <p className="text-gray-600 mb-4">{content.promptsGuidance}</p>}
         {content.sections.map((section, si) => (
           <div key={si} className="mb-8">
             <h3 className="font-semibold text-lg mb-3 text-gray-800">{section.title}</h3>
             <div className="grid gap-4 md:grid-cols-2">
               {section.prompts.map((p, i) => (
-                <PromptCard key={i} text={p.text} />
+                <PromptCard key={i} text={p.text} guidance={p.guidance} />
               ))}
             </div>
           </div>

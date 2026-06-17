@@ -6,12 +6,12 @@ import CategoryCard from '@/components/CategoryCard';
 import { categories } from '@/lib/categories';
 
 const featured = [
-  { title: "50 Best Grok Prompts", href: "/best-grok-prompts", desc: "Copy-paste ready prompts for productivity, coding, creativity and more.", img: "/images/grok-50-best-prompts.jpg" },
-  { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested prompts + tips for high-quality image generation.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
-  { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Honest 2026 comparison of strengths, weaknesses and best use cases.", img: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" },
-  { title: "How to Search with Grok", href: "/grok-search", desc: "Unlock real-time X research, trends and SEO insights with copy-paste prompts.", img: "/images/grok-search-research-guide-2026.jpg" },
-  { title: "Grok for Business", href: "/grok-for/business", desc: "Practical workflows for meetings, strategy, research and faster execution.", img: "/images/grok-for-business-2026.jpg" },
-  { title: "Grok Memes (I'm Tired Boss)", href: "/memes", desc: "Viral funny series and shareable Grok humor.", img: "/images/grok-meme-depressed-robot.jpg" },
+  { title: "50 Best Grok Prompts", href: "/best-grok-prompts", desc: "Copy-paste ready grok prompts for productivity, coding, creativity and everyday tasks. Battle-tested 2026 collection.", img: "/images/grok-50-best-prompts.jpg" },
+  { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested grok image prompts + tips for high-quality generation. Marketing visuals, concepts and creative control.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
+  { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Honest 2026 grok vs chatgpt vs claude comparison: real-time search, coding, reasoning, pricing and best use cases.", img: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" },
+  { title: "How to Search with Grok", href: "/grok-search", desc: "Unlock grok real-time X search for research, trends, SEO keyword ideas and traffic insights. Complete with copy-paste prompts.", img: "/images/grok-search-research-guide-2026.jpg" },
+  { title: "Grok for Business 2026", href: "/grok-for/business", desc: "Practical grok business prompts 2026 for meetings, strategy, research, content and sales. Move faster with real-time X insights.", img: "/images/grok-for-business-2026.jpg" },
+  { title: "Grok Memes (I'm Tired Boss)", href: "/memes", desc: "Viral funny grok memes and the 'I'm Tired Boss' series. Copy & share relatable AI humor.", img: "/images/grok-meme-depressed-robot.jpg" },
 ];
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
     cat.description.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 8);
 
-  const topCategories = categories.slice(0, 8);
+  const topCategories = categories.slice(0, 15);
 
   return (
     <div>

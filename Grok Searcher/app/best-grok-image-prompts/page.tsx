@@ -16,7 +16,7 @@ export default function ImagePrompts() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {imagePrompts.map((p, i) => (
-          <PromptCard key={i} text={p.text} />
+          <PromptCard key={i} text={p.text} guidance={p.guidance} />
         ))}
       </div>
     </div>
