@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Optimize images if we add more in future
   images: {
     remotePatterns: [],
+    // Better formats and sizes for faster loads and modern browsers
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 };
 

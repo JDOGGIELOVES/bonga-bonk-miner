@@ -23,7 +23,7 @@ export default function CategoriesClient() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filtered.map((cat) => (
+        {filtered.slice(0, 30).map((cat) => (
           <Link 
             key={cat.slug} 
             href={`/grok-for/${cat.slug}`} 
@@ -34,6 +34,9 @@ export default function CategoriesClient() {
           </Link>
         ))}
       </div>
+      {filtered.length > 30 && (
+        <p className="mt-2 text-xs text-gray-500">Showing first 30. Use the search box above to filter all {filtered.length} categories instantly.</p>
+      )}
 
       {filtered.length === 0 && <p className="mt-6 text-gray-500">No categories match your search.</p>}
 
@@ -48,7 +51,6 @@ export default function CategoriesClient() {
                 <Link href={`/grok-for/${cat.slug}`} className="hover:underline hover:text-blue-600">
                   {cat.title}
                 </Link>
-                {cat.description && ` — ${cat.description}`}
               </li>
             ))}
         </ul>

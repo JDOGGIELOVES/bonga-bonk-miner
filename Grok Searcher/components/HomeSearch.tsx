@@ -28,7 +28,7 @@ export default function HomeSearch() {
     cat.description.toLowerCase().includes(searchTerm.toLowerCase())
   ).slice(0, 8);
 
-  const topCategories = categories.slice(0, 15);
+  const topCategories = categories.slice(0, 10);
 
   return (
     <>
