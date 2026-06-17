@@ -17,11 +17,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = getCategoryBySlug(params.slug);
   if (!cat) return { title: 'Category Not Found' };
 
+  const pageTitle = `${cat.title} Prompts & Guides`;
+  const desc = cat.description || `Expert Grok prompts and guides for ${cat.title.replace('Grok for ', '')}. Copy-paste ready use cases and examples.`;
+  const imageUrl = cat.image || '/images/grok-50-best-prompts.jpg';
+
   return {
-    title: `${cat.title} Prompts & Guides`,
-    description: cat.description,
+    title: pageTitle,
+    description: desc,
     openGraph: {
-      images: cat.image ? [{ url: cat.image }] : undefined,
+      title: pageTitle,
+      description: desc,
+      images: [{ url: imageUrl, alt: cat.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      description: desc,
+      images: [imageUrl],
     },
   };
 }
@@ -116,10 +128,43 @@ export default function GrokForCategory({ params }: Props) {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": cat.title,
-        "description": cat.description,
-        "author": { "@type": "Organization", "name": "Grok Searcher" }
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": cat.title,
+            "description": cat.description,
+            "url": `https://groksearcher.com/grok-for/${params.slug}`,
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
+          },
+          {
+            "@type": "Article",
+            "headline": cat.title,
+            "description": cat.description,
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "publisher": { "@type": "Organization", "name": "Grok Searcher", "url": "https://groksearcher.com" },
+            "url": `https://groksearcher.com/grok-for/${params.slug}`
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://groksearcher.com/categories" },
+              { "@type": "ListItem", "position": 3, "name": cat.title, "item": `https://groksearcher.com/grok-for/${params.slug}` }
+            ]
+          },
+          ...(content.faqs && content.faqs.length > 0 ? [{
+            "@type": "FAQPage",
+            "mainEntity": content.faqs.map((faq: {q: string, a: string}) => ({
+              "@type": "Question",
+              "name": faq.q,
+              "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+            }))
+          }] : [])
+        ]
       }} />
     </div>
   );

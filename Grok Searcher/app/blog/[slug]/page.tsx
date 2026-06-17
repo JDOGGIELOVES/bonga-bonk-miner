@@ -19,6 +19,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: post.title,
     description: post.description,
+    openGraph: {
+      title: `${post.title} | Grok Searcher`,
+      description: post.description,
+      images: [{ url: "/images/grok-search-research-guide-2026.jpg" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: ["/images/grok-search-research-guide-2026.jpg"],
+    },
   };
 }
 
@@ -43,10 +54,30 @@ export default function BlogPost({ params }: Props) {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": post.title,
-        "description": post.description,
-        "author": { "@type": "Organization", "name": "Grok Searcher" }
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": post.title,
+            "description": post.description,
+            "url": `https://groksearcher.com/blog/${params.slug}`
+          },
+          {
+            "@type": "Article",
+            "headline": post.title,
+            "description": post.description,
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "publisher": { "@type": "Organization", "name": "Grok Searcher" },
+            "url": `https://groksearcher.com/blog/${params.slug}`
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://groksearcher.com/blog" },
+              { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://groksearcher.com/blog/${params.slug}` }
+            ]
+          }
+        ]
       }} />
     </div>
   );

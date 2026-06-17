@@ -2,10 +2,18 @@ import type { Metadata } from 'next';
 import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
-  title: "Grok vs Claude 2026",
-  description: "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality.",
+  title: "Grok vs Claude 2026 Comparison",
+  description: "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality. When to choose each model.",
   openGraph: {
-    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" }],
+    title: "Grok vs Claude 2026 | Grok Searcher",
+    description: "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality.",
+    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg", alt: "Grok vs Claude" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Grok vs Claude 2026 | Grok Searcher",
+    description: "Real-time X insights vs long-form reasoning and writing quality.",
+    images: ["/images/grok-vs-chatgpt-vs-claude-2026.jpg"],
   },
 };
 
@@ -41,9 +49,29 @@ export default function GrokVsClaude() {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "Grok vs Claude 2026",
-        "description": "Comparison focusing on real-time capabilities vs reasoning quality."
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Grok vs Claude 2026",
+            "description": "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality.",
+            "url": "https://groksearcher.com/comparisons/grok-vs-claude"
+          },
+          {
+            "@type": "Article",
+            "headline": "Grok vs Claude 2026",
+            "description": "Real-time social intelligence vs deep reasoning and writing craft.",
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "url": "https://groksearcher.com/comparisons/grok-vs-claude"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" },
+              { "@type": "ListItem", "position": 3, "name": "Grok vs Claude", "item": "https://groksearcher.com/comparisons/grok-vs-claude" }
+            ]
+          }
+        ]
       }} />
     </div>
   );

@@ -5,10 +5,17 @@ import { bestPrompts } from '@/lib/prompts';
 
 export const metadata: Metadata = {
   title: "50 Best Grok Prompts (Copy-Paste)",
-  description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined.",
+  description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined. Free 2026 collection.",
   openGraph: {
     title: "50 Best Grok Prompts (Copy-Paste) | Grok Searcher",
-    images: [{ url: "/images/grok-50-best-prompts.jpg" }],
+    description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined.",
+    images: [{ url: "/images/grok-50-best-prompts.jpg", alt: "50 Best Grok Prompts" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "50 Best Grok Prompts (Copy-Paste) | Grok Searcher",
+    description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks.",
+    images: ["/images/grok-50-best-prompts.jpg"],
   },
 };
 
@@ -35,9 +42,33 @@ export default function BestGrokPrompts() {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "50 Best Grok Prompts You Can Copy and Paste",
-        "author": { "@type": "Organization", "name": "Grok Searcher" }
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "50 Best Grok Prompts (Copy-Paste)",
+            "description": "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks.",
+            "url": "https://groksearcher.com/best-grok-prompts"
+          },
+          {
+            "@type": "Article",
+            "headline": "50 Best Grok Prompts You Can Copy and Paste",
+            "description": "Battle-tested collection of copy-paste Grok prompts.",
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "publisher": { "@type": "Organization", "name": "Grok Searcher" },
+            "url": "https://groksearcher.com/best-grok-prompts"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "50 Best Grok Prompts", "item": "https://groksearcher.com/best-grok-prompts" }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": faqData.mainEntity
+          }
+        ]
       }} />
 
       {/* General */}

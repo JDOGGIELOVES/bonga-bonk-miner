@@ -17,14 +17,20 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     description: "Free copy-paste Grok prompts, guides and comparisons for every use case by xAI.",
-    images: [{ url: "/images/grok-50-best-prompts.jpg" }],
+    images: [{ url: "/images/grok-50-best-prompts.jpg", alt: "Grok Searcher - Best Grok Prompts" }],
     url: "https://groksearcher.com",
+    siteName: "Grok Searcher",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     description: "Free copy-paste Grok prompts, guides and comparisons for every use case by xAI.",
     images: ["/images/grok-50-best-prompts.jpg"],
+    creator: "@groksearcher",
+  },
+  alternates: {
+    canonical: "https://groksearcher.com",
   },
 };
 

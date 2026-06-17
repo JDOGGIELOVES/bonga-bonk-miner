@@ -3,8 +3,19 @@ import type { Metadata } from 'next';
 import { blogPosts } from '@/lib/blog';
 
 export const metadata: Metadata = {
-  title: "Blog & Guides",
-  description: "In-depth articles and guides about using Grok effectively for research, prompting, and workflows.",
+  title: "Blog & Guides - Grok Tips, Research & Prompting",
+  description: "In-depth articles and guides about using Grok effectively for research, prompting, real-time search, and AI workflows. Practical 2026 tutorials.",
+  openGraph: {
+    title: "Blog & Guides | Grok Searcher",
+    description: "In-depth articles and guides about using Grok effectively for research, prompting, and workflows.",
+    images: [{ url: "/images/grok-search-research-guide-2026.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog & Guides | Grok Searcher",
+    description: "In-depth articles and guides about using Grok effectively for research, prompting, and workflows.",
+    images: ["/images/grok-search-research-guide-2026.jpg"],
+  },
 };
 
 export default function BlogIndex() {

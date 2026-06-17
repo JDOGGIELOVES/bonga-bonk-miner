@@ -1,8 +1,20 @@
 import type { Metadata } from 'next';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Best Grok Memes & 'I'm Tired Boss' Series",
   description: "Funny Grok memes and the viral 'I'm Tired Boss' series. Copy and share the best ones.",
+  openGraph: {
+    title: "Best Grok Memes & 'I'm Tired Boss' Series | Grok Searcher",
+    description: "Funny Grok memes and the viral 'I'm Tired Boss' series. Copy and share the best ones.",
+    images: [{ url: "/images/grok-meme-depressed-robot.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Best Grok Memes & 'I'm Tired Boss' Series | Grok Searcher",
+    description: "Funny Grok memes and the viral 'I'm Tired Boss' series.",
+    images: ["/images/grok-meme-depressed-robot.jpg"],
+  },
 };
 
 export default function Memes() {
@@ -23,6 +35,25 @@ export default function Memes() {
       </div>
 
       <p className="mt-8 text-sm text-gray-500">Share responsibly. Grok has feelings (sometimes).</p>
+
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Best Grok Memes & 'I'm Tired Boss' Series",
+            "description": "Funny Grok memes and the viral 'I'm Tired Boss' series.",
+            "url": "https://groksearcher.com/memes"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Grok Memes", "item": "https://groksearcher.com/memes" }
+            ]
+          }
+        ]
+      }} />
     </div>
   );
 }

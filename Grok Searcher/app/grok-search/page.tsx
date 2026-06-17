@@ -1,10 +1,21 @@
 import type { Metadata } from 'next';
 import PromptCard from '@/components/PromptCard';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "How to Search with Grok: Complete 2026 Guide",
   description: "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights. Includes ready-to-copy prompts.",
-  openGraph: { images: [{ url: "/images/grok-search-research-guide-2026.jpg" }] }
+  openGraph: {
+    title: "How to Search with Grok: Complete 2026 Guide | Grok Searcher",
+    description: "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights. Includes ready-to-copy prompts.",
+    images: [{ url: "/images/grok-search-research-guide-2026.jpg", alt: "How to Search with Grok" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "How to Search with Grok: Complete 2026 Guide | Grok Searcher",
+    description: "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights.",
+    images: ["/images/grok-search-research-guide-2026.jpg"],
+  },
 };
 
 export default function GrokSearchGuide() {
@@ -25,6 +36,32 @@ export default function GrokSearchGuide() {
           {prompts.map((p, i) => <PromptCard key={i} text={p.text} guidance={p.guidance} />)}
         </div>
       </div>
+
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "How to Search with Grok: Complete 2026 Guide",
+            "description": "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights.",
+            "url": "https://groksearcher.com/grok-search"
+          },
+          {
+            "@type": "Article",
+            "headline": "How to Search with Grok",
+            "description": "Unlock Grok's real-time X search power for research, trends, SEO keyword ideas, and traffic insights.",
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "url": "https://groksearcher.com/grok-search"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "How to Search with Grok", "item": "https://groksearcher.com/grok-search" }
+            ]
+          }
+        ]
+      }} />
     </div>
   );
 }

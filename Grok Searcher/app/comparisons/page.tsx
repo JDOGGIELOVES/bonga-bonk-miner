@@ -1,9 +1,21 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Grok vs ChatGPT vs Claude & More Comparisons",
   description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini. Find out which AI is best for research, coding, writing and real-time insights in 2026.",
+  openGraph: {
+    title: "Grok vs ChatGPT vs Claude & More Comparisons | Grok Searcher",
+    description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
+    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Grok vs ChatGPT vs Claude & More Comparisons | Grok Searcher",
+    description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
+    images: ["/images/grok-vs-chatgpt-vs-claude-2026.jpg"],
+  },
 };
 
 const comparisons = [
@@ -26,6 +38,25 @@ export default function ComparisonsHub() {
           </Link>
         ))}
       </div>
+
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Grok vs ChatGPT vs Claude & More Comparisons",
+            "description": "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
+            "url": "https://groksearcher.com/comparisons"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" }
+            ]
+          }
+        ]
+      }} />
     </div>
   );
 }

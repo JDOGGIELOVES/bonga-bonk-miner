@@ -5,7 +5,15 @@ export const metadata: Metadata = {
   title: "Grok vs ChatGPT vs Claude 2026",
   description: "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
   openGraph: {
-    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" }],
+    title: "Grok vs ChatGPT vs Claude 2026 | Grok Searcher",
+    description: "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
+    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg", alt: "Grok vs ChatGPT vs Claude" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Grok vs ChatGPT vs Claude 2026 | Grok Searcher",
+    description: "Detailed comparison of Grok, ChatGPT and Claude.",
+    images: ["/images/grok-vs-chatgpt-vs-claude-2026.jpg"],
   },
 };
 
@@ -35,9 +43,29 @@ export default function GrokVsChatGPT() {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": "Grok vs ChatGPT vs Claude 2026",
-        "description": "Detailed comparison of Grok, ChatGPT and Claude."
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Grok vs ChatGPT vs Claude 2026",
+            "description": "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing.",
+            "url": "https://groksearcher.com/comparisons/grok-vs-chatgpt"
+          },
+          {
+            "@type": "Article",
+            "headline": "Grok vs ChatGPT vs Claude 2026",
+            "description": "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
+            "author": { "@type": "Organization", "name": "Grok Searcher" },
+            "url": "https://groksearcher.com/comparisons/grok-vs-chatgpt"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" },
+              { "@type": "ListItem", "position": 3, "name": "Grok vs ChatGPT vs Claude", "item": "https://groksearcher.com/comparisons/grok-vs-chatgpt" }
+            ]
+          }
+        ]
       }} />
     </div>
   );
