@@ -41,22 +41,32 @@ export default function GrokForCategory({ params }: Props) {
 
       {(content.whyTitle || content.whyItems) && (
         <div className="bg-white p-8 rounded-3xl border mb-12">
-          <h2 className="text-2xl font-semibold mb-4">{content.whyTitle || `Why ${cat.title.replace('Grok for ', '')} Are Using Grok in 2026`}</h2>
-          {content.useCasesIntro && <p className="mb-4 text-sm text-gray-600">{content.useCasesIntro}</p>}
+          <h2 className="text-2xl font-semibold mb-4">{content.whyTitle || `Why ${cat.title.replace('Grok for ', '')} Pros Use Grok`}</h2>
           <div className="grid md:grid-cols-3 gap-6 text-sm">
-            {(content.whyItems || []).length > 0 ? content.whyItems.map((item, i) => (
-              <div key={i}>
-                <strong>{item.title}</strong><br />
-                {item.desc}
-              </div>
-            )) : content.useCases.slice(0, 3).map((uc, i) => (
-              <div key={i}>
-                <strong>{uc}</strong><br />
-                Real-time insights and fast execution with Grok.
-              </div>
-            ))}
+            {(() => {
+              const whyItems = content.whyItems || [];
+              return whyItems.length > 0 
+                ? whyItems.map((item, i) => (
+                    <div key={i}>
+                      <strong>{item.title}</strong><br />
+                      {item.desc}
+                    </div>
+                  ))
+                : content.useCases.slice(0, 3).map((uc, i) => {
+                    const whyPhrases = [
+                      `Leverage Grok for targeted results in ${uc}.`,
+                      `Get expert assistance with ${uc} using Grok.`,
+                      `Enhance your approach to ${uc} with Grok's help.`
+                    ];
+                    return (
+                      <div key={i}>
+                        <strong>{uc}</strong><br />
+                        {whyPhrases[i % whyPhrases.length]}
+                      </div>
+                    );
+                  });
+            })()}
           </div>
-          <p className="mt-6 text-sm text-gray-600">Grok’s real-time X access + strong reasoning makes it especially useful for fast-moving {cat.title.toLowerCase().replace('grok for ', '')} work where traditional search or other AIs lag behind.</p>
         </div>
       )}
 
@@ -65,15 +75,19 @@ export default function GrokForCategory({ params }: Props) {
           <h2 className="text-3xl font-bold mb-6">High-Impact Use Cases</h2>
           {content.useCasesIntro && <p className="text-gray-600 mb-4">{content.useCasesIntro}</p>}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {content.useCases.map((uc, i) => (
-              <div key={i} className="bg-white p-6 rounded-2xl border">
-                <h3 className="font-semibold mb-3">{uc}</h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
-                  <li>Real-time signals and fast drafting</li>
-                  <li>Actionable outputs you can use immediately</li>
-                </ul>
-              </div>
-            ))}
+            {content.useCases.map((uc, i) => {
+              const phrases = [
+                `Specialized Grok prompts help you handle ${uc} with precision and speed.`,
+                `Master ${uc} faster using Grok's targeted assistance and examples.`,
+                `Apply Grok effectively to ${uc} for better outcomes and efficiency.`
+              ];
+              return (
+                <div key={i} className="bg-white p-6 rounded-2xl border">
+                  <h3 className="font-semibold mb-3">{uc}</h3>
+                  <p className="text-sm text-gray-600">{phrases[i % phrases.length]}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -106,10 +120,6 @@ export default function GrokForCategory({ params }: Props) {
           </div>
         </div>
       )}
-
-      <div className="text-sm text-gray-500">
-        Tip: Replace [brackets] with your specific details. Combine these with prompts from the Best Grok Prompts collection.
-      </div>
 
       <JsonLd data={{
         "@context": "https://schema.org",
