@@ -7,7 +7,8 @@ import {
   TAPS_PER_BONGA,
 } from "@/lib/miner-game";
 
-const MIN_TAP_INTERVAL_MS = process.env.NODE_ENV === "production" ? 45 : 5;
+// No server-side tap speed penalty — players can tap as fast as they want to reach their personal 1000 daily limit quickly.
+// (Sequence validation via tapIndex, daily cap, and IP binding still protect against cheating/abuse.)
 const MAX_TAPS_PER_DAY = TAPS_PER_BONGA * DAILY_BONGA_LIMIT;
 
 export interface MinerEarnRecord {
@@ -158,9 +159,8 @@ export async function registerServerTap(params: {
     return { ok: false, reason: "Daily tap limit reached.", record };
   }
 
-  if (record.lastTapAt && now - record.lastTapAt < MIN_TAP_INTERVAL_MS) {
-    return { ok: false, reason: "Tap too fast.", record };
-  }
+  // No "too fast" penalty — rapid tapping is allowed to hit the 1000 personal daily limit quickly.
+  // Sequence validation, daily cap, and IP checks remain.
 
   record.taps += 1;
   record.lastTapAt = now;

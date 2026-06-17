@@ -43,7 +43,10 @@ export function maxBongaPerIpPerDay(): number {
 }
 
 export function maxBongaPerIpForKind(kind: "miner" | "pet" | "garden" | "bank" | "bank"): number {
-  if (kind === "garden") return gardenDailyClaimLimit();
+  // Garden daily cap (1500) is per-player. Allow reasonable multi-player per connection
+  // (up to the wallet-per-IP limit) so the cap applies per player, not shared across all players
+  // on the same IP or seen as an ecosystem-wide total.
+  if (kind === "garden") return gardenDailyClaimLimit() * maxWalletsPerIpPerDay();
   if (kind === "pet") return PET_LOVE_REWARD;
   return minerDailyClaimLimit();
 }

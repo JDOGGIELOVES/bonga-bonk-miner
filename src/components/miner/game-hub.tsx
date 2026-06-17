@@ -111,14 +111,14 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
           <Volume2 className="h-4 w-4" />
         )}
       </Button>
-      {/* Prominent reggae music toggle for Bonk Miner (see audio-controls for volume) */}
+      {/* Prominent House Attack Radio toggle (live 24/7 house music via radio.garden) */}
       <Button
         variant="ghost"
         size="icon"
         className="h-9 w-9 rounded-full"
         onClick={() => gameAudio.toggleMusic()}
-        aria-label="Toggle reggae music"
-        title={musicEnabled ? "Music on — Reggae Bonk Vibes (Kevin MacLeod CC BY 4.0)" : "Music off"}
+        aria-label="Toggle House Attack Radio"
+        title={musicEnabled ? "House Attack Radio on — live underground house / tech house 24/7 (radio.garden)" : "Radio off"}
       >
         {musicEnabled ? (
           <Music className="h-4 w-4 text-bonga-teal" />
@@ -151,8 +151,8 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
             {mode === "miner"
-              ? "Tap to bonk. Mine $BONGA. Spread positive energy with Bonk's Sister — peace & love in every bonk."
-              : "Grow cosmic plants. Water with vibes. Earn garden $BONGA while you peace out. ✌️"}
+              ? "Tap to bonk. Mine $BONGA. House Attack Radio (live house music) plays automatically on interaction."
+              : "Grow cosmic plants. Water with vibes. Earn garden $BONGA while you peace out. ✌️ House radio in background."}
           </p>
           {connected && isHolder && !checking && (
             <div className="mt-2 flex flex-col items-center gap-1">

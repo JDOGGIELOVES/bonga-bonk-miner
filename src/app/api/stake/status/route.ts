@@ -40,6 +40,7 @@ export async function GET(request: Request) {
       canClaim: status.canClaim,
       heldByRarity: status.heldByRarity,
       stakedByRarity: status.stakedByRarity,
+      totalClaimed: status.totalClaimed || 0,
       minClaim: 10,
     });
   } catch (error) {

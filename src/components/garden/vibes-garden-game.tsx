@@ -39,6 +39,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const { connected, publicKey } = useWallet();
   const { setVisible } = useWalletModal();
   const { isHolder, checking } = useBongaNftHolder();
+  const walletAddress = publicKey?.toBase58() ?? null;
   const [state, setState] = useState<GardenState | null>(null);
   const [shopOpen, setShopOpen] = useState(false);
   const [shopMsg, setShopMsg] = useState("");
@@ -54,6 +55,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const pendingActionsRef = useRef<GardenSyncAction[]>([]);
   const [syncRefreshKey, setSyncRefreshKey] = useState(0);
   const [gardenStatus, setGardenStatus] = useState<GardenEarnStatus | null>(null);
+  const [gardenDepositLoading, setGardenDepositLoading] = useState(false);
 
   // Per-plant pop feedback for watering (localized, no layout shift on the game window).
   // General feedback for quests/affirms etc. (will render inside the visual area).
@@ -65,14 +67,14 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   }, [isHolder]);
 
   useEffect(() => {
-    const loaded = loadGardenState();
+    const loaded = loadGardenState(walletAddress);
     setState(loaded);
-  }, []);
+  }, [walletAddress]);
 
   useEffect(() => {
     if (!state) return;
-    saveGardenState(state);
-  }, [state]);
+    saveGardenState(state, walletAddress);
+  }, [state, walletAddress]);
 
   useEffect(() => {
     if (!state || catchupDoneRef.current || checking) return;
@@ -208,12 +210,13 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const handleWater = useCallback(
     (instanceId: string) => {
       if (!state) return;
-      void gameAudio.resume().then(() => {
-        const s = gameAudio.getSettings();
-        if (s.musicEnabled && !s.muted) {
-          gameAudio.updateSettings({ musicEnabled: true });
-        }
-      });
+      // Start House Attack Radio (live) *synchronously* on this user gesture (water/plant). Critical for autoplay.
+      // Resume for WebAudio (SFX) can be async.
+      const s = gameAudio.getSettings();
+      if (s.musicEnabled && !s.muted) {
+        gameAudio.startMusic();
+      }
+      void gameAudio.resume();
       const { state: next, earned, capped } = waterPlant(state, instanceId, isHolder);
       setState(next);
       queueGardenSync({ type: "water", instanceId }, next);
@@ -229,7 +232,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         depositPendingToBank({ wallet: walletAddress, source: "garden" }).catch(() => {});
       }
     },
-    [state, isHolder, showPlantPop, queueGardenSync]
+    [state, isHolder, showPlantPop, queueGardenSync, connected, walletAddress]
   );
 
   const handleBuy = useCallback(
@@ -270,7 +273,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         depositPendingToBank({ wallet: walletAddress, source: "garden" }).catch(() => {});
       }
     },
-    [state, showGeneralFeedback, queueGardenSync]
+    [state, showGeneralFeedback, queueGardenSync, connected, walletAddress]
   );
 
   const handleMeditate = useCallback(() => {
@@ -293,6 +296,31 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     tryQuest("good-deed");
   }, [tryQuest, showGeneralFeedback]);
 
+  // Manual deposit button for consistency with Tap Miner and Staking.
+  // Auto-deposits already happen on water/quest, but this gives explicit "Deposit to Bank" control + loading UI + timeout protection like miner.
+  const handleDepositToBank = useCallback(async () => {
+    if (!publicKey) return;
+    setGardenDepositLoading(true);
+    try {
+      const depositPromise = depositPendingToBank({ 
+        wallet: publicKey.toBase58(), 
+        source: "garden" 
+      });
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Deposit timeout - please try the Bonga Bank page sync instead")), 8000)
+      );
+      await Promise.race([depositPromise, timeoutPromise]);
+
+      // Refresh server verified status (farmedToday etc. may update)
+      const status = await fetchGardenEarnStatus(publicKey.toBase58());
+      if (status) setGardenStatus(status);
+    } catch (e: any) {
+      console.warn("Garden deposit issue:", e?.message);
+    } finally {
+      setGardenDepositLoading(false);
+    }
+  }, [publicKey]);
+
   if (!state) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -310,7 +338,9 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const beauty = gardenBeautyLevel(state.plants.length);
   const nftBonus = getNftMultiplier(isHolder);
   const idlePerSec = getGardenIdleRate(state, isHolder);
-  const capReached = isDailyEarnCapReached(state);
+  const capReached = gardenStatus 
+    ? (gardenStatus.farmedToday >= GARDEN_DAILY_EARN_CAP) 
+    : isDailyEarnCapReached(state);
 
   return (
     <div className="space-y-4">
@@ -324,7 +354,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Farmed today</p>
           <p className={`font-display text-xl font-bold tabular-nums ${capReached ? "text-amber-600" : "text-foreground"}`}>
-            {formatGardenBonga(state.bongaFarmedToday)}
+            {gardenStatus ? formatGardenBonga(gardenStatus.farmedToday) : formatGardenBonga(state.bongaFarmedToday)}
           </p>
           <p className="text-[10px] text-muted-foreground">/ {GARDEN_DAILY_EARN_CAP} cap</p>
         </div>
@@ -348,9 +378,25 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         </div>
       </div>
 
+      {/* Manual deposit for consistency with Bonk Miner (has "Deposit Pending..." button) and Staking.
+          Auto deposit happens on water/quests, this provides explicit sync + loading state like the other games. */}
+      {connected && publicKey && (
+        <div className="flex justify-center -mt-2 mb-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-[10px] tracking-wider"
+            disabled={gardenDepositLoading}
+            onClick={handleDepositToBank}
+          >
+            {gardenDepositLoading ? "Depositing to Vault..." : "Deposit to Bonga Bank Vault"}
+          </Button>
+        </div>
+      )}
+
       {/* Clear daily limit progress bar + label */}
       {(() => {
-        const farmed = state.bongaFarmedToday;
+        const farmed = gardenStatus ? gardenStatus.farmedToday : state.bongaFarmedToday;
         const cap = GARDEN_DAILY_EARN_CAP;
         const pct = Math.min(100, Math.max(0, (farmed / cap) * 100));
         return (
@@ -498,9 +544,9 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
           size="lg"
           className="h-12 gap-2 rounded-full px-5 text-sm"
           onClick={() => gameAudio.toggleMusic()}
-          title={musicEnabled ? "Music on — toggle ambient vibes" : "Music off"}
+          title={musicEnabled ? "House Attack Radio on — live house music 24/7" : "Radio off"}
         >
-          {musicEnabled ? "♪" : "♩"} Music
+          {musicEnabled ? "♪" : "♩"} Radio
         </Button>
       </div>
 

@@ -18,9 +18,10 @@ interface GameStatsProps {
   dailyLimitReached?: boolean;
   nextDailyReset?: string;
   limitMessage?: string | null;
+  serverVerifiedEarned?: number; // from server miner earn record — this is what actually deposits to Bonga Bank
 }
 
-export function GameStats({ state, combo, connected, dailyLimitReached, nextDailyReset, limitMessage }: GameStatsProps) {
+export function GameStats({ state, combo, connected, dailyLimitReached, nextDailyReset, limitMessage, serverVerifiedEarned }: GameStatsProps) {
   const atLimit = state.bongaToday >= DAILY_BONGA_LIMIT;
   const progress = progressToNextBonga(state.tapsToday);
   const untilNext = tapsUntilNextBonga(state.tapsToday);
@@ -48,6 +49,13 @@ export function GameStats({ state, combo, connected, dailyLimitReached, nextDail
         />
         <StatBox label="Session" value={state.sessionTaps} />
       </div>
+
+      {connected && typeof serverVerifiedEarned === 'number' && (
+        <div className="mt-3 text-center text-[10px] text-muted-foreground">
+          Verified for Bonga Bank Vault: <span className="font-semibold text-bonga-teal">{serverVerifiedEarned}</span> / {DAILY_BONGA_LIMIT}
+          <span className="block text-[9px]">(only server-verified taps auto-deposit; local taps are for fun/feedback)</span>
+        </div>
+      )}
 
       {TAPS_PER_BONGA !== 1 && (
         <div className="mt-5">

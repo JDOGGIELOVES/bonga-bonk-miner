@@ -5,7 +5,7 @@ import { buildPageMetadata } from "@/lib/site-seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Bonga Pet Love — Share Pet Photos, Earn $BONGA Daily",
   description:
-    "Bonga Pet Love — upload a hand-petting pet photo, stay anonymous, join the community gallery, and earn 100 $BONGA per wallet per day. On-device verification at bongabonks.com.",
+    "Bonga Pet Love — upload a hand-petting pet photo, stay anonymous, join the community gallery, and earn 1000 $BONGA per validated image (auto to Bonga Bank Vault). On-device verification at bongabonks.com. Images must have creation date after 2026-04-01.",
   path: "/pet-love",
   keywords: [
     "Bonga Pet Love",

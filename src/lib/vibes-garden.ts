@@ -229,10 +229,11 @@ function migrateGardenState(parsed: Partial<GardenState>): GardenState {
   };
 }
 
-export function loadGardenState(): GardenState {
+export function loadGardenState(wallet?: string | null): GardenState {
   if (typeof window === "undefined") return defaultGardenState();
+  const key = wallet ? `${GARDEN_STORAGE_KEY}-${wallet}` : GARDEN_STORAGE_KEY;
   try {
-    const raw = localStorage.getItem(GARDEN_STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return defaultGardenState();
     const parsed = JSON.parse(raw) as Partial<GardenState>;
     return rolloverDaily(migrateGardenState(parsed));
@@ -241,9 +242,10 @@ export function loadGardenState(): GardenState {
   }
 }
 
-export function saveGardenState(state: GardenState): void {
+export function saveGardenState(state: GardenState, wallet?: string | null): void {
   if (typeof window === "undefined") return;
-  localStorage.setItem(GARDEN_STORAGE_KEY, JSON.stringify(state));
+  const key = wallet ? `${GARDEN_STORAGE_KEY}-${wallet}` : GARDEN_STORAGE_KEY;
+  localStorage.setItem(key, JSON.stringify(state));
 }
 
 export function getNftMultiplier(isHolder: boolean): {
@@ -380,6 +382,12 @@ export function buyPlant(
   }
   if (!isPlantAvailableInShop(state, plantTypeId, isNftHolder)) {
     return { state, ok: false, reason: "Not in shop yet." };
+  }
+  if (plantTypeId === "peace-lily") {
+    const owned = countOwnedPlants(state, plantTypeId);
+    if (owned >= 10) {
+      return { state, ok: false, reason: "Maximum 10 free Peace Lilies." };
+    }
   }
   if (state.gardenBonga < type.cost) {
     return { state, ok: false, reason: "Need more garden $BONGA." };

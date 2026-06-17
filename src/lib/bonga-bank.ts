@@ -252,13 +252,16 @@ function emptyGlobalBankStats(): GlobalBankStats {
   };
 }
 
+// In-memory last-good cache for the vault's "Community Mined & Banked" numbers.
+// Same resilience fix as the claim tally so these don't reset to zero on transient storage misses.
+let lastGoodBankStats: GlobalBankStats | null = null;
+
 async function readGlobalBankStats(): Promise<GlobalBankStats> {
   try {
     let raw: string | null = null;
     if (useBlobStorage()) {
       raw = await readBlobText(GLOBAL_BANK_STATS_BLOB);
     } else {
-      // For simplicity, fall back to a local file similar to others (or just return empty if no blob)
       const fp = path.join(getLocalDataDir(), "global-stats.json");
       try {
         raw = await readFile(fp, "utf8");
@@ -266,14 +269,22 @@ async function readGlobalBankStats(): Promise<GlobalBankStats> {
         raw = null;
       }
     }
-    if (!raw) return emptyGlobalBankStats();
+    if (!raw) {
+      if (lastGoodBankStats) return { ...lastGoodBankStats };
+      const empty = emptyGlobalBankStats();
+      lastGoodBankStats = empty;
+      return empty;
+    }
     const parsed = JSON.parse(raw) as Partial<GlobalBankStats>;
-    return {
+    const stats = {
       totalLifetimeBanked: Math.max(0, Number(parsed.totalLifetimeBanked) || 0),
       totalUniquePlayers: Math.max(0, Number(parsed.totalUniquePlayers) || 0),
       lastUpdated: parsed.lastUpdated || new Date().toISOString(),
     };
+    lastGoodBankStats = stats;
+    return stats;
   } catch {
+    if (lastGoodBankStats) return { ...lastGoodBankStats };
     return emptyGlobalBankStats();
   }
 }
@@ -304,5 +315,6 @@ async function updateGlobalBankStatsOnDeposit(amount: number, isNewPlayer: boole
     stats.totalUniquePlayers = (stats.totalUniquePlayers || 0) + 1;
   }
   await writeGlobalBankStats(stats);
+  lastGoodBankStats = { ...stats }; // keep cache fresh after successful write
   return stats;
 }

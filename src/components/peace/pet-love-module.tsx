@@ -311,7 +311,7 @@ export function PetLoveModule() {
         signMessage,
       });
 
-      setMessage(`Sent ${result.amount} $BONGA on-chain!`);
+      setMessage(`Deposited ${result.amount} $BONGA to your Bonga Bank Vault!`);
       setExplorerUrl(result.explorerUrl);
       await refreshStatus(wallet);
     } catch (err) {
@@ -515,30 +515,30 @@ export function PetLoveModule() {
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Claim {PET_LOVE_REWARD} $BONGA
+                    Deposit {PET_LOVE_REWARD} $BONGA to Bonga Bank Vault
                   </>
                 )}
               </Button>
             ) : globalClaimCapReached ? (
               <p className="text-xs text-amber-700 dark:text-amber-300">
                 Pet Love hit today&apos;s site-wide payout cap (
-                {status?.globalClaimCap?.maxClaims} claims). Your photo is saved —
-                try claiming again tomorrow (UTC).
+                {status?.globalClaimCap?.maxClaims} deposits). Your photo is saved —
+                try depositing again tomorrow (UTC).
               </p>
             ) : alreadyClaimed || ipClaimCapReached ? (
               <Badge variant="green">
                 {ipClaimCapReached && !alreadyClaimed
-                  ? "Reward already claimed from this connection today"
-                  : "Reward claimed today"}
+                  ? "Reward already deposited from this connection today"
+                  : "Reward deposited to Bonga Bank today"}
               </Badge>
             ) : claimsPaused ? (
               <p className="text-xs text-amber-700 dark:text-amber-300">
                 Pet Love payouts are temporarily paused. Your photo is saved — check
-                back soon to claim your {PET_LOVE_REWARD} $BONGA.
+                back soon to deposit your {PET_LOVE_REWARD} $BONGA to Bonga Bank.
               </p>
             ) : (
               <p className="text-xs text-amber-700 dark:text-amber-300">
-                Photo saved. On-chain claim is not available yet — treasury env vars
+                Photo saved. Deposit to Bonga Bank Vault not available yet — treasury env vars
                 may need to be set in Vercel (ON_CHAIN_CLAIMS_ENABLED).
               </p>
             )}
@@ -557,7 +557,7 @@ export function PetLoveModule() {
               This connection already shared a Pet Love photo today.
             </p>
             <p className="text-xs text-muted-foreground">
-              Pet Love allows one upload and one claim per IP address per UTC day
+              Pet Love allows one upload and one reward deposit per IP address per UTC day
               to stop scripted drains. Try again tomorrow or from your home network.
             </p>
           </div>

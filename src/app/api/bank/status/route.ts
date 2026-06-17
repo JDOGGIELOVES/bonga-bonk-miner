@@ -5,7 +5,6 @@ import { gardenClaimableFromRecord, getGardenEarnRecord, rolloverGardenRecordIfN
 import { getStakeRecord, computePendingStakeRewards } from "@/lib/stake-store";
 import { hasClaimedPetRewardToday, getSubmissionForWalletToday } from "@/lib/pet-love-store";
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
-import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -80,7 +79,6 @@ export async function GET(request: Request) {
     lifetimeWithdrawn: bank.lifetimeWithdrawn,
     minWithdraw: min,
     canWithdraw: bank.bankedBonga >= min,
-    dailyOnChainWalletCap: walletMaxOnChainBongaPerDay(),
     pending: {
       miner: pendingMiner,
       garden: pendingGarden,

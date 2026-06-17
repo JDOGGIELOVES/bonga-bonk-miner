@@ -218,7 +218,7 @@ export interface BongaBankStatus {
   lifetimeWithdrawn: number;
   minWithdraw: number;
   canWithdraw: boolean;
-  dailyOnChainWalletCap?: number;
+  // dailyOnChainWalletCap removed from bank status UI (primary limit is 10k bank min)
   pending: {
     miner: number;
     garden: number;
@@ -349,6 +349,7 @@ export interface StakeStatus {
   canClaim: boolean;
   heldByRarity?: Record<string, number>;
   stakedByRarity?: Record<string, number>;
+  totalClaimed?: number; // cumulative deposited to your Bonga Bank Vault from staking (running total, does not reset when pending is deposited)
   minClaim: number;
   error?: string;
 }

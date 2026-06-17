@@ -16,7 +16,7 @@ export function minerDailyClaimLimit(): number {
 
 /**
  * Combined daily on-chain wallet cap (explicitly pinned default: 2600).
- * Pinned components: minerDailyClaimLimit (1000) + gardenDailyClaimLimit (1500) + PET_LOVE_REWARD (100).
+ * Pinned components: minerDailyClaimLimit (1000) + gardenDailyClaimLimit (1500) + PET_LOVE_REWARD (1000).
  * 
  * IMPORTANT CLARIFICATION FOR PLAYERS:
  * $BONGA earned from the games can ONLY be claimed on-chain after your personal BONGA BANK VAULT 
@@ -25,7 +25,7 @@ export function minerDailyClaimLimit(): number {
  * 
  * This daily cap is a secondary velocity limit on actual treasury on-chain payouts per wallet per UTC day.
  */
-export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 2600; // pinned: 1000 (miner) + 1500 (garden) + 100 (pet)
+export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 3600; // pinned: 1000 (miner) + 1500 (garden) + 1000 (pet)
 
 export function walletMaxOnChainBongaPerDay(): number {
   const defaultCombined =

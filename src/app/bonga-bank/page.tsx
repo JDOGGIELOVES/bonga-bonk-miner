@@ -6,7 +6,6 @@ import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
 import { BongaHeader } from "@/components/layout/bonga-header";
 import { BongaFooter } from "@/components/layout/bonga-footer";
-import { SolanaProvider } from "@/components/solana/solana-provider";
 import {
   fetchBongaBankStatus,
   depositPendingToBank,
@@ -36,30 +35,29 @@ export default function BongaBankPage() {
   const refreshStatus = useCallback(async () => {
     if (!walletAddress) {
       setStatus(null);
-      setVaultOpen(false);
+      // Do not force-close the visual if user already clicked to open the vault.
+      // The under-door counter will show 0.00 + await-connect guidance until address arrives.
       return;
     }
     try {
       let s = await fetchBongaBankStatus(walletAddress);
       setStatus(s);
 
-      // Automatically deposit any pending earnings from miner/garden/staking/pet into your personal vault.
-      // No manual "move" or deposit button needed — it happens as you earn (or on vault entry).
-      if (s && s.pending && s.pending.total > 0) {
-        try {
-          await depositPendingToBank({ wallet: walletAddress, source: "all" });
-          s = await fetchBongaBankStatus(walletAddress); // refresh to show updated banked balance
-          setStatus(s);
-        } catch (e) {
-          // non-fatal
-        }
+      // Always attempt to auto-flush any pending from miner/garden/staking/pet into banked balance on vault open/refresh.
+      // This ensures staking earnings and miner taps (verified server side) show up in the visible vault total.
+      // The call is idempotent if no pending.
+      try {
+        await depositPendingToBank({ wallet: walletAddress, source: "all" });
+        s = await fetchBongaBankStatus(walletAddress); // re-fetch to reflect the moved amounts in bankedBonga
+        setStatus(s);
+      } catch (e) {
+        // non-fatal — user can refresh again
       }
 
-      // Dramatic vault opening animation when data arrives
-      setTimeout(() => setVaultOpen(true), 180);
+      // Ensure revealed state
+      setVaultOpen(true);
     } catch (e) {
       setError("Failed to load Bonga Bank status.");
-      setVaultOpen(false);
     }
   }, [walletAddress]);
 
@@ -127,16 +125,18 @@ export default function BongaBankPage() {
   };
 
   const handleEnterVault = () => {
+    // Open the visual vault (door + reveal the balance area under it) immediately.
+    // This ensures the big number counter appears with no blank space, even before wallet finishes connecting.
+    setVaultOpen(true);
     if (!connected) {
       setVisible(true);
     }
-    // Always refresh latest balance from your deposits, then open the vault to reveal it
+    // Kick off status load (will auto-deposit pending + populate real number when address is known)
     refreshStatus();
-    setVaultOpen(true);
   };
 
   return (
-    <SolanaProvider>
+    <>
       <BongaHeader />
       <div className="min-h-screen bg-bonga-page">
         {/* BANK VAULT OPENING DESIGN */}
@@ -213,9 +213,11 @@ export default function BongaBankPage() {
             <div className={`absolute -inset-1 rounded-3xl bg-gradient-to-r from-bonga-orange/10 via-transparent to-transparent transition-opacity ${vaultOpen ? 'opacity-70' : 'opacity-0'}`} style={{ filter: 'blur(20px)' }} />
           </div>
 
-          {/* Revealed vault interior - the blank area is now filled with this when door opens */}
-          {connected && walletAddress && (
-            <div className={`vault-interior mx-auto max-w-[820px] mt-2 mb-8 p-6 bg-zinc-900 border-4 border-zinc-500 rounded-3xl text-center shadow-inner transition-all ${vaultOpen ? 'revealed' : 'opacity-0 translate-y-2'}`}>
+          {/* Revealed vault interior — ALWAYS appears under the swinging door as soon as you click ENTER THE VAULT (vaultOpen).
+             This guarantees the big number counter / "holders" are visible and there is NEVER a blank area.
+             Shows 0.00 immediately; updates to real banked balance once connected + data loads (auto-flush of pending too). */}
+          {vaultOpen && (
+            <div className={`vault-interior mx-auto max-w-[820px] mt-2 mb-8 p-6 bg-zinc-900 border-4 border-zinc-500 rounded-3xl text-center shadow-inner transition-all ${vaultOpen ? 'revealed' : ''}`}>
               <div className="text-[10px] uppercase tracking-[2px] text-bonga-orange/70 mb-1">YOUR PERSONAL BONGA BANK VAULT</div>
               <div className="mx-auto inline-block bg-black border-2 border-bonga-orange/70 p-4 rounded-xl min-w-[280px]">
                 <div className="font-mono text-[3.5rem] md:text-[4rem] leading-none font-black tabular-nums tracking-[-2px] text-bonga-orange">
@@ -223,7 +225,19 @@ export default function BongaBankPage() {
                 </div>
               </div>
               <div className="text-xl text-white/70 mt-2">$BONGA</div>
-              <div className="text-xs text-white/60 mt-2">Your mined $BONGA auto-deposits here. 0.00 shows until first deposit loads.</div>
+              <div className="text-xs text-white/60 mt-2">
+                {walletAddress
+                  ? "Your mined $BONGA auto-deposits here as you play. 0.00 until first earnings arrive."
+                  : "Connect your wallet (popup should be open) — balance loads automatically after connect."}
+              </div>
+              {!walletAddress && (
+                <button
+                  onClick={() => setVisible(true)}
+                  className="mt-3 px-5 py-1.5 text-sm rounded-full border border-bonga-orange/50 text-bonga-orange hover:bg-bonga-orange/10"
+                >
+                  Open Wallet Connect
+                </button>
+              )}
             </div>
           )}
 
@@ -265,7 +279,7 @@ export default function BongaBankPage() {
                   <h2 className="font-display text-2xl font-bold">My Mined Savings</h2>
                   {status && <div className="text-xs text-muted-foreground font-mono">Connected: {walletAddress.slice(0,6)}…{walletAddress.slice(-4)}</div>}
                 </div>
-                <p className="text-sm text-muted-foreground mb-6">All the $BONGA you've mined and saved in your personal off-chain Bonga Bank. This is your "mined savings" view — accumulate here to keep the game economics sustainable (fewer, larger on-chain withdrawals mean the treasury spends far less SOL than the value of $BONGA distributed to players).</p>
+                <p className="text-sm text-muted-foreground mb-6">All the $BONGA you've mined and saved in your personal off-chain Bonga Bank. Everything auto-deposits here as you tap, water, or earn from staking — no manual deposit or claim buttons needed in the games. Connect + open the vault to see it. This model keeps the ecosystem sustainable.</p>
 
                 {/* Big current balance - the clear mined savings amount */}
                 <div className="mb-6 text-center">
@@ -303,7 +317,6 @@ export default function BongaBankPage() {
                       )}
                       <div className="text-[10px] text-muted-foreground mt-2 text-center">
                         $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches {status.minWithdraw?.toLocaleString() || "10,000"} $BONGA.
-                        {status.dailyOnChainWalletCap && <> Combined daily on-chain wallet cap: {status.dailyOnChainWalletCap.toLocaleString()} $BONGA/day.</>}
                       </div>
                     </div>
 
@@ -350,11 +363,30 @@ export default function BongaBankPage() {
                       >
                         Refresh Savings
                       </button>
+                      <button
+                        onClick={async () => {
+                          if (!walletAddress) return;
+                          setLoading(true);
+                          setError(null);
+                          try {
+                            await depositPendingToBank({ wallet: walletAddress, source: "all" });
+                            await refreshStatus();
+                          } catch (e: any) {
+                            setError(e?.message || "Sync failed");
+                          } finally {
+                            setLoading(false);
+                          }
+                        }}
+                        disabled={loading}
+                        className="rounded-lg px-4 py-2 text-sm bg-bonga-teal text-black hover:bg-bonga-teal/90 disabled:opacity-50"
+                      >
+                        Sync All Pending Earnings to Vault
+                      </button>
                     </div>
 
                     {status.pending && (status.pending.total || 0) > 0 && (
                       <div className="mt-4 rounded bg-muted/40 p-3 text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Pending from games (auto-depositing to your vault on load):</span> miner {status.pending.miner} + garden {status.pending.garden} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
+                        <span className="font-medium text-foreground">Pending from games (will be added to your bank balance on sync/open):</span> miner {status.pending.miner} + garden {status.pending.garden} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
                       </div>
                     )}
 
@@ -402,11 +434,10 @@ export default function BongaBankPage() {
               <div className="bonga-card p-6 text-sm text-muted-foreground">
                 <p className="mb-2 font-medium text-foreground">How the Bonga Bank works</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Play the game (taps up to 1000/day, garden up to 1500/day, pets, staking) to earn $BONGA into daily pending buckets (auto-deposit to Bank Vault for staking/miner/garden/pet rewards).</li>
-                  <li>Use “Deposit” to move pending earnings into your permanent off-chain Bonga Bank for free.</li>
-                  <li>Small direct claims on game pages are automatically deposited here (no Solana transaction fee for tiny amounts).</li>
-                  <li><strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong> The combined daily on-chain wallet cap (miner + garden + pet) is an additional limit on how much can be withdrawn from the treasury per wallet per day.</li>
-                  <li>This dramatically reduces the number of costly treasury transfers while still letting you accumulate everything you mine.</li>
+                  <li>Play the Bonk Miner (1 tap = 1 $BONGA, 1000/day), Vibes Garden (up to 1500/day), Pet Love (1000 per validated image), or stake NFTs — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or "move" buttons in the games.</li>
+                  <li>Open the Vault (connect wallet + ENTER) to see your balance and auto-flush any fresh pending earnings.</li>
+                  <li><strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong></li>
+                  <li>This keeps Solana fees tiny compared to the value distributed to the community while you still accumulate 100% of everything you mine.</li>
                 </ul>
                 <p className="mt-3">
                   On-chain withdrawals still require a pre-created $BONGA ATA on your wallet and go through all the usual safety checks (simulation, allow-lists, rate limits, nonces, anomaly detection).
@@ -424,6 +455,6 @@ export default function BongaBankPage() {
         </div>
       </div>
       <BongaFooter />
-    </SolanaProvider>
+    </>
   );
 }

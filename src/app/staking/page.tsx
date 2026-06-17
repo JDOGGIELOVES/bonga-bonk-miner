@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { SolanaProvider } from "@/components/solana/solana-provider";
 import { StakingClient } from "./staking-client";
 
 export const metadata: Metadata = {
@@ -19,9 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function StakingPage() {
-  return (
-    <SolanaProvider>
-      <StakingClient />
-    </SolanaProvider>
-  );
+  return <StakingClient />;
 }

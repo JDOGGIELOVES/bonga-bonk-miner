@@ -100,7 +100,7 @@ export function AudioControls() {
                 onChange={(v) => update({ sfxVolume: v })}
               />
               <VolumeSlider
-                label="Reggae Music"
+                label="House Radio"
                 value={settings.musicVolume}
                 disabled={settings.muted || !settings.musicEnabled}
                 onChange={(v) => update({ musicVolume: v })}
@@ -108,11 +108,12 @@ export function AudioControls() {
             </div>
 
             <p className="mt-2 text-xs font-medium text-bonga-teal">
-              {settings.musicEnabled ? "♪ Now playing: Reggae Bonk Vibes (for the Miner)" : "Music paused"}
+              {settings.musicEnabled ? "♪ Now playing: House Attack Radio (live house music)" : "Music paused"}
             </p>
             <p className="mt-1 text-[9px] leading-tight text-muted-foreground">
-              Music: "B-Roll - Islandesque" by Kevin MacLeod (incompetech.com) • CC BY 4.0<br />
-              Drop custom as <code className="rounded bg-muted px-1">/public/sounds/reggae-bonk.mp3</code> or edit config.
+              Live 24/7 underground house / tech house / deep house / techno<br />
+              Proxied from <a href="https://radio.garden/listen/house-attack-radio/8h6Ep8KU" target="_blank" rel="noopener" className="underline">radio.garden</a> (HouseAttack.co) for reliable playback.<br />
+              <strong>Still silent?</strong> Try the header Music button again, or test directly: open <a href="/api/radio/house-attack" target="_blank" className="underline">/api/radio/house-attack</a> in a new tab (should stream audio). Then return and toggle here.
             </p>
           </motion.div>
         )}

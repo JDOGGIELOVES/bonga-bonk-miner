@@ -111,7 +111,7 @@ export function ClaimBonga({
     try {
       const wallet = publicKey.toBase58();
 
-      // For the tap miner game: daily mined Bonga (max 1000) goes right into the BONGA BANK
+      // For the tap miner game: daily mined Bonga (max 1000) auto-deposited to Bonga Bank Vault (claim only on bank page)
       // Use the bank deposit (no signature needed for verified miner earnings; server uses the earn record)
       const amountToDeposit = Math.max(0, serverEarned?.claimable ?? claimable);
       if (amountToDeposit <= 0) return;

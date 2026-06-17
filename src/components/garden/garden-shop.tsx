@@ -77,7 +77,7 @@ export function GardenShop({
         <div className="mt-3 rounded-bonga-lg border border-bonga-teal/20 bg-bonga-teal/5 p-3 text-xs leading-relaxed text-muted-foreground">
           <p className="font-semibold text-foreground">Shop tips</p>
           <p className="mt-1">
-            Buy plants for your central garden. Duplicates stack full idle + tap income. Max{" "}
+            Buy plants for your central garden. Duplicates stack full idle + tap income. Up to 10 free Peace Lilies. Max{" "}
             {GARDEN_DAILY_EARN_CAP} garden $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain at 10k).
           </p>
           <p className="mt-1.5">
@@ -111,6 +111,11 @@ export function GardenShop({
                       You own {owned} · {stackedIdle.toFixed(3)}/s idle from this type
                     </p>
                   )}
+                  {plant.id === "peace-lily" && owned >= 10 && (
+                    <p className="mt-1 text-[11px] font-medium text-amber-600">
+                      Max 10 free reached
+                    </p>
+                  )}
                 </div>
                 <div className="shrink-0 text-right">
                   {nftLocked ? (
@@ -128,10 +133,14 @@ export function GardenShop({
                         size="sm"
                         variant="secondary"
                         className="mt-2 h-10 min-w-[88px] px-3 text-xs"
-                        disabled={!canAfford}
+                        disabled={!canAfford || (plant.id === "peace-lily" && owned >= 10)}
                         onClick={() => onBuy(plant.id, plantZone)}
                       >
-                        {owned > 0 ? "Plant another" : "Plant"}
+                        {plant.id === "peace-lily" && owned >= 10
+                          ? "Max 10 free"
+                          : owned > 0
+                          ? "Plant another"
+                          : "Plant"}
                       </Button>
                     </>
                   )}

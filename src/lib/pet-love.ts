@@ -1,6 +1,6 @@
 /** Bonga Pet Love — hand + pet photos, one upload per wallet per day. */
 
-export const PET_LOVE_REWARD = 100;
+export const PET_LOVE_REWARD = 1000; // Updated: 1000 $BONGA per validated Pet Love image, auto-deposited to Bonga Bank Vault
 
 export const PET_LOVE_DOMAIN = "Bonga Pet Love";
 

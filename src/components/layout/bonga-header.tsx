@@ -60,8 +60,8 @@ export function BongaHeader({
         <div className="flex flex-wrap items-center gap-1.5 justify-end flex-1 min-w-0">
           {currentMode === 'garden' && onModeChange ? (
             // Per user request (after repeated navigation issues): simplified nav on garden view.
-            // Only keep the reliable back-to-miner link. Other links (Peace, NFTs, etc.) are removed from garden to avoid broken experience.
-            // Added small link to the how-to-connect info as requested.
+            // Only keep the reliable back-to-miner link. How to Connect and Bonga Bank removed because they don't work reliably from garden.
+            // Other links (Peace, NFTs, Staking, etc.) are removed from garden to avoid broken experience.
             <>
               <button
                 onClick={() => onModeChange('miner')}
@@ -69,23 +69,11 @@ export function BongaHeader({
               >
                 ← Back to Bonk Miner
               </button>
-              <Link
-                href="/bonga-bank"
-                className="rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
-              >
-                Bonga Bank
-              </Link>
-              <Link
-                href="/how-to-connect"
-                className="rounded-full border border-border/60 bg-card/60 px-2 py-0.5 text-[10px] font-semibold text-foreground/80 transition hover:border-foreground/40 hover:text-foreground sm:text-xs sm:px-2.5 sm:py-1"
-              >
-                How to Connect Wallet
-              </Link>
             </>
           ) : (
             <>
               {/* Full nav on miner/other views */}
-              {/* Updated nav per upgrade plan: Home / Bonk Miner | Vibes Garden | Peace | NFTs | Staking | Community | Treasury */}
+              {/* Updated nav per upgrade plan: Home / Bonk Miner | Vibes Garden | Peace | Pet Love | NFTs | Staking | Community | Treasury */}
               <Link
                 href="/"
                 className={getLinkClass(
@@ -147,6 +135,15 @@ export function BongaHeader({
                 )}
               >
                 Peace
+              </Link>
+              <Link
+                href="/pet-love"
+                className={getLinkClass(
+                  "/pet-love",
+                  "rounded-full border border-bonga-purple/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-purple transition hover:bg-bonga-purple/10 sm:text-xs sm:px-2.5 sm:py-1"
+                )}
+              >
+                Pet Love
               </Link>
               <Link
                 href="/nft"

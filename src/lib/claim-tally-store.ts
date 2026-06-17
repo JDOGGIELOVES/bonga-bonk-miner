@@ -20,6 +20,11 @@ export const SUSPICIOUS_HOURLY_THRESHOLD = 3000; // kept for reference / legacy
 
 const ONE_HOUR_MS = 60 * 60 * 1000;  // max window for pruning
 
+// In-memory last-good cache for the community claim tally.
+// Prevents the "all fields zero" problem on transient read failures or when blob storage
+// is not (yet) configured and the code falls back to ephemeral /tmp on Vercel serverless.
+let lastGoodTally: GlobalClaimTally | null = null;
+
 export interface CategoryTally {
   bonga: number;
   claims: number;
@@ -232,22 +237,31 @@ export async function isWalletBlocked(wallet: string): Promise<{ blocked: boolea
 export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {
   const raw = await readRecord(TALLY_BLOB_PATH);
   if (!raw) {
-    // Bootstrap the tally blob on first read (e.g. before any claims have been made).
-    // This prevents repeated 400 "blob not found" errors from Vercel Blob on every poll.
+    // Transient read failure or first-ever / no blob creds (falls back to local tmp which is ephemeral).
+    // Return last known good value if we have one so the community claimed numbers don't drop to zero.
+    if (lastGoodTally) {
+      return { ...lastGoodTally };
+    }
+    // Only seed a brand new empty on very first lifetime read (no cache yet). Do not blindly overwrite.
     const empty = emptyTally();
     try {
       await writeRecord(TALLY_BLOB_PATH, JSON.stringify(empty));
     } catch (e) {
-      // If write fails (e.g. no blob creds yet), just return empty for now.
-      console.error("Failed to bootstrap claim tally blob:", e);
+      console.error("Failed to bootstrap claim tally blob (will use in-memory empty until writes succeed):", e);
     }
+    lastGoodTally = empty; // remember even the zero so subsequent transient misses don't look worse
     return empty;
   }
 
   try {
-    return parseTally(raw);
+    const parsed = parseTally(raw);
+    lastGoodTally = parsed; // success path — cache it for resilience
+    return parsed;
   } catch (error) {
     console.error("Claim tally parse failed:", error);
+    if (lastGoodTally) {
+      return { ...lastGoodTally };
+    }
     return emptyTally();
   }
 }
@@ -378,6 +392,10 @@ export async function recordGlobalClaim(
       }
 
       await writeRecord(TALLY_BLOB_PATH, JSON.stringify(next));
+
+      // Update the in-memory cache immediately with the value we just persisted.
+      // This keeps the community claimed stats stable even if the very next read misses the blob.
+      lastGoodTally = next;
 
       if (wallet && category) {
         await trackAndFlagWalletClaim(wallet, safeAmount, category);

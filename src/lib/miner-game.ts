@@ -3,6 +3,11 @@ export const DAILY_BONGA_LIMIT = 1000;
 export const BONGA_CLAIM_BATCH = 1; // now 1:1 with bank deposits, no small batches needed
 export const STORAGE_KEY = "bonga-bonk-miner";
 
+// Client-side minimum interval between taps (ms) to prevent UI freeze, runaway audio,
+// and state update spam from super-rapid clicking. ~13 taps/sec feels fast but stable.
+// Players can still reach the 1000 daily limit in a reasonable ~75-80 second burst session.
+export const CLIENT_MIN_TAP_INTERVAL_MS = 75;
+
 export const MEME_COINS = [
   { id: "doge", emoji: "🐕", name: "Doge", color: "#C2A633" },
   { id: "pepe", emoji: "🐸", name: "Pepe", color: "#4CAF50" },

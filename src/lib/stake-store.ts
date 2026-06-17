@@ -72,6 +72,7 @@ export interface StakeRecord {
   staked: Record<string, number>;
   stakedAt: string; // ISO
   lastClaimedAt?: string; // ISO
+  totalClaimed?: number; // cumulative rewards deposited to Bonga Bank from this stake position (doesn't reset)
 }
 
 export interface StakeStatus {
@@ -82,10 +83,11 @@ export interface StakeStatus {
   pendingBonga: number;
   dailyRate: number;
   canClaim: boolean;
+  totalClaimed?: number; // cumulative deposited to Bonga Bank (personal running total, does not reset on deposit)
 }
 
 function emptyStake(): StakeRecord {
-  return { staked: {}, stakedAt: new Date().toISOString() };
+  return { staked: {}, stakedAt: new Date().toISOString(), totalClaimed: 0 };
 }
 
 export function getDailyStakeRate(staked: Record<string, number>): number {
@@ -199,6 +201,7 @@ export async function getStakeStatusForWallet(
     pendingBonga: pending,
     dailyRate,
     canClaim,
+    totalClaimed: effectiveRecord?.totalClaimed || 0,
   };
 }
 
@@ -265,6 +268,7 @@ export async function recordStakeClaim(wallet: string, claimedAmount: number): P
       const updated: StakeRecord = {
         ...existing,
         lastClaimedAt: nowIso,
+        totalClaimed: (existing?.totalClaimed || 0) + safe,
       };
       await saveStakeRecord(wallet, updated);
       return updated;

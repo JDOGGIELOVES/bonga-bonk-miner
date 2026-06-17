@@ -19,9 +19,11 @@ export function NFTLanding() {
       <BongaHeader />
       <NFTHero />
       <NFTGallery />
-      <NFTMintPanel />
 
-      {/* Prominent Staking Earnings — to entice NFT purchases */}
+      {/* Prominent Staking Earnings — to entice NFT purchases. 
+          Moved before the mint panel (which contains "Your Bongas" owned NFTs) 
+          so the "Stake Your Bonga NFT — Earn Every Day" heading appears above 
+          the area showing NFTs you currently hold, avoiding overlap. */}
       <section className="py-14 bg-muted/20 border-y border-border/40">
         <div className="mx-auto max-w-5xl px-4">
           <div className="text-center mb-8">
@@ -80,6 +82,8 @@ export function NFTLanding() {
           </div>
         </div>
       </section>
+
+      <NFTMintPanel />
 
       <UtilitySection />
       <TaiChiSection />

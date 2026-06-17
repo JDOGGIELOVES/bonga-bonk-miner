@@ -31,6 +31,7 @@ import {
   DAILY_BONGA_LIMIT,
   TAPS_PER_BONGA,
   MEME_COINS,
+  CLIENT_MIN_TAP_INTERVAL_MS,
   type GameState,
 } from "@/lib/miner-game";
 import { gameAudio } from "@/lib/audio/audio-manager";
@@ -65,10 +66,13 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
   const [onChainClaims, setOnChainClaims] = useState(false);
   const [serverEarnRefreshKey, setServerEarnRefreshKey] = useState(0);
   const [serverEarned, setServerEarned] = useState<any>(null); // full MinerEarnedStatus for limit/reset info
+  const [minerDepositLoading, setMinerDepositLoading] = useState(false);
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const comboTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const effectIdRef = useRef(0);
   const serverTapsRef = useRef(0);
+  const lastTapTimeRef = useRef(0);
+  const lastAutoDepositRef = useRef(0);
 
   useEffect(() => {
     const state = loadGameState();
@@ -93,7 +97,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
   }, []);
 
   useEffect(() => {
-    if (!onChainClaims || !publicKey) {
+    if (!publicKey) {
       serverTapsRef.current = 0;
       return;
     }
@@ -110,7 +114,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     return () => {
       cancelled = true;
     };
-  }, [onChainClaims, publicKey]);
+  }, [publicKey]);
 
   const respawnCoin = useCallback((hitId: string) => {
     setTimeout(() => {
@@ -167,13 +171,23 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
     (clientX: number, clientY: number) => {
       if (!gameState || !gameAreaRef.current) return;
 
-      void gameAudio.resume().then(() => {
-        // Start reggae BGM on first user gesture for fast perceived playback (replaces delayed lo-fi procedural)
-        const s = gameAudio.getSettings();
-        if (s.musicEnabled && !s.muted) {
-          gameAudio.updateSettings({ musicEnabled: true }); // triggers startMusic with the reggae track
-        }
-      });
+      // Rate limit taps on the client to prevent freezes and autonomous sound loops
+      // from ultra-rapid pointer/mouse/touch events.
+      const now = Date.now();
+      if (now - lastTapTimeRef.current < CLIENT_MIN_TAP_INTERVAL_MS) {
+        return;
+      }
+      lastTapTimeRef.current = now;
+
+      // Start House Attack Radio (live) *synchronously* on the user gesture (tap). This is critical for
+      // browser autoplay policy — HTMLAudio.play() must be called in the same call stack as the click/tap.
+      // Do NOT wait for the async AudioContext resume (that is only for WebAudio SFX/bonks).
+      const s = gameAudio.getSettings();
+      if (s.musicEnabled && !s.muted) {
+        gameAudio.startMusic();
+      }
+      // Resume ctx async for any WebAudio sounds (bonks, coins). Safe to fire-and-forget.
+      void gameAudio.resume();
 
       const rect = gameAreaRef.current.getBoundingClientRect();
       const x = clientX - rect.left;
@@ -222,7 +236,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
         gameAudio.playCoinCollect();
       }
 
-      if (onChainClaims && publicKey) {
+      if (publicKey) {
         const wallet = publicKey.toBase58();
         const tapIndex = serverTapsRef.current + 1;
         void registerMinerTap({ wallet, tapIndex }).then((tapResult) => {
@@ -231,7 +245,11 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             setServerEarnRefreshKey((key) => key + 1);
             onTallyRefresh?.();
             // Auto deposit to personal Bonga Bank Vault (no claim button in miner anymore)
-            if (publicKey) {
+            // Debounce to avoid hammering the deposit API / lock during rapid tapping.
+            // This prevents the "deposit pending" state from appearing stuck due to concurrent operations.
+            const now = Date.now();
+            if (now - lastAutoDepositRef.current > 3000) {  // at most every ~3s
+              lastAutoDepositRef.current = now;
               depositPendingToBank({ wallet, source: "miner" }).catch(() => {});
             }
             return;
@@ -251,7 +269,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
         });
       }
     },
-    [gameState, coins, combo, respawnCoin, addEffect, addParticles, onChainClaims, publicKey]
+    [gameState, coins, combo, respawnCoin, addEffect, addParticles, publicKey]
   );
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -325,7 +343,50 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
               dailyLimitReached={serverEarned?.dailyLimitReached}
               nextDailyReset={serverEarned?.nextDailyReset}
               limitMessage={serverEarned?.limitMessage}
+              serverVerifiedEarned={serverEarned?.earned}
             />
+
+            {connected && publicKey && (
+              <div className="flex justify-center pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-[10px] tracking-wider"
+                  disabled={minerDepositLoading}
+                  onClick={async () => {
+                    if (!publicKey) return;
+                    setMinerDepositLoading(true);
+                    try {
+                      // Add timeout to prevent hanging "Depositing to Vault..." state forever
+                      // if the bank deposit API / lock is slow or stuck.
+                      const depositPromise = depositPendingToBank({ 
+                        wallet: publicKey.toBase58(), 
+                        source: "miner" 
+                      });
+                      const timeoutPromise = new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error("Deposit timeout - please try the Bonga Bank page sync instead")), 8000)
+                      );
+                      await Promise.race([depositPromise, timeoutPromise]);
+                      
+                      // Refresh verified server earnings (now claimable should be 0, bank updated)
+                      const earned = await fetchMinerEarned(publicKey.toBase58());
+                      if (earned) {
+                        serverTapsRef.current = earned.taps;
+                        setServerEarned(earned);
+                      }
+                      setServerEarnRefreshKey((k) => k + 1);
+                    } catch (e: any) {
+                      // non-fatal - show error briefly if needed, but always clear loading
+                      console.warn("Miner deposit issue:", e?.message);
+                    } finally {
+                      setMinerDepositLoading(false);
+                    }
+                  }}
+                >
+                  {minerDepositLoading ? "Depositing to Vault..." : "Deposit Pending to Bonga Bank Vault"}
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Game arena */}

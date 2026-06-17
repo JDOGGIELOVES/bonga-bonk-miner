@@ -30,6 +30,9 @@ export async function computePerceptualHashFromBuffer(
  * Basic heuristic to help flag stock / old / professionally shot images vs casual phone photos of real pets.
  * Returns a "stock score" 0-100 (higher = more likely stock) and reasons.
  * Uses sharp metadata + simple JPEG EXIF date scan (no new deps).
+ *
+ * SECURITY: Images MUST have EXIF DateTimeOriginal on or after 2026-04-01.
+ * This prevents use of stock/old photos. Any image before the cutoff is rejected.
  */
 export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
   likelyStock: boolean;
@@ -38,6 +41,9 @@ export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
 }> {
   const reasons: string[] = [];
   let score = 0;
+  let exifDate: string | null = null;
+
+  const PET_IMAGE_CUTOFF = new Date('2026-04-01T00:00:00Z');
 
   try {
     const sharp = (await import("sharp")).default;
@@ -59,22 +65,20 @@ export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
     }
 
     // Try to extract DateTimeOriginal from JPEG EXIF (basic scan, no full parser)
-    const exifDate = extractExifDateTimeOriginal(buffer);
+    exifDate = extractExifDateTimeOriginal(buffer);
     if (exifDate) {
       const photoDate = new Date(exifDate);
-      const now = new Date();
-      const ageDays = (now.getTime() - photoDate.getTime()) / (1000 * 3600 * 24);
-      if (ageDays > 30) {
-        score += 25;
-        reasons.push(`Photo metadata date is ${Math.floor(ageDays)} days old (stock photos often are)`);
-      } else if (ageDays < 0) {
-        score += 10;
+      if (photoDate < PET_IMAGE_CUTOFF) {
+        score += 70; // Very high penalty — must be recent original
+        reasons.push(`Photo creation date ${photoDate.toISOString().slice(0,10)} is before required cutoff of 2026-04-01. Only images taken on/after April 1, 2026 are accepted for Pet Love.`);
+      } else if (photoDate > new Date()) {
+        score += 20;
         reasons.push("Suspicious future date in EXIF");
       }
     } else {
-      // Many phone photos have EXIF; complete lack + other signals = more stock-like
-      score += 8;
-      reasons.push("No camera date metadata (common in stock or heavily processed images)");
+      // Strict: no EXIF date means cannot verify recent creation — reject as potential stock
+      score += 50;
+      reasons.push("No EXIF DateTimeOriginal found. Pet Love requires original photos with camera creation date on or after 2026-04-01.");
     }
 
     // Very low noise / high "cleanness" heuristic via sharp stats (if available)
@@ -92,7 +96,9 @@ export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
     // ignore analysis errors
   }
 
-  const likelyStock = score >= 40;
+  // Enforce hard cutoff: if any indication of pre-2026-04-01 date, treat as stock and reject
+  const hasInvalidOldDate = reasons.some(r => r.includes('before required cutoff') || r.includes('before 2026-04-01'));
+  const likelyStock = score >= 40 || hasInvalidOldDate || !exifDate;
   return { likelyStock, score: Math.min(100, score), reasons };
 }
 

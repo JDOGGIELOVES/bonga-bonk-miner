@@ -96,7 +96,7 @@ export async function POST(request: Request) {
             ? `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!` 
             : null,
         },
-        { status: result.reason === "Tap too fast." ? 429 : 400 }
+        { status: 400 }
       );
     }
 

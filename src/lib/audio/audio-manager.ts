@@ -1,5 +1,6 @@
 import {
   DEFAULT_AUDIO_SETTINGS,
+  HOUSE_ATTACK_RADIO_STREAM,
   loadAudioSettings,
   saveAudioSettings,
   SOUND_PATHS,
@@ -106,8 +107,7 @@ class GameAudioManager {
     const sparkleUrl = SOUND_URLS.sparkle || SOUND_PATHS.sparkle;
     this.sparkleBuffer = await this.fetchBuffer(sparkleUrl);
 
-    // Note: bgm (reggae) is now loaded via HTMLAudioElement in startMusic for faster playback start.
-    // No need to pre-decode as buffer (avoids the slow lo-fi procedural fallback).
+    // Note: BGM is now the live House Attack Radio stream (HTMLAudioElement). No buffer preloading needed.
   }
 
   private playBuffer(buffer: AudioBuffer, dest: AudioNode, volume: number, playbackRate = 1) {
@@ -179,33 +179,79 @@ class GameAudioManager {
   }
 
   startMusic() {
-    if (!this.ctx || !this.musicGain || this.settings.muted || !this.settings.musicEnabled) return;
+    if (this.settings.muted || !this.settings.musicEnabled) return;
     this.stopMusicPlayback();
 
-    const bgmUrl = SOUND_URLS.bgm || SOUND_PATHS.bgm;
-    if (bgmUrl) {
-      // Use HTMLAudioElement for the reggae track (faster start than full buffer decode + procedural fallback)
-      // This replaces the slow lo-fi procedural fallback with the reggae track mentioned previously.
-      const audio = new Audio(bgmUrl);
-      audio.loop = true;
-      audio.volume = this.settings.musicVolume;
-      audio.preload = 'auto';
-      // Play as soon as possible (after user gesture via resume)
+    // Primary: House Attack Radio live stream (https://radio.garden/listen/house-attack-radio/8h6Ep8KU)
+    // We load via our same-origin proxy (/api/radio/house-attack) so CORS from upstream is bypassed.
+    // Live radio — continuous 24/7 underground house/tech house/deep house/techno.
+    // "Play automatically" happens on the first user gesture (tap in miner / water in garden) when musicEnabled.
+    const radioUrl = HOUSE_ATTACK_RADIO_STREAM;
+
+    if (!radioUrl) {
+      // Extremely unlikely — last resort old procedural
+      console.warn('[audio] No House Attack Radio stream configured. Using procedural fallback.');
+      void this.init().then(() => {
+        if (this.ctx && this.musicGain) {
+          this.proceduralBgm = startProceduralBgm(this.ctx, this.musicGain, this.settings.musicVolume);
+        }
+      });
+      return;
+    }
+
+    // Live stream setup (no loop — it's continuous live feed)
+    const audio = new Audio(radioUrl);
+    audio.loop = false; // live radio does not "loop"
+    audio.volume = this.settings.musicVolume;
+    audio.preload = 'auto';
+    (audio as any).crossOrigin = 'anonymous';
+
+    // Robust reconnect logic for live streams (network blips, CORS hiccups, etc.)
+    const attemptPlay = (reconnect = false) => {
       const playPromise = audio.play();
       if (playPromise) {
-        playPromise.catch((err) => {
-          // Autoplay policy or network — will retry on next user interaction or toggle
-          console.warn('BGM reggae play deferred:', err);
-        });
+        playPromise
+          .then(() => {
+            console.log('[audio] House Attack Radio (proxied) playing live:', radioUrl, reconnect ? '(reconnected)' : '');
+            this.bgmAudio = audio;
+          })
+          .catch((err) => {
+            console.warn('[audio] House Attack Radio (proxied) play() blocked or failed:', err);
+            // Keep the element; next gesture/toggle will retry via startMusic()
+          });
       }
-      this.bgmAudio = audio;
-    } else {
-      this.proceduralBgm = startProceduralBgm(
-        this.ctx,
-        this.musicGain,
-        this.settings.musicVolume
-      );
-    }
+    };
+
+    const handleError = () => {
+      console.warn('[audio] House Attack Radio (proxied) stream error — attempting reconnect in 2s...');
+      try { audio.pause(); } catch {}
+      // Schedule a fresh reconnect attempt (common pattern for live radio in <audio>)
+      setTimeout(() => {
+        if (this.settings.musicEnabled && !this.settings.muted) {
+          // Recreate audio element for clean reconnect
+          this.stopMusicPlayback();
+          // Re-trigger start (will create new audio + listeners)
+          this.startMusic();
+        }
+      }, 2000);
+    };
+
+    audio.onerror = handleError;
+
+    // Some live streams "end" on temporary disconnects — restart
+    audio.onended = () => {
+      if (this.settings.musicEnabled && !this.settings.muted && this.bgmAudio === audio) {
+        console.log('[audio] House Attack Radio (proxied) ended (live reconnect)');
+        audio.src = radioUrl; // reset source
+        attemptPlay(true);
+      }
+    };
+
+    // Try to start immediately (must be called from user gesture for autoplay)
+    attemptPlay();
+
+    // Keep reference even if play is async — volume controls etc. still work
+    this.bgmAudio = audio;
   }
 
   setMuted(muted: boolean) {
@@ -214,7 +260,9 @@ class GameAudioManager {
     if (muted) {
       this.stopMusicPlayback();
     } else if (this.settings.musicEnabled) {
-      void this.resume().then(() => this.startMusic());
+      // Direct start on unmute gesture
+      this.startMusic();
+      void this.resume();
     }
     this.notify();
   }
@@ -226,7 +274,11 @@ class GameAudioManager {
   setMusicEnabled(enabled: boolean) {
     this.settings.musicEnabled = enabled;
     if (enabled && !this.settings.muted) {
-      void this.resume().then(() => this.startMusic());
+      // Start House Attack Radio directly — the click/tap that called toggleMusic is a user gesture,
+      // so audio.play() should succeed without needing the async AudioContext resume first.
+      this.startMusic();
+      // Still resume ctx in background for SFX/bonks if needed
+      void this.resume();
     } else {
       this.stopMusicPlayback();
     }
@@ -243,7 +295,9 @@ class GameAudioManager {
 
     if (partial.musicEnabled !== undefined || partial.muted !== undefined) {
       if (this.settings.musicEnabled && !this.settings.muted) {
-        void this.resume().then(() => this.startMusic());
+        // Direct (the caller of updateSettings is a click on a toggle/slider in the UI = gesture)
+        this.startMusic();
+        void this.resume();
       } else {
         this.stopMusicPlayback();
       }
@@ -253,9 +307,13 @@ class GameAudioManager {
       if (this.bgmAudio) {
         this.bgmAudio.volume = this.settings.musicVolume;
       }
-      if (this.proceduralBgm && !this.bgmBuffer && !this.bgmAudio) {
-        this.stopMusicPlayback();
-        if (this.settings.musicEnabled && !this.settings.muted) this.startMusic();
+      // For procedural fallback (rare)
+      if (this.proceduralBgm) {
+        // The procedural start handles volume internally on restart; simple restart if needed
+        if (this.settings.musicEnabled && !this.settings.muted) {
+          this.stopMusicPlayback();
+          this.startMusic();
+        }
       }
     }
 

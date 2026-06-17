@@ -20,15 +20,27 @@ export const SOUND_PATHS = {
   coinCollect: "/sounds/coin-collect.mp3",
   /** Extra sparkle layer on $BONGA earn */
   sparkle: "/sounds/sparkle.mp3",
-  /** Reggae background loop for the Bonk Miner game.
-   *  Option 1: Drop your own reggae MP3/OGG into /public/sounds/ as "reggae-bonk.mp3" (local preferred for reliability).
-   *  Option 2: Remote URL is set in SOUND_URLS.bgm (current: Kevin MacLeod reggae track).
-   *  If missing, falls back to procedural sounds.
+  /** (Legacy) Background music path slot. Not used for primary BGM anymore.
+   *  The active station is House Attack Radio (see HOUSE_ATTACK_RADIO_STREAM below).
+   *  You can still drop a custom local MP3 here and update start logic if desired.
    */
-  bgm: "/sounds/reggae-bonk.mp3",
+  bgm: "",
   /** Gentle flute for Tai Chi sessions */
   taiChiFlute: "/sounds/taichi-flute.mp3",
 } as const;
+
+/**
+ * House Attack Radio live stream (user requested — https://radio.garden/listen/house-attack-radio/8h6Ep8KU )
+ *
+ * We use a same-origin Next.js proxy (/api/radio/house-attack) so the browser <audio> element
+ * can play it without CORS blocks from the upstream (radio.garden → virtualtronics.net Shoutcast).
+ *
+ * The proxy streams the raw audio/mpeg live feed. This should now play reliably when started
+ * from a user gesture (tap the miner or garden, or click the Music icon).
+ *
+ * Direct upstream (for reference): https://virtualtronics.net/proxy/houseattack?mp=/stream
+ */
+export const HOUSE_ATTACK_RADIO_STREAM = "/api/radio/house-attack";
 
 /**
  * Optional remote URLs — leave empty strings to use procedural fallback.
@@ -40,10 +52,8 @@ export const SOUND_URLS = {
   ] as string[],
   coinCollect: "",
   sparkle: "",
-  // Free reggae track for Bonk Miner (Kevin MacLeod - B-Roll - Islandesque, CC BY 4.0)
-  // Attribution required: "B-Roll - Islandesque by Kevin MacLeod | incompetech.com"
-  // License: https://creativecommons.org/licenses/by/4.0/
-  bgm: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/B-Roll%20-%20Islandesque.mp3",
+  // Legacy fallback (not used for BGM anymore). Kept for reference.
+  bgm: "",
 } as const;
 
 export const DEFAULT_AUDIO_SETTINGS = {

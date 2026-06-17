@@ -15,7 +15,7 @@ import {
   fetchGlobalClaimTally,
   requestStakeLock,
   requestStakeUnlock,
-  requestStakeClaim,
+  depositPendingToBank,
   type StakeStatus,
 } from "@/lib/claim-client";
 import { STAKE_RATES } from "@/lib/nft-collection";
@@ -96,29 +96,46 @@ export function StakingClient() {
     return () => clearInterval(id);
   }, []);
 
-  // Auto-deposit staking rewards to Bonga Bank Vault (no manual "claim" button)
-  // Triggers the signed deposit process automatically when pending rewards reach the min threshold
+  // Auto-deposit staking rewards to Bonga Bank Vault (no manual "claim" button, fully silent)
+  // When pending >= min, automatically move to your personal vault (matches miner/garden behavior).
+  // No signature prompt — uses the same deposit path as other games.
   useEffect(() => {
     const currentPending = status?.pendingBonga ?? 0;
+    const min = status?.minClaim ?? 10;
     if (
       !walletAddress ||
+      !connected ||
       !status?.canClaim ||
-      currentPending < (status?.minClaim ?? 10) ||
+      currentPending < min ||
       actionLoading !== null
     ) {
       return;
     }
     const now = Date.now();
-    if (now - lastAutoClaimRef.current < 10000) return; // simple debounce to avoid repeated prompts
+    if (now - lastAutoClaimRef.current < 15000) return; // debounce
     lastAutoClaimRef.current = now;
-    void handleClaim().catch(() => {});
-  }, [walletAddress, status?.pendingBonga, status?.canClaim, status?.minClaim, actionLoading]);
+
+    setActionLoading("claim");
+    depositPendingToBank({ wallet: walletAddress, source: "stake" })
+      .then((res) => {
+        if (res.ok) {
+          const deposited = res.totalDeposited ?? currentPending;
+          setSuccess(`Staking rewards auto-deposited ${deposited} $BONGA to your Bonga Bank Vault!`);
+        }
+        return refreshStatus();
+      })
+      .catch((e: any) => {
+        setError(e?.message || "Auto deposit to bank failed");
+      })
+      .finally(() => setActionLoading(null));
+  }, [walletAddress, connected, status?.pendingBonga, status?.canClaim, status?.minClaim, actionLoading]);
 
   const stakedCount = status?.stakedCount ?? 0;
   const heldCount = status?.heldCount ?? heldFromHook ?? 0;
   const pending = status?.pendingBonga ?? 0;
   const dailyRate = status?.dailyRate ?? 0;
   const canClaim = status?.canClaim ?? false;
+  const totalClaimed = status?.totalClaimed ?? 0;
 
   const heldByRarity = status?.heldByRarity || {};
   const stakedByRarity = status?.stakedByRarity || {};
@@ -195,30 +212,6 @@ export function StakingClient() {
       await refreshStatus();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Unlock failed";
-      setError(msg);
-    } finally {
-      setActionLoading(null);
-    }
-  }
-
-  async function handleClaim() {
-    if (!walletAddress || !connected || !canClaim) return;
-    setError(null);
-    setSuccess(null);
-    setActionLoading("claim");
-    try {
-      const date = new Date().toISOString().slice(0, 10);
-      const claimAmt = Math.max(status?.minClaim ?? 10, Math.floor(pending));
-      const res = await requestStakeClaim({
-        wallet: walletAddress,
-        amount: claimAmt,
-        date,
-        connectedWallet: wallet ?? null,
-      });
-      setSuccess(`Staking rewards auto-deposited ${claimAmt} $BONGA to your Bonga Bank Vault! ${res.explorerUrl ? "View on Solscan." : ""}`);
-      await refreshStatus();
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Claim failed";
       setError(msg);
     } finally {
       setActionLoading(null);
@@ -314,11 +307,38 @@ export function StakingClient() {
                     <div className="font-display text-5xl font-extrabold tracking-tighter mt-1 text-bonga-teal">
                       {pending.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground">prorated $BONGA — will auto-deposit to your personal Bonga Bank Vault when ready (min {status?.minClaim ?? 10})</div>
+                    <div className="text-xs text-muted-foreground">prorated $BONGA — current accrual since last deposit (min {status?.minClaim ?? 10} to auto-deposit to vault)</div>
+                  </div>
+                  <div className="mt-2 text-sm font-medium text-bonga-teal">
+                    Total staking rewards deposited to your Bonga Bank Vault: {totalClaimed.toLocaleString()} $BONGA
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground">
-                    Rewards automatically deposit to your Bonga Bank Vault as they accrue (you may see a one-time wallet signature prompt when they reach the minimum). No manual claim needed here.
+                    Rewards automatically (and silently) deposit to your Bonga Bank Vault when they reach the minimum — the "pending" number above resets on each deposit because it is the current accrual timer. Your cumulative total from staking is shown above and also visible in the Bonga Bank (main balance + recent deposits).
                   </p>
+                  {pending > 0 && (
+                    <button
+                      onClick={async () => {
+                        if (!walletAddress) return;
+                        setActionLoading("claim");
+                        setError(null);
+                        try {
+                          const res = await depositPendingToBank({ wallet: walletAddress, source: "stake" });
+                          if (res.ok) {
+                            setSuccess(`Deposited ${res.totalDeposited ?? pending} $BONGA to Bonga Bank Vault.`);
+                          }
+                          await refreshStatus();
+                        } catch (e: any) {
+                          setError(e?.message || "Sync to bank failed");
+                        } finally {
+                          setActionLoading(null);
+                        }
+                      }}
+                      disabled={actionLoading !== null}
+                      className="mt-3 text-xs underline text-bonga-teal hover:text-bonga-teal/80 disabled:opacity-50"
+                    >
+                      Deposit pending rewards to Bonga Bank now →
+                    </button>
+                  )}
                 </div>
 
                 {/* Community Staking Tally - running total of bonga claimed via staking */}
@@ -418,9 +438,9 @@ export function StakingClient() {
               </div>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>• Connect wallet holding Bonga NFTs</li>
-                <li>• Choose how many to stake and sign the lock message</li>
+                <li>• Choose how many to stake and sign the lock message (to update your position)</li>
                 <li>• Earn tiered $BONGA per day (Common 1000 / Rare 1500 / Legendary 2000 / Cosmic 3500) prorated — all auto-deposited to Bonga Bank Vault</li>
-                <li>• Rewards auto-deposit to vault (min {status?.minClaim ?? 10}) — no manual claim button needed</li>
+                <li>• Rewards auto-deposit silently to vault when pending reaches min (no signature, no manual claim button)</li>
                 <li>• Unstake with a signature whenever you want</li>
                 <li>• Your NFTs never leave your wallet</li>
               </ul>
@@ -447,7 +467,7 @@ export function StakingClient() {
           </div>
 
           <div className="mt-8 text-center text-xs text-muted-foreground">
-            Staking rewards automatically deposit to your Bonga Bank Vault (no manual claim button). High-velocity abuse will be auto-flagged and blocked.
+            Staking rewards automatically (and silently) deposit to your Bonga Bank Vault when they reach the minimum — no signature prompts or manual claim button. Visit Bonga Bank to see the updated balance. High-velocity abuse will be auto-flagged and blocked.
             Staking boosts are in addition to normal NFT holder game multipliers.
           </div>
 
