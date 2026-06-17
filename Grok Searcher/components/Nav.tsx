@@ -38,7 +38,7 @@ export default function Nav() {
 
         <div className="flex items-center gap-3">
           <a
-            href="https://grok.x.ai"
+            href="https://grok.com"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs px-3 py-1.5 bg-black text-white rounded-full hover:bg-gray-800 transition"

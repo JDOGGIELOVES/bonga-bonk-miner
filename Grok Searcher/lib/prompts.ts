@@ -27,9 +27,14 @@ export const imagePrompts: Prompt[] = [
 ];
 
 // Rich category-specific prompt data
+export interface UseCase {
+  title: string;
+  description: string;
+}
+
 export interface CategoryContent {
   intro: string;
-  useCases: string[];
+  useCases: UseCase[];
   sections: { title: string; prompts: Prompt[] }[];
   faqs?: { q: string; a: string }[];
   whyTitle?: string;
@@ -42,10 +47,10 @@ export const categoryContent: Record<string, CategoryContent> = {
   business: {
     intro: "Grok excels at pulling real-time market signals from X while helping you move fast on strategy, meetings, and execution.",
     useCases: [
-      "Meeting summarization and action planning",
-      "Competitor and market intelligence from live X data",
-      "Stakeholder updates and leadership briefings",
-      "Rapid strategy option comparison"
+      { title: "Meeting summarization and action planning", description: "Transform rambling meeting notes or transcripts into clear action items with owners and deadlines that teams can actually execute on." },
+      { title: "Competitor and market intelligence from live X data", description: "Pull fresh signals from X conversations to build real-time SWOT analyses and spot emerging threats or opportunities before competitors do." },
+      { title: "Stakeholder updates and leadership briefings", description: "Turn complex project updates into concise, executive-ready summaries that highlight risks, wins, and exactly what decisions are needed." },
+      { title: "Rapid strategy option comparison", description: "Quickly weigh two different approaches for a business decision by comparing pros, cons, risks, and expected outcomes using current market context." }
     ],
     sections: [
       {
@@ -73,12 +78,16 @@ export const categoryContent: Record<string, CategoryContent> = {
       { title: "Meeting & decision acceleration", desc: "Summarize calls, generate action plans, and prep briefs instantly." },
       { title: "Content & sales at scale", desc: "Draft emails, proposals, social posts, and research reports in minutes." }
     ],
-    useCasesIntro: "These scenarios highlight where Grok delivers the biggest time savings and competitive edge — use them as inspiration for the kinds of daily tasks where real-time insights and fast drafting make a real difference.",
+    useCasesIntro: "These scenarios highlight where Grok delivers the biggest time savings and competitive edge for business teams — use them as inspiration for daily tasks where real-time signals and fast execution matter most.",
     promptsGuidance: "Copy these directly into Grok to handle real business work faster. They’re battle-tested for meetings, research, sales, and content — tweak the brackets with your specific details for best results."
   },
   marketing: {
     intro: "Speed up content, campaigns, research, and performance work with ready-to-use prompts built for modern marketers.",
-    useCases: ["Content at Scale", "Research & Insights", "Campaign Acceleration"],
+    useCases: [
+      { title: "Content at Scale", description: "Rapidly produce on-brand social threads, email sequences, and ad variations that match your voice while incorporating real-time trending topics." },
+      { title: "Research & Insights", description: "Monitor X for audience sentiment and competitor moves to uncover fresh angles and data points that make your campaigns stand out." },
+      { title: "Campaign Acceleration", description: "Generate full campaign briefs, A/B test ideas, and performance optimization recommendations in minutes instead of days." }
+    ],
     sections: [
       {
         title: "Content & Campaigns",
@@ -94,12 +103,17 @@ export const categoryContent: Record<string, CategoryContent> = {
       { title: "Research & Insights", desc: "Competitor moves, audience sentiment, emerging trends on X." },
       { title: "Campaign Acceleration", desc: "Briefs, A/B test ideas, performance analysis, and optimization recommendations." }
     ],
-    useCasesIntro: "Grok’s real-time X data + strong creative reasoning makes it especially useful for trend-jacking, social listening, content ideation, and fast iteration on campaigns.",
+    useCasesIntro: "Grok’s real-time X data combined with creative reasoning is ideal for marketers who need to spot trends fast and generate campaign ideas that cut through the noise.",
     promptsGuidance: "Drop these prompts straight into Grok with your details in the brackets. They’re designed for campaign ideation, copy, research, and content systems that actually convert and save time."
   },
   sales: {
     intro: "Personalize outreach, research accounts in real time, and handle objections using fresh signals from X.",
-    useCases: ["Personalized outreach & proposal drafting", "Objection handling & battle cards", "Win/loss analysis from notes", "Account research & talk tracks"],
+    useCases: [
+      { title: "Personalized outreach & proposal drafting", description: "Reference the prospect's recent X activity or company news to write warm, relevant outreach that feels researched instead of generic." },
+      { title: "Objection handling & battle cards", description: "Build ready-to-use responses for common pushbacks, informed by what competitors are actually saying publicly right now." },
+      { title: "Win/loss analysis from notes", description: "Extract patterns from past deals by analyzing call notes and emails to refine your pitch and forecast more accurately." },
+      { title: "Account research & talk tracks", description: "Quickly surface the latest company developments and stakeholder signals from X to create hyper-relevant conversation starters." }
+    ],
     sections: [
       {
         title: "Outreach & Research",
@@ -117,12 +131,17 @@ export const categoryContent: Record<string, CategoryContent> = {
       { title: "Faster research", desc: "Get account snapshots and battle cards in seconds instead of hours." },
       { title: "Objection handling at scale", desc: "Generate tailored responses and sequences on demand." }
     ],
-    useCasesIntro: "These prompts help sales pros move faster from research to proposal while staying relevant.",
+    useCasesIntro: "These prompts are designed to help sales professionals research accounts quickly and craft outreach that feels personal and timely.",
     promptsGuidance: "Paste real context (LinkedIn profile, recent X posts, previous emails) for hyper-personalized output. Tweak brackets and iterate."
   },
   engineers: {
     intro: "Accelerate code reviews, architecture decisions, debugging, and learning new stacks with precise prompts.",
-    useCases: ["Code review", "System design", "Debugging", "Learning new frameworks"],
+    useCases: [
+      { title: "Code review", description: "Catch subtle bugs, security issues, and performance bottlenecks while suggesting idiomatic refactors specific to your tech stack." },
+      { title: "System design", description: "Explore scalable architectures for complex features while weighing trade-offs around latency, cost, and maintainability." },
+      { title: "Debugging", description: "Break down cryptic error logs or production incidents into root causes with step-by-step reproduction paths and fixes." },
+      { title: "Learning new frameworks", description: "Get practical, working examples of modern patterns so you can ship features in unfamiliar codebases without weeks of ramp-up." }
+    ],
     sections: [
       {
         title: "Code & Architecture",
@@ -136,7 +155,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   entrepreneurs: {
     intro: "Validate ideas quickly, build pitch materials, and run growth experiments with live market feedback.",
-    useCases: ["Idea validation", "Pitch decks", "Fundraising prep", "Growth experiments"],
+    useCases: [
+      { title: "Idea validation", description: "Stress-test your startup concept against real market signals and competitor activity pulled from X to find weak spots early." },
+      { title: "Pitch decks", description: "Craft compelling narrative slides that connect your traction directly to investor priorities using fresh industry context." },
+      { title: "Fundraising prep", description: "Anticipate tough questions from VCs and prepare data-backed answers drawn from current market movements and comparable deals." },
+      { title: "Growth experiments", description: "Design low-cost tests for new channels or features and quickly analyze results against real user conversations happening right now." }
+    ],
     sections: [
       {
         title: "Validation & Pitching",
@@ -149,7 +173,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   students: {
     intro: "Study smarter with structured explanations, essay frameworks, and exam prep that actually sticks.",
-    useCases: ["Essay writing", "Exam prep", "Research synthesis", "Time management"],
+    useCases: [
+      { title: "Essay writing", description: "Turn scattered research notes into coherent outlines with strong thesis statements and properly cited supporting arguments." },
+      { title: "Exam prep", description: "Create focused study guides and practice questions that target the exact concepts your professor emphasized in lectures." },
+      { title: "Research synthesis", description: "Quickly compare multiple academic sources and distill the key disagreements and consensus into clear takeaways for papers." },
+      { title: "Time management", description: "Build realistic weekly study schedules that balance classes, assignments, and rest while hitting all your deadlines." }
+    ],
     sections: [
       {
         title: "Learning & Writing",
@@ -162,7 +191,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   teachers: {
     intro: "Save hours creating differentiated lessons, assessments, and parent communications.",
-    useCases: ["Lesson planning", "Differentiation", "Assessments", "Parent comms"],
+    useCases: [
+      { title: "Lesson planning", description: "Build complete lessons with engaging hooks, hands-on activities, and clear assessments aligned to your specific curriculum standards." },
+      { title: "Differentiation", description: "Adapt the same core assignment for advanced, on-level, and struggling learners while keeping everyone working toward the same goals." },
+      { title: "Assessments", description: "Create varied quizzes and projects that actually measure understanding instead of just memorization of facts." },
+      { title: "Parent comms", description: "Write clear, positive updates about student progress that help families support learning without causing alarm." }
+    ],
     sections: [
       {
         title: "Classroom Materials",
@@ -175,7 +209,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "data-analysts": {
     intro: "Clean data, build stories, and communicate insights with prompts tailored to analysis workflows.",
-    useCases: ["Data cleaning", "Visualization", "Storytelling", "Dashboard design"],
+    useCases: [
+      { title: "Data cleaning", description: "Spot anomalies and inconsistencies in messy datasets and generate reproducible cleaning scripts that preserve the original signal." },
+      { title: "Visualization", description: "Choose the right chart types and design clear dashboards that reveal the story in your data to non-technical stakeholders." },
+      { title: "Storytelling", description: "Translate statistical findings into compelling narratives that executives can use to make confident business decisions." },
+      { title: "Dashboard design", description: "Build intuitive monitoring tools that surface the metrics that actually matter for your team's goals in real time." }
+    ],
     sections: [
       {
         title: "Analysis & Communication",
@@ -188,7 +227,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   healthcare: {
     intro: "Support clinical reasoning, patient education, documentation, and research with accurate, empathetic prompts.",
-    useCases: ["Patient communication", "Research synthesis", "Documentation", "Wellness planning"],
+    useCases: [
+      { title: "Patient communication", description: "Explain complex medical concepts in plain language that builds trust and helps patients make informed decisions about their care." },
+      { title: "Research synthesis", description: "Quickly review the latest studies on a condition and extract practical clinical takeaways while flagging study limitations." },
+      { title: "Documentation", description: "Draft accurate clinical notes and patient instructions that are thorough yet concise and reduce after-hours charting time." },
+      { title: "Wellness planning", description: "Create personalized lifestyle and prevention plans that patients are actually likely to follow based on their real circumstances." }
+    ],
     sections: [
       {
         title: "Clinical & Patient",
@@ -201,7 +245,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   investors: {
     intro: "Leverage real-time X signals for market sentiment, due diligence, and thesis development.",
-    useCases: ["Market scanning", "Due diligence", "Thesis writing", "Risk analysis"],
+    useCases: [
+      { title: "Market scanning", description: "Track real-time sentiment shifts and emerging narratives around sectors or tickers directly from influential voices on X." },
+      { title: "Due diligence", description: "Build comprehensive company profiles by combining public filings with the latest unfiltered commentary from customers and competitors." },
+      { title: "Thesis writing", description: "Articulate clear investment theses supported by fresh data points and contrarian signals that stand out in pitch meetings." },
+      { title: "Risk analysis", description: "Identify hidden tail risks and early warning signs by monitoring discussions that traditional financial models miss." }
+    ],
     sections: [
       {
         title: "Research & Analysis",
@@ -214,7 +263,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   fitness: {
     intro: "Build personalized fitness, nutrition and recovery plans backed by practical reasoning.",
-    useCases: ["Program design", "Nutrition planning", "Habit formation", "Injury prevention"],
+    useCases: [
+      { title: "Program design", description: "Build progressive training plans that match the client's current fitness level, equipment access, and specific performance goals." },
+      { title: "Nutrition planning", description: "Create sustainable meal frameworks that support training demands while fitting real-life schedules and food preferences." },
+      { title: "Habit formation", description: "Design small, compounding daily actions that actually stick instead of overwhelming overhauls that lead to burnout." },
+      { title: "Injury prevention", description: "Identify movement patterns that increase injury risk and build in mobility and recovery work tailored to the client's sport or lifestyle." }
+    ],
     sections: [
       {
         title: "Training & Nutrition",
@@ -227,7 +281,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   productivity: {
     intro: "Build systems for focus, task management, and high-output workflows.",
-    useCases: ["Daily systems", "Deep work", "Automation", "Review rituals"],
+    useCases: [
+      { title: "Daily systems", description: "Design morning and evening routines that protect your most important work while handling the inevitable interruptions of real life." },
+      { title: "Deep work", description: "Create focused blocks and environmental triggers that let you enter flow states on cognitively demanding tasks without constant context switching." },
+      { title: "Automation", description: "Build simple scripts and workflows that eliminate repetitive admin so you can spend more time on high-value creative or strategic work." },
+      { title: "Review rituals", description: "Establish weekly reviews that surface what's working, what needs adjustment, and clear priorities for the week ahead." }
+    ],
     sections: [
       {
         title: "Systems & Routines",
@@ -240,7 +299,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "creative-writing": {
     intro: "Accelerate fiction, worldbuilding, dialogue, and editing with structured creative prompts.",
-    useCases: ["Story outlining", "Character development", "Dialogue", "Revision"],
+    useCases: [
+      { title: "Story outlining", description: "Map out compelling three-act structures or non-linear plots with clear turning points that keep readers turning pages." },
+      { title: "Character development", description: "Create multi-dimensional characters with conflicting desires, backstories, and arcs that feel real rather than archetypal." },
+      { title: "Dialogue", description: "Write natural-sounding conversations that reveal character, advance plot, and avoid the stilted exposition common in first drafts." },
+      { title: "Revision", description: "Diagnose weak sections in your manuscript and receive specific, actionable suggestions for strengthening pacing, tension, and voice." }
+    ],
     sections: [
       {
         title: "Story & Character",
@@ -253,7 +317,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "language-learners": {
     intro: "Accelerate language acquisition with conversation practice, grammar drills, and cultural nuance.",
-    useCases: ["Conversation practice", "Vocabulary building", "Grammar correction", "Cultural context"],
+    useCases: [
+      { title: "Conversation practice", description: "Simulate realistic dialogues in your target language with corrections and alternative phrasings that sound natural to native speakers." },
+      { title: "Vocabulary building", description: "Learn words in context through example sentences and memory techniques rather than rote lists that are quickly forgotten." },
+      { title: "Grammar correction", description: "Get explanations for why a sentence is wrong along with multiple corrected versions at different formality levels." },
+      { title: "Cultural context", description: "Understand the unspoken social rules and idiomatic expressions that textbooks rarely teach but are essential for real communication." }
+    ],
     sections: [
       {
         title: "Speaking & Listening",
@@ -266,7 +335,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "travel-planners": {
     intro: "Build detailed, personalized travel experiences with real-time considerations.",
-    useCases: ["Itinerary creation", "Budget optimization", "Local experiences", "Contingency planning"],
+    useCases: [
+      { title: "Itinerary creation", description: "Build day-by-day plans that balance must-see sights with hidden local gems while accounting for realistic travel times and energy levels." },
+      { title: "Budget optimization", description: "Find ways to experience a destination authentically without overspending by identifying high-value activities and smart money-saving hacks." },
+      { title: "Local experiences", description: "Discover authentic activities and neighborhoods that most tourists miss, often by tapping into current conversations from people who actually live there." },
+      { title: "Contingency planning", description: "Prepare flexible backup plans for common disruptions like weather, strikes, or overbooked attractions so your trip doesn't fall apart." }
+    ],
     sections: [
       {
         title: "Planning & Logistics",
@@ -279,7 +353,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "market-research": {
     intro: "Design studies, analyze trends, and synthesize actionable market insights.",
-    useCases: ["Survey design", "Trend analysis", "Competitor teardown", "Persona development"],
+    useCases: [
+      { title: "Survey design", description: "Write questions that minimize bias and actually reveal what your target customers think and do, not what they think you want to hear." },
+      { title: "Trend analysis", description: "Spot emerging patterns in your industry by synthesizing conversations happening right now on social platforms with traditional data sources." },
+      { title: "Competitor teardown", description: "Analyze what rivals are doing well and where they're vulnerable by examining their public messaging, customer feedback, and recent moves." },
+      { title: "Persona development", description: "Create detailed, evidence-based customer profiles that go beyond demographics to include actual goals, pain points, and decision triggers." }
+    ],
     sections: [
       {
         title: "Research Design & Insights",
@@ -292,7 +371,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "customer-support": {
     intro: "Handle inquiries with empathy, efficiency, and escalation best practices.",
-    useCases: ["Ticket responses", "De-escalation", "Knowledge base", "Process improvement"],
+    useCases: [
+      { title: "Ticket responses", description: "Write helpful, empathetic replies that resolve issues quickly while making customers feel heard instead of processed." },
+      { title: "De-escalation", description: "Turn angry or frustrated customers into advocates by acknowledging their feelings and offering clear, fair next steps." },
+      { title: "Knowledge base", description: "Create clear, searchable articles that actually answer the questions customers ask most often, reducing repeat tickets." },
+      { title: "Process improvement", description: "Identify bottlenecks in your support workflow and design better handoffs, templates, and escalation paths." }
+    ],
     sections: [
       {
         title: "Communication Scripts",
@@ -305,7 +389,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "personal-finance": {
     intro: "Make smarter money decisions with budgeting, investing, and planning frameworks.",
-    useCases: ["Budget creation", "Debt payoff", "Investment choices", "Financial goals"],
+    useCases: [
+      { title: "Budget creation", description: "Build realistic spending plans that account for irregular income, seasonal expenses, and the things you actually care about spending money on." },
+      { title: "Debt payoff", description: "Compare strategies like avalanche versus snowball and create a motivating plan that fits your psychology and cash flow." },
+      { title: "Investment choices", description: "Evaluate different investment vehicles against your time horizon, risk tolerance, and specific life goals rather than generic advice." },
+      { title: "Financial goals", description: "Break down big money targets like buying a home or retiring early into monthly milestones with clear tracking and adjustment points." }
+    ],
     sections: [
       {
         title: "Money Management",
@@ -318,7 +407,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "dating-relationships": {
     intro: "Improve communication, connection, and conflict resolution in personal relationships.",
-    useCases: ["Conversation starters", "Conflict resolution", "Date ideas", "Relationship check-ins"],
+    useCases: [
+      { title: "Conversation starters", description: "Move beyond small talk into meaningful topics that reveal values and build real connection without feeling like an interview." },
+      { title: "Conflict resolution", description: "Navigate disagreements constructively by finding the underlying needs behind positions and reaching agreements both people can own." },
+      { title: "Date ideas", description: "Plan experiences that match your shared interests and energy levels instead of defaulting to dinner and a movie every time." },
+      { title: "Relationship check-ins", description: "Have productive conversations about how the relationship is going so small issues don't become big resentments." }
+    ],
     sections: [
       {
         title: "Communication & Connection",
@@ -331,7 +425,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "parenting-family": {
     intro: "Navigate parenting challenges with age-appropriate strategies and family bonding ideas.",
-    useCases: ["Discipline", "Activities", "Communication", "Milestone support"],
+    useCases: [
+      { title: "Discipline", description: "Set and hold boundaries with kids in ways that teach responsibility without damaging the relationship or your sanity." },
+      { title: "Activities", description: "Find low-prep, high-engagement things to do together that create memories instead of just filling time with screens." },
+      { title: "Communication", description: "Talk to children at their developmental level so they actually hear you and feel safe coming to you with problems." },
+      { title: "Milestone support", description: "Help kids navigate big transitions like starting school or losing a pet with age-appropriate explanations and rituals." }
+    ],
     sections: [
       {
         title: "Daily Parenting",
@@ -344,7 +443,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "pet-care": {
     intro: "Provide practical advice for pet health, training, and enrichment.",
-    useCases: ["Training plans", "Health concerns", "Behavior issues", "Enrichment"],
+    useCases: [
+      { title: "Training plans", description: "Create consistent, positive reinforcement programs for basic obedience or advanced tricks that actually work with your specific pet's personality." },
+      { title: "Health concerns", description: "Understand common symptoms and when to see a vet, plus prepare good questions so appointments are more productive." },
+      { title: "Behavior issues", description: "Identify the root cause behind barking, chewing, or anxiety and design targeted interventions instead of punishment." },
+      { title: "Enrichment", description: "Build mental and physical stimulation into your pet's routine so they stay happy and well-behaved even when you're busy." }
+    ],
     sections: [
       {
         title: "Care & Training",
@@ -357,7 +461,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "gardening-diy": {
     intro: "Plan gardens, troubleshoot plants, and tackle home improvement projects confidently.",
-    useCases: ["Garden planning", "Plant care", "DIY repairs", "Tool selection"],
+    useCases: [
+      { title: "Garden planning", description: "Design a garden that matches your climate, space, and available time instead of copying Pinterest ideas that fail in real conditions." },
+      { title: "Plant care", description: "Diagnose what's wrong with struggling plants and get specific, season-appropriate care instructions instead of generic advice." },
+      { title: "DIY repairs", description: "Tackle common home fixes with clear steps, tool lists, and safety reminders so projects actually get finished." },
+      { title: "Tool selection", description: "Choose the right tools for the job without overspending on features you'll never use or buying cheap ones that break immediately." }
+    ],
     sections: [
       {
         title: "Projects & Care",
@@ -370,7 +479,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   sustainability: {
     intro: "Adopt sustainable practices and develop ESG strategies with measurable impact.",
-    useCases: ["Sustainable living", "ESG frameworks", "Carbon reduction", "Reporting"],
+    useCases: [
+      { title: "Sustainable living", description: "Find practical changes to your daily habits that actually reduce impact without requiring a complete lifestyle overhaul or expensive products." },
+      { title: "ESG frameworks", description: "Build meaningful environmental and social governance programs that go beyond checkbox compliance and create real business value." },
+      { title: "Carbon reduction", description: "Identify the highest-impact areas in your operations or personal life and create measurable reduction plans with clear milestones." },
+      { title: "Reporting", description: "Turn sustainability efforts into credible reports that stakeholders trust and that highlight genuine progress instead of greenwashing." }
+    ],
     sections: [
       {
         title: "Action & Strategy",
@@ -383,7 +497,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   nonprofits: {
     intro: "Strengthen fundraising, operations, and impact for mission-driven work.",
-    useCases: ["Grant writing", "Donor engagement", "Program design", "Impact measurement"],
+    useCases: [
+      { title: "Grant writing", description: "Craft compelling proposals that clearly connect your mission to funder priorities with measurable outcomes they care about." },
+      { title: "Donor engagement", description: "Build authentic relationships with supporters through personalized communication that shows impact without feeling like constant asking." },
+      { title: "Program design", description: "Create effective programs that solve real community problems while staying realistic about your organization's capacity and resources." },
+      { title: "Impact measurement", description: "Design simple tracking systems that prove your work makes a difference without creating overwhelming administrative burden." }
+    ],
     sections: [
       {
         title: "Fundraising & Operations",
@@ -396,7 +515,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   consulting: {
     intro: "Deliver high-value client work with structured frameworks and clear deliverables.",
-    useCases: ["Proposals", "Workshops", "Diagnostics", "Recommendations"],
+    useCases: [
+      { title: "Proposals", description: "Write winning proposals that clearly define scope, deliverables, and value in language that resonates with the client's specific pain points." },
+      { title: "Workshops", description: "Design and facilitate engaging sessions that move participants from discussion to concrete action plans they own." },
+      { title: "Diagnostics", description: "Quickly assess organizational or project health and surface the root issues rather than just the visible symptoms." },
+      { title: "Recommendations", description: "Deliver clear, prioritized advice that clients can actually implement given their constraints, culture, and resources." }
+    ],
     sections: [
       {
         title: "Client Work",
@@ -409,7 +533,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "cloud-devops": {
     intro: "Design, deploy, and maintain reliable infrastructure and CI/CD pipelines.",
-    useCases: ["Architecture", "Automation", "Monitoring", "Incident response"],
+    useCases: [
+      { title: "Architecture", description: "Design cloud and infrastructure setups that balance reliability, cost, and future flexibility for your actual scale and team skills." },
+      { title: "Automation", description: "Build CI/CD pipelines and infrastructure as code that reduces manual toil and makes deployments boring instead of stressful." },
+      { title: "Monitoring", description: "Set up observability that surfaces real problems early with actionable alerts instead of alert fatigue from too much noise." },
+      { title: "Incident response", description: "Create runbooks and postmortems that turn outages into lasting improvements rather than repeated firefighting." }
+    ],
     sections: [
       {
         title: "Infrastructure & Automation",
@@ -422,7 +551,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "machine-learning": {
     intro: "Build, evaluate, and ethically deploy machine learning systems.",
-    useCases: ["Model development", "Data pipelines", "Evaluation", "Responsible AI"],
+    useCases: [
+      { title: "Model development", description: "Move from prototype to production models with proper validation, versioning, and monitoring that actually improves over time." },
+      { title: "Data pipelines", description: "Build reliable data flows that handle real-world messiness while keeping experiments reproducible and costs under control." },
+      { title: "Evaluation", description: "Measure what actually matters for your use case instead of defaulting to accuracy metrics that hide real problems." },
+      { title: "Responsible AI", description: "Identify and mitigate bias, fairness, and safety issues before models go live with concrete testing approaches." }
+    ],
     sections: [
       {
         title: "ML Workflows",
@@ -435,7 +569,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "event-planning": {
     intro: "Plan seamless events from concept to execution with detailed logistics.",
-    useCases: ["Timeline creation", "Vendor management", "Run of show", "Risk mitigation"],
+    useCases: [
+      { title: "Timeline creation", description: "Build realistic project timelines that include buffer for the inevitable surprises and dependencies that kill most event plans." },
+      { title: "Vendor management", description: "Negotiate clear contracts and manage relationships so vendors deliver what you agreed on without last-minute surprises." },
+      { title: "Run of show", description: "Create detailed minute-by-minute plans that keep everyone on the same page during the chaos of event day." },
+      { title: "Risk mitigation", description: "Anticipate what could go wrong and have concrete backup plans so problems become minor inconveniences instead of disasters." }
+    ],
     sections: [
       {
         title: "Planning & Execution",
@@ -448,7 +587,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "music-production": {
     intro: "Create, refine, and finish professional-sounding music projects.",
-    useCases: ["Beat making", "Mixing", "Arrangement", "Sound design"],
+    useCases: [
+      { title: "Beat making", description: "Create original beats and grooves that fit your genre while avoiding the generic loops that make tracks sound amateur." },
+      { title: "Mixing", description: "Balance elements so every instrument and vocal sits in its own space with clarity and impact across different playback systems." },
+      { title: "Arrangement", description: "Structure songs so they build tension and release in satisfying ways instead of staying flat or becoming repetitive." },
+      { title: "Sound design", description: "Craft unique sounds and textures that give your music a signature character instead of sounding like everyone else's presets." }
+    ],
     sections: [
       {
         title: "Production Techniques",
@@ -461,7 +605,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   ecommerce: {
     intro: "Optimize online stores for conversion, retention, and growth.",
-    useCases: ["Product copy", "Email flows", "Pricing", "Customer research"],
+    useCases: [
+      { title: "Product copy", description: "Write descriptions that highlight the benefits customers actually care about instead of just listing features." },
+      { title: "Email flows", description: "Design sequences that nurture leads or win back customers without feeling spammy or desperate." },
+      { title: "Pricing", description: "Test and communicate pricing in ways that feel fair while maximizing revenue and perceived value." },
+      { title: "Customer research", description: "Understand what actually drives purchase decisions by listening to real customer language instead of assumptions." }
+    ],
     sections: [
       {
         title: "Store & Marketing",
@@ -474,7 +623,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "grant-writing": {
     intro: "Craft compelling, fundable proposals with clear narratives and data.",
-    useCases: ["Needs statements", "Budgets", "Evaluation plans", "Executive summaries"],
+    useCases: [
+      { title: "Needs statements", description: "Clearly articulate the problem you're solving with evidence that makes funders care and want to be part of the solution." },
+      { title: "Budgets", description: "Create transparent, justifiable budgets that show exactly how money will be used and what results it will produce." },
+      { title: "Evaluation plans", description: "Design ways to measure success that satisfy funders while actually helping you improve the program in real time." },
+      { title: "Executive summaries", description: "Summarize complex proposals into compelling one-pagers that busy reviewers actually read and remember." }
+    ],
     sections: [
       {
         title: "Proposal Development",
@@ -487,7 +641,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "competitive-intelligence": {
     intro: "Monitor markets and competitors with structured, actionable intelligence.",
-    useCases: ["SWOT analysis", "Pricing tracking", "Feature comparison", "Sentiment monitoring"],
+    useCases: [
+      { title: "SWOT analysis", description: "Build living SWOT documents that incorporate fresh market signals instead of static documents that quickly become outdated." },
+      { title: "Pricing tracking", description: "Monitor competitor pricing moves and positioning shifts in real time so you can respond strategically instead of reacting too late." },
+      { title: "Feature comparison", description: "Create honest, useful comparisons that highlight real differences customers care about instead of marketing fluff." },
+      { title: "Sentiment monitoring", description: "Track how customers and analysts actually feel about competitors by listening to unfiltered conversations on X and forums." }
+    ],
     sections: [
       {
         title: "Intelligence Gathering",
@@ -500,7 +659,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "risk-management": {
     intro: "Identify, assess, and mitigate risks across operations and strategy.",
-    useCases: ["Risk registers", "Scenario planning", "Compliance", "Crisis prep"],
+    useCases: [
+      { title: "Risk registers", description: "Create living documents that identify, rate, and track risks with clear owners and mitigation actions instead of shelf-ware." },
+      { title: "Scenario planning", description: "Work through best, worst, and most likely cases for major decisions so you're prepared instead of surprised." },
+      { title: "Compliance", description: "Translate complex regulations into practical checklists and processes your team can actually follow without constant legal babysitting." },
+      { title: "Crisis prep", description: "Develop response playbooks and communication templates so your team can act decisively when something goes wrong." }
+    ],
     sections: [
       {
         title: "Risk Frameworks",
@@ -513,7 +677,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "team-collaboration": {
     intro: "Improve how teams communicate, align, and execute together.",
-    useCases: ["Meeting design", "Async processes", "Feedback systems", "Project handoffs"],
+    useCases: [
+      { title: "Meeting design", description: "Run meetings that have clear purposes, decisions, and next steps instead of being time sinks everyone dreads." },
+      { title: "Async processes", description: "Build documentation and update rhythms that keep distributed teams aligned without constant meetings or missed context." },
+      { title: "Feedback systems", description: "Create regular, constructive feedback loops that improve performance and psychological safety instead of awkward annual reviews." },
+      { title: "Project handoffs", description: "Document and transfer work between teams so nothing gets lost and the receiving team can hit the ground running." }
+    ],
     sections: [
       {
         title: "Team Processes",
@@ -526,7 +695,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   leadership: {
     intro: "Develop vision, inspire teams, and make high-stakes decisions.",
-    useCases: ["Vision communication", "Team development", "Decision making", "Executive presence"],
+    useCases: [
+      { title: "Vision communication", description: "Translate big-picture strategy into stories and goals that inspire your team and align daily work with the bigger picture." },
+      { title: "Team development", description: "Identify growth opportunities for individuals and build development plans that actually move the needle on their careers." },
+      { title: "Decision making", description: "Make faster, better decisions by surfacing the right inputs and criteria while avoiding analysis paralysis or gut-feel mistakes." },
+      { title: "Executive presence", description: "Communicate with clarity and confidence in high-stakes settings while still being authentic and approachable." }
+    ],
     sections: [
       {
         title: "Leadership Practice",
@@ -539,7 +713,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "fashion-style": {
     intro: "Develop personal style, analyze trends, and communicate fashion concepts.",
-    useCases: ["Outfit curation", "Trend forecasting", "Brand voice", "Personal shopping"],
+    useCases: [
+      { title: "Outfit curation", description: "Build versatile wardrobes that work for your actual life and body instead of chasing every trend on social media." },
+      { title: "Trend forecasting", description: "Spot which fashion and style trends will actually matter for your audience instead of chasing every fleeting TikTok moment." },
+      { title: "Brand voice", description: "Develop consistent visual and written language for fashion brands that feels authentic rather than trying too hard." },
+      { title: "Personal shopping", description: "Help clients find pieces that genuinely flatter them and fit their lifestyle instead of pushing whatever is currently popular." }
+    ],
     sections: [
       {
         title: "Style Development",
@@ -552,7 +731,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "history-philosophy": {
     intro: "Explore historical events and philosophical ideas with depth and clarity.",
-    useCases: ["Historical analysis", "Philosophical arguments", "Contextual comparison", "Essay support"],
+    useCases: [
+      { title: "Historical analysis", description: "Connect past events to present situations with nuance instead of oversimplified lessons or anachronistic judgments." },
+      { title: "Philosophical arguments", description: "Construct clear, logical arguments on complex ethical or existential questions while acknowledging counterpoints." },
+      { title: "Contextual comparison", description: "Compare ideas or events across time and cultures to reveal what is universal and what is context-dependent." },
+      { title: "Essay support", description: "Strengthen academic writing with well-chosen evidence and clear argumentation tailored to the specific prompt or thesis." }
+    ],
     sections: [
       {
         title: "Analysis & Interpretation",
@@ -565,7 +749,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   astronomy: {
     intro: "Understand the universe through current science, observation, and discovery.",
-    useCases: ["Celestial events", "Explanations", "Observation planning", "Space news context"],
+    useCases: [
+      { title: "Celestial events", description: "Understand upcoming eclipses, meteor showers, or planetary alignments and know exactly where and when to look." },
+      { title: "Explanations", description: "Get clear, accurate breakdowns of complex space science concepts without dumbing them down or losing important details." },
+      { title: "Observation planning", description: "Plan successful stargazing or astrophotography sessions with the right equipment, timing, and locations for your area." },
+      { title: "Space news context", description: "Make sense of the latest space missions, discoveries, or controversies with proper scientific and historical background." }
+    ],
     sections: [
       {
         title: "Learning & Observing",
@@ -578,7 +767,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "mental-health": {
     intro: "Support emotional well-being with evidence-informed strategies and self-awareness tools.",
-    useCases: ["Self-care routines", "Coping skills", "Communication", "Boundary setting"],
+    useCases: [
+      { title: "Self-care routines", description: "Build sustainable practices that actually recharge you instead of adding another thing to your to-do list that you feel guilty about skipping." },
+      { title: "Coping skills", description: "Develop practical tools for managing anxiety, stress, or difficult emotions that you can use in the moment, not just in theory." },
+      { title: "Communication", description: "Express your needs and feelings clearly in relationships without blame or shutdown so conflicts lead to connection." },
+      { title: "Boundary setting", description: "Learn to say no and protect your time and energy in ways that strengthen relationships instead of creating resentment." }
+    ],
     sections: [
       {
         title: "Wellness Tools",
@@ -591,7 +785,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   automotive: {
     intro: "Make informed decisions about vehicles, maintenance, and modifications.",
-    useCases: ["Buying guides", "Maintenance", "Modifications", "Troubleshooting"],
+    useCases: [
+      { title: "Buying guides", description: "Compare vehicles based on your actual driving patterns, budget, and priorities instead of marketing hype or reviewer opinions." },
+      { title: "Maintenance", description: "Understand what really needs to be done when and how to avoid unnecessary dealer upsells on routine service." },
+      { title: "Modifications", description: "Plan upgrades that actually improve the experience you want instead of chasing looks or power you won't use." },
+      { title: "Troubleshooting", description: "Diagnose common car problems with clear next steps so you can decide whether it's a DIY job or time for a professional." }
+    ],
     sections: [
       {
         title: "Vehicle Knowledge",
@@ -604,7 +803,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   sports: {
     intro: "Improve athletic performance, team strategy, and coaching effectiveness.",
-    useCases: ["Training plans", "Game strategy", "Player development", "Mental preparation"],
+    useCases: [
+      { title: "Training plans", description: "Design sport-specific training that builds the exact physical qualities and skills needed for your level and position." },
+      { title: "Game strategy", description: "Analyze opponents and design plays or tactics that exploit their weaknesses while covering your own vulnerabilities." },
+      { title: "Player development", description: "Create individualized development plans that turn raw talent into consistent performance under pressure." },
+      { title: "Mental preparation", description: "Build routines and mindsets that help athletes stay focused, confident, and resilient during competition." }
+    ],
     sections: [
       {
         title: "Coaching & Training",
@@ -617,7 +821,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "ar-vr": {
     intro: "Design immersive experiences and understand spatial computing.",
-    useCases: ["Experience design", "Interaction patterns", "World building", "Prototyping"],
+    useCases: [
+      { title: "Experience design", description: "Create immersive AR or VR experiences that feel magical but are actually usable and solve real user problems." },
+      { title: "Interaction patterns", description: "Design intuitive controls and feedback that work across different hardware instead of forcing users to learn new gestures every time." },
+      { title: "World building", description: "Develop rich, consistent virtual spaces with their own rules, history, and logic that feel alive to users." },
+      { title: "Prototyping", description: "Quickly test core mechanics and user flows before investing in full production so you don't build the wrong thing." }
+    ],
     sections: [
       {
         title: "Design & Development",
@@ -630,7 +839,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   robotics: {
     intro: "Build, program, and deploy robotic systems with practical engineering focus.",
-    useCases: ["Robot design", "Programming", "Automation", "Safety"],
+    useCases: [
+      { title: "Robot design", description: "Choose the right mechanical platform, sensors, and actuators for the specific tasks your robot needs to perform." },
+      { title: "Programming", description: "Write control code that makes robots reliable in the real world with handling for edge cases and failures." },
+      { title: "Automation", description: "Integrate robots into larger workflows so they augment human work instead of creating new bottlenecks." },
+      { title: "Safety", description: "Design and test systems that prevent harm to people and property while still being useful in real environments." }
+    ],
     sections: [
       {
         title: "Build & Program",
@@ -643,7 +857,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   quantum: {
     intro: "Grasp quantum concepts and explore real-world computing applications.",
-    useCases: ["Conceptual explanations", "Algorithm design", "Applications", "Limitations"],
+    useCases: [
+      { title: "Conceptual explanations", description: "Understand the core ideas behind quantum computing without needing a physics PhD while still getting the important nuances right." },
+      { title: "Algorithm design", description: "Explore how quantum algorithms work and where they might provide real advantage over classical approaches for your problems." },
+      { title: "Applications", description: "Identify which real-world problems in your field are actually good candidates for quantum approaches today or in the near future." },
+      { title: "Limitations", description: "Understand current hardware constraints and error rates so you have realistic expectations about what quantum can deliver now." }
+    ],
     sections: [
       {
         title: "Concepts & Applications",
@@ -656,7 +875,12 @@ export const categoryContent: Record<string, CategoryContent> = {
   },
   "web3-crypto": {
     intro: "Navigate blockchain, tokens, and decentralized systems with clear analysis.",
-    useCases: ["Tokenomics", "Smart contracts", "Market analysis", "Project evaluation"],
+    useCases: [
+      { title: "Tokenomics", description: "Evaluate whether a token's supply, distribution, and utility actually create sustainable value or just short-term speculation." },
+      { title: "Smart contracts", description: "Understand the logic and risks in decentralized protocols so you can interact with them safely and effectively." },
+      { title: "Market analysis", description: "Analyze on-chain data and community signals to separate real adoption from hype in the web3 space." },
+      { title: "Project evaluation", description: "Assess the team, technology, and traction of web3 projects using criteria that actually predict long-term survival." }
+    ],
     sections: [
       {
         title: "Analysis & Strategy",
@@ -664,6 +888,48 @@ export const categoryContent: Record<string, CategoryContent> = {
           { text: "Evaluate the tokenomics of [project]. What works, what are red flags?" },
           { text: "Explain how [DeFi protocol or NFT mechanic] works and its risks for users." }
         ]
+      }
+    ]
+  },
+  "zero-click-threats": {
+    intro: "Zero-click threats can compromise your device with zero interaction. Use these Grok prompts to understand risks, harden your setup, detect issues early, and stay safe online.",
+    useCases: [
+      { title: "Understanding zero-click exploits", description: "Break down how silent attacks work in messaging apps and why they bypass traditional security." },
+      { title: "Device and app hardening", description: "Apply specific updates, settings, and habits to minimize your exposure to zero-click vulnerabilities." },
+      { title: "Detection and response", description: "Recognize subtle signs of compromise and follow a clear plan to contain and recover from an attack." },
+      { title: "Safe communication practices", description: "Adopt low-risk habits for apps like iMessage, WhatsApp, and email to reduce zero-click attack surface." }
+    ],
+    sections: [
+      {
+        title: "Understanding & Awareness",
+        prompts: [
+          { text: "Explain how a zero-click exploit works in apps like iMessage or WhatsApp. Include why it's dangerous and real-world examples.", guidance: "This grok prompt for zero click threats helps you grasp the mechanics so you can take the risk seriously and prioritize defenses." },
+          { text: "List the top zero-click threats in 2026 for mobile devices and how they typically spread without user action.", guidance: "Use this to stay informed on current vectors and adjust your habits accordingly for better protection." }
+        ]
+      },
+      {
+        title: "Prevention & Hardening",
+        prompts: [
+          { text: "Create a prioritized checklist to protect my iPhone or Android from zero-click attacks. Focus on updates, settings, and apps to avoid.", guidance: "This practical grok prompt turns abstract threats into a simple daily/weekly routine you can actually follow." },
+          { text: "What settings in WhatsApp, Signal, or iMessage reduce zero-click risks the most? Explain why each one helps.", guidance: "Get targeted configuration advice to lock down your messaging apps against silent exploits." }
+        ]
+      },
+      {
+        title: "Detection & Response",
+        prompts: [
+          { text: "What unusual signs might indicate a zero-click compromise on my phone? How should I investigate and respond safely?", guidance: "This grok prompt to keep you safe gives you early warning signs and a calm step-by-step response plan." },
+          { text: "Outline what to do in the first 30 minutes if I suspect a zero-click attack. Include preserving evidence and who to contact.", guidance: "Be prepared with this incident response prompt so you act quickly and correctly instead of panicking." }
+        ]
+      }
+    ],
+    faqs: [
+      {
+        "q": "Can zero-click threats affect any phone or only iPhones?",
+        "a": "Both iOS and Android have had vulnerabilities. Keeping your OS and apps fully updated is the single most effective defense for either platform."
+      },
+      {
+        "q": "Do I need special software to detect zero-click attacks?",
+        "a": "Often the signs are subtle. Regular updates, avoiding suspicious messages, and monitoring for unusual behavior are more practical than paid 'anti-zero-click' tools."
       }
     ]
   }
@@ -674,8 +940,13 @@ export const getCategoryPrompts = (slug: string): CategoryContent => {
 
   const title = slug.replace(/-/g, ' ');
   return {
-    intro: `Grok can help dramatically with ${title.toLowerCase()} work by combining reasoning with real-time context where available.`,
-    useCases: ["Daily workflows", "Research & analysis", "Content & communication", "Decision support"],
+    intro: `Discover how Grok can transform your work in ${title.toLowerCase()} with targeted prompts that leverage real-time insights and structured thinking for better results.`,
+    useCases: [
+      { title: `${title} workflows`, description: `Build repeatable processes that remove friction from your regular ${title.toLowerCase()} tasks so you can focus on the work that actually matters.` },
+      { title: `${title} research & analysis`, description: `Quickly gather and synthesize information from multiple sources into clear insights you can act on for ${title.toLowerCase()}.` },
+      { title: `${title} content & communication`, description: `Produce clear, on-point writing and presentations that get your ideas across without wasting the reader's time in ${title.toLowerCase()}.` },
+      { title: `${title} decision support`, description: `Structure complex choices with pros, cons, and relevant context so you can decide with more confidence and less regret when working in ${title.toLowerCase()}.` }
+    ],
     sections: [
       {
         title: "Core Prompts for " + title,

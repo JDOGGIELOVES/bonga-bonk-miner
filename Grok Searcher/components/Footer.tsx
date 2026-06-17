@@ -37,7 +37,7 @@ export default function Footer() {
             <div className="font-medium text-gray-900 mb-2">Connect</div>
             <div className="space-y-1.5">
               <a href="https://twitter.com/intent/tweet?text=Great%20free%20Grok%20prompts%20%26%20guides%3A%20https%3A%2F%2Fgroksearcher.com" target="_blank" className="hover:text-gray-900 block">Share on X</a>
-              <a href="https://grok.x.ai" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 block">Try Grok</a>
+              <a href="https://grok.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 block">Try Grok</a>
             </div>
             <div className="mt-4 text-[10px] text-gray-500">
               Content last updated {lastUpdated}.<br />

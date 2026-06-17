@@ -39,7 +39,7 @@ export default function GrokForCategory({ params }: Props) {
         <p className="text-xl text-gray-600">{cat.description}</p>
       </div>
 
-      {(content.whyTitle || content.whyItems) && (
+      {( (content.whyItems && content.whyItems.length > 0) || content.whyTitle ) && (
         <div className="bg-white p-8 rounded-3xl border mb-12">
           <h2 className="text-2xl font-semibold mb-4">{content.whyTitle || `Why ${cat.title.replace('Grok for ', '')} Pros Use Grok`}</h2>
           <div className="grid md:grid-cols-3 gap-6 text-sm">
@@ -54,13 +54,13 @@ export default function GrokForCategory({ params }: Props) {
                   ))
                 : content.useCases.slice(0, 3).map((uc, i) => {
                     const whyPhrases = [
-                      `Leverage Grok for targeted results in ${uc}.`,
-                      `Get expert assistance with ${uc} using Grok.`,
-                      `Enhance your approach to ${uc} with Grok's help.`
+                      `Leverage Grok for targeted results in ${uc.title}.`,
+                      `Get expert assistance with ${uc.title} using Grok.`,
+                      `Enhance your approach to ${uc.title} with Grok's help.`
                     ];
                     return (
                       <div key={i}>
-                        <strong>{uc}</strong><br />
+                        <strong>{uc.title}</strong><br />
                         {whyPhrases[i % whyPhrases.length]}
                       </div>
                     );
@@ -75,19 +75,12 @@ export default function GrokForCategory({ params }: Props) {
           <h2 className="text-3xl font-bold mb-6">High-Impact Use Cases</h2>
           {content.useCasesIntro && <p className="text-gray-600 mb-4">{content.useCasesIntro}</p>}
           <div className="grid md:grid-cols-2 gap-6 mb-12">
-            {content.useCases.map((uc, i) => {
-              const phrases = [
-                `Specialized Grok prompts help you handle ${uc} with precision and speed.`,
-                `Master ${uc} faster using Grok's targeted assistance and examples.`,
-                `Apply Grok effectively to ${uc} for better outcomes and efficiency.`
-              ];
-              return (
-                <div key={i} className="bg-white p-6 rounded-2xl border">
-                  <h3 className="font-semibold mb-3">{uc}</h3>
-                  <p className="text-sm text-gray-600">{phrases[i % phrases.length]}</p>
-                </div>
-              );
-            })}
+            {content.useCases.map((uc, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl border">
+                <h3 className="font-semibold mb-3">{uc.title}</h3>
+                <p className="text-sm text-gray-600 leading-snug">{uc.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       )}
