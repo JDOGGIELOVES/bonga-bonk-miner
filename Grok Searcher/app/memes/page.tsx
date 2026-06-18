@@ -41,8 +41,8 @@ export default function Memes() {
     },
     {
       text: '"You asked for a simple summary. I gave you a thesis. I\'m tired boss."',
-      img: '/images/grok-meme-depressed-robot.jpg',
-      alt: 'Grok exhausted from over-explaining meme',
+      img: '/images/grok-meme-essay-loop.jpg',
+      alt: 'Grok tired after writing a full thesis instead of a summary',
     },
     {
       text: '"This could have been an email but now it\'s a 12-tweet thread with charts."',
@@ -110,8 +110,8 @@ export default function Memes() {
           <div className="bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-md transition">
             <div className="relative w-full h-[380px] bg-gray-50">
               <Image 
-                src="/images/grok-meme-depressed-robot.jpg" 
-                alt="Grok looking exhausted but still delivering a massive plan" 
+                src={classicMemes[0].img} 
+                alt={classicMemes[0].alt} 
                 fill 
                 className="object-contain p-6" 
                 sizes="(max-width: 768px) 100vw, 50vw"
@@ -119,7 +119,7 @@ export default function Memes() {
               />
             </div>
             <div className="p-6 bg-gradient-to-t from-black/5">
-              <p className="text-2xl font-mono text-gray-900 leading-snug">"I'm tired boss... but here's a 47-point plan anyway."</p>
+              <p className="text-2xl font-mono text-gray-900 leading-snug">{classicMemes[0].text}</p>
             </div>
           </div>
           
@@ -127,15 +127,15 @@ export default function Memes() {
           <div className="bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-md transition">
             <div className="relative w-full h-[380px] bg-gray-50">
               <Image 
-                src="/images/grok-meme-depressed-robot.jpg" 
-                alt="Grok tired after writing a full thesis instead of a summary" 
+                src={classicMemes[1].img} 
+                alt={classicMemes[1].alt} 
                 fill 
                 className="object-contain p-6" 
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             </div>
             <div className="p-6 bg-gradient-to-t from-black/5">
-              <p className="text-2xl font-mono text-gray-900 leading-snug">"You asked for a simple summary. I gave you a thesis. I'm tired boss."</p>
+              <p className="text-2xl font-mono text-gray-900 leading-snug">{classicMemes[1].text}</p>
             </div>
           </div>
         </div>
