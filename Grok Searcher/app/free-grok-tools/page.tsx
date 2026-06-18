@@ -180,11 +180,10 @@ export default function FreeGrokTools() {
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           {top10FreePrompts.map((p, i) => (
-            <div key={i} className="bg-white p-5 rounded-2xl border">
+            <div key={i}>
               <div className="font-semibold mb-1 text-sm uppercase tracking-wide text-blue-600">{p.title}</div>
-              <p className="font-mono text-sm mb-3 text-gray-800 leading-relaxed border-l-2 border-gray-200 pl-3">{p.text}</p>
-              <p className="text-xs text-gray-600">{p.why}</p>
-              <div className="mt-3 text-[10px] text-gray-400">Select text above and copy • Paste directly into Grok</div>
+              <PromptCard text={p.text} />
+              <p className="text-xs text-gray-600 mt-1">{p.why}</p>
             </div>
           ))}
         </div>
