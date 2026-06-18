@@ -217,10 +217,10 @@ export function GardenVisual({ plants, onWater, beautyLevel, plantPops, generalF
           {generalFeedback && (
             <motion.p
               key={generalFeedback.id}
-              initial={{ opacity: 0, y: -8 }}
+              initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              className="pointer-events-none absolute left-1/2 top-10 z-30 -translate-x-1/2 rounded-full bg-card/95 px-4 py-1 text-center text-xs font-bold text-bonga-orange shadow-sm sm:text-sm"
+              exit={{ opacity: 0, y: -8 }}
+              className="pointer-events-none absolute left-1/2 top-[28%] z-30 max-w-[88%] -translate-x-1/2 rounded-2xl bg-card/95 px-4 py-2.5 text-center text-sm font-medium leading-snug text-bonga-orange shadow-md sm:top-[24%] sm:max-w-[82%] sm:py-2 sm:text-[13px]"
             >
               {generalFeedback.text}
             </motion.p>

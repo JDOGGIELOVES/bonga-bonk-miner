@@ -31,6 +31,7 @@ import {
 } from "@/lib/vibes-garden";
 import { getTodaysAffirmation } from "@/lib/bonga-affirmations";
 import { gameAudio } from "@/lib/audio/audio-manager";
+import { LiveRadioPlayer } from "@/components/audio/LiveRadioPlayer";
 import { Info, ShoppingBag, Sparkles, Wallet } from "lucide-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
@@ -45,7 +46,6 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const [shopMsg, setShopMsg] = useState("");
   const [meditating, setMeditating] = useState(false);
   const [offlineNotice, setOfflineNotice] = useState<string | null>(null);
-  const [musicEnabled, setMusicEnabled] = useState(true);
   const floatId = useRef(0);
   const isHolderRef = useRef(isHolder);
   const catchupDoneRef = useRef(false);
@@ -166,14 +166,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     return () => clearInterval(tick);
   }, [state, queueGardenSync]);
 
-  // Sync music state for the inline garden toggle (global audio controls also available)
-  useEffect(() => {
-    const s = gameAudio.getSettings();
-    setMusicEnabled((s as any).musicEnabled ?? true);
-    return gameAudio.subscribe((settings) => {
-      setMusicEnabled((settings as any).musicEnabled ?? true);
-    });
-  }, []);
+
 
   useEffect(() => {
     if (!connected || !publicKey) {
@@ -204,7 +197,8 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   const showGeneralFeedback = useCallback((text: string) => {
     const id = ++floatId.current;
     setGeneralFeedback({ id, text });
-    setTimeout(() => setGeneralFeedback((f) => (f?.id === id ? null : f)), 1200);
+    // Longer duration so people can actually read it (especially on mobile)
+    setTimeout(() => setGeneralFeedback((f) => (f?.id === id ? null : f)), 3000);
   }, []);
 
   const handleWater = useCallback(
@@ -287,8 +281,15 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
   const handleAffirm = useCallback(() => {
     const affirmation = getTodaysAffirmation();
-    showGeneralFeedback(affirmation.emoji);
+    // Complete the quest first (gives the +3 reward feedback)
     tryQuest("affirm");
+    // Then show the actual affirmation text so the user can read it
+    setTimeout(() => {
+      const shortText = affirmation.text.length > 92 
+        ? affirmation.text.slice(0, 89) + "..." 
+        : affirmation.text;
+      showGeneralFeedback(`${affirmation.emoji}  ${shortText}`);
+    }, 220);
   }, [tryQuest, showGeneralFeedback]);
 
   const handleGoodDeed = useCallback(() => {
@@ -529,24 +530,20 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
         )}
       </div>
 
-      {/* Prominent daily affirmation — one tap peace moment + music (peaceful ambient) */}
-      <div className="flex flex-wrap justify-center gap-2 px-2">
+      {/* Prominent, consistent Live Radio controls — same component as in the Miner */}
+      <div className="mx-auto w-full max-w-md px-2">
+        <LiveRadioPlayer />
+      </div>
+
+      {/* Prominent daily affirmation — one tap peace moment */}
+      <div className="flex justify-center px-2">
         <Button
           variant="peace"
           size="lg"
-          className="h-12 flex-1 max-w-md gap-2 rounded-full text-base shadow-sm sm:w-auto sm:px-10"
+          className="h-12 w-full max-w-md gap-2 rounded-full text-base shadow-sm"
           onClick={handleAffirm}
         >
           🌼 Daily Affirmation
-        </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="h-12 gap-2 rounded-full px-5 text-sm"
-          onClick={() => gameAudio.toggleMusic()}
-          title={musicEnabled ? "House Attack Radio on — live house music 24/7" : "Radio off"}
-        >
-          {musicEnabled ? "♪" : "♩"} Radio
         </Button>
       </div>
 

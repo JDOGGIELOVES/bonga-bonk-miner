@@ -10,9 +10,10 @@ import { BongaHeader } from "@/components/layout/bonga-header";
 import { BongaFooter } from "@/components/layout/bonga-footer";
 import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
 import { AudioControls } from "@/components/miner/audio-controls";
+import { LiveRadioPlayer } from "@/components/audio/LiveRadioPlayer";
 import { Button } from "@/components/ui/button";
 import { gameAudio } from "@/lib/audio/audio-manager";
-import { Volume2, VolumeX, Music, Music2 } from "lucide-react";
+import { Volume2, VolumeX } from "lucide-react";
 import { PeacefulBackground } from "@/components/layout/peaceful-background";
 import { useBongaNftHolder } from "@/hooks/use-bonga-nft-holder";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -58,7 +59,6 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
   // Expose mode to header + tabs. handleModeChange keeps both the UI and the ?mode= URL in sync
   // so navigation feels like real links (address bar, refresh, history, direct links all agree).
   const [muted, setMuted] = useState(false);
-  const [musicEnabled, setMusicEnabled] = useState(true);
   const [tallyRefreshKey, setTallyRefreshKey] = useState(0);
   const bumpTally = () => setTallyRefreshKey((k) => k + 1);
 
@@ -81,10 +81,8 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
   useEffect(() => {
     const settings = gameAudio.getSettings();
     setMuted(settings.muted);
-    setMusicEnabled((settings as any).musicEnabled ?? true);
     return gameAudio.subscribe((s) => {
       setMuted(s.muted);
-      setMusicEnabled((s as any).musicEnabled ?? true);
     });
   }, []);
 
@@ -109,21 +107,6 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
           <VolumeX className="h-4 w-4 text-muted-foreground" />
         ) : (
           <Volume2 className="h-4 w-4" />
-        )}
-      </Button>
-      {/* Prominent House Attack Radio toggle (live 24/7 house music via radio.garden) */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9 rounded-full"
-        onClick={() => gameAudio.toggleMusic()}
-        aria-label="Toggle House Attack Radio"
-        title={musicEnabled ? "House Attack Radio on — live underground house / tech house 24/7 (radio.garden)" : "Radio off"}
-      >
-        {musicEnabled ? (
-          <Music className="h-4 w-4 text-bonga-teal" />
-        ) : (
-          <Music2 className="h-4 w-4 text-muted-foreground" />
         )}
       </Button>
     </div>
@@ -151,9 +134,14 @@ export function GameHub({ onWalletConnect }: GameHubProps) {
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
             {mode === "miner"
-              ? "Tap to bonk. Mine $BONGA. House Attack Radio (live house music) plays automatically on interaction."
-              : "Grow cosmic plants. Water with vibes. Earn garden $BONGA while you peace out. ✌️ House radio in background."}
+              ? "Tap to bonk. Mine $BONGA. House Attack Radio plays on interaction."
+              : "Grow cosmic plants. Water with vibes. Earn garden $BONGA."}
           </p>
+
+          {/* Prominent, consistent Live Radio player — same on Miner and Garden */}
+          <div className="mx-auto mt-4 w-full max-w-md">
+            <LiveRadioPlayer />
+          </div>
           {connected && isHolder && !checking && (
             <div className="mt-2 flex flex-col items-center gap-1">
               <div className="inline-flex items-center gap-2 rounded-full border border-bonga-teal/50 bg-bonga-teal/15 px-4 py-1.5 text-sm font-semibold text-bonga-teal shadow-sm">
