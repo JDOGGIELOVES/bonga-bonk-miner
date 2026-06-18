@@ -53,6 +53,9 @@ export const metadata: Metadata = {
   verification: {
     google: 'google2eb975f867d5451b',
   },
+  other: {
+    'msvalidate.01': '3DC89A9CB879AA36B47F991E57843108',
+  },
 };
 
 export default function RootLayout({
