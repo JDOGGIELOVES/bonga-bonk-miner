@@ -20,6 +20,7 @@ export default function UploadPromptForm() {
     guidance: '',
     name: '',
   });
+  const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
@@ -45,16 +46,36 @@ export default function UploadPromptForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      // Limit to 3 files, 5MB each
+      const validFiles = newFiles.filter(f => f.size <= 5 * 1024 * 1024).slice(0, 3);
+      setFiles(validFiles);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
 
     try {
+      const form = new FormData();
+      form.append('title', formData.title);
+      form.append('prompt', formData.prompt);
+      form.append('category', formData.category);
+      form.append('guidance', formData.guidance);
+      form.append('name', formData.name);
+      form.append('website', ''); // honeypot
+
+      files.forEach((file) => {
+        form.append('files', file);
+      });
+
       const response = await fetch('/api/submit-prompt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: form,
       });
 
       if (!response.ok) {
@@ -70,6 +91,7 @@ export default function UploadPromptForm() {
         guidance: '',
         name: '',
       });
+      setFiles([]);
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -186,6 +208,24 @@ export default function UploadPromptForm() {
             placeholder="Great after meetings or when you need clear next steps..."
             className="w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Attachments (optional) — screenshots, .txt files, etc. (max 3 files, 5MB each)
+          </label>
+          <input
+            type="file"
+            multiple
+            onChange={handleFileChange}
+            accept=".txt,.md,.png,.jpg,.jpeg,.pdf"
+            className="w-full border rounded-xl px-4 py-3 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-gray-100 file:text-sm"
+          />
+          {files.length > 0 && (
+            <p className="text-xs text-gray-500 mt-1">
+              Selected: {files.map(f => f.name).join(', ')}
+            </p>
+          )}
         </div>
 
         {error && (

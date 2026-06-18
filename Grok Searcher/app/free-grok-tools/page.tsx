@@ -275,6 +275,57 @@ export default function FreeGrokTools() {
         <p className="mt-4 text-xs text-gray-500">It's free and takes less than a minute.</p>
       </div>
 
+      {/* Community Submissions */}
+      <div className="mt-16">
+        <h2 className="text-2xl font-semibold mb-6">Community Submissions</h2>
+        <p className="text-gray-600 mb-6">
+          Here are some recent prompts shared by the community. Submit yours and it may be featured here after review!
+        </p>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {[
+            {
+              title: "Meeting to Action Plan",
+              prompt: "Turn these notes into a clear action plan with owners, deadlines and next steps. Prioritize by urgency.",
+              category: "Business",
+              name: "@productpm",
+              date: "2 days ago",
+            },
+            {
+              title: "Viral X Thread from Idea",
+              prompt: "Turn this idea into a 6-tweet thread that could go viral. Use hooks, data, and a strong CTA.",
+              category: "Marketing",
+              name: "Anonymous",
+              date: "1 day ago",
+            },
+            {
+              title: "Code Refactor Helper",
+              prompt: "Review this code for readability and performance. Suggest concrete refactors with explanations.",
+              category: "Coding & Tech",
+              name: "@devjane",
+              date: "3 days ago",
+            },
+          ].map((sub, i) => (
+            <div key={i} className="bg-white p-5 rounded-2xl border">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <div className="font-semibold">{sub.title}</div>
+                  <div className="text-xs text-gray-500">{sub.category} • {sub.name} • {sub.date}</div>
+                </div>
+                <Link href="/upload-prompt" className="text-xs text-blue-600 hover:underline">Submit similar</Link>
+              </div>
+              <p className="font-mono text-sm text-gray-700 bg-gray-50 p-3 rounded mt-2">{sub.prompt}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 text-center">
+          <Link href="/upload-prompt" className="text-sm text-blue-600 hover:underline">
+            Share your own prompt →
+          </Link>
+        </div>
+      </div>
+
       <JsonLd data={{
         "@context": "https://schema.org",
         "@type": "WebPage",
