@@ -11,10 +11,10 @@ export const metadata: Metadata = {
     description: "Tested Grok image generation prompts for marketing, concepts, products and creative work.",
     images: [
       {
-        url: "/images/grok-prompt-engineering-masterclass-2026.jpg",
+        url: "/images/sample-cinematic-explorer.jpg",
         width: 1200,
         height: 630,
-        alt: "Best Grok Image Prompts",
+        alt: "Dynamic artistic image example created with Grok image prompts",
       },
     ],
   },
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
     description: "Tested Grok image generation prompts for marketing, concepts, products and creative work.",
     images: [
       {
-        url: "/images/grok-prompt-engineering-masterclass-2026.jpg",
-        alt: "Best Grok Image Prompts",
+        url: "/images/sample-cinematic-explorer.jpg",
+        alt: "Dynamic artistic image example created with Grok image prompts",
       },
     ],
   },

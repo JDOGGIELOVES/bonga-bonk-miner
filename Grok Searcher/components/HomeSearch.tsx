@@ -9,7 +9,7 @@ import { categories } from '@/lib/categories';
 const featured = [
   { title: "50 Best Grok Prompts", href: "/best-grok-prompts", desc: "Copy-paste ready grok prompts for productivity, coding, creativity and everyday tasks. Battle-tested 2026 collection.", img: "/images/grok-50-best-prompts.jpg" },
   { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use. No sign-up required.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
-  { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested grok image prompts + tips for high-quality generation. Marketing visuals, concepts and creative control.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
+  { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested grok image prompts + tips for high-quality generation. Marketing visuals, concepts and creative control.", img: "/images/sample-cinematic-explorer.jpg", alt: "Dynamic artistic image example from Grok prompts" },
   { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Honest 2026 grok vs chatgpt vs claude comparison: real-time search, coding, reasoning, pricing and best use cases.", img: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" },
   { title: "How to Search with Grok", href: "/grok-search", desc: "Unlock grok real-time X search for research, trends, SEO keyword ideas and traffic insights. Complete with copy-paste prompts.", img: "/images/grok-search-research-guide-2026.jpg" },
   { title: "Grok for Business 2026", href: "/grok-for/business", desc: "Practical grok business prompts 2026 for meetings, strategy, research, content and sales. Move faster with real-time X insights.", img: "/images/grok-for-business-2026.jpg" },
@@ -97,7 +97,7 @@ export default function HomeSearch() {
                 <div className="relative w-full h-[210px] bg-gray-50">
                   <Image 
                     src={item.img} 
-                    alt={item.title} 
+                    alt={item.alt || item.title} 
                     fill 
                     className="object-contain"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
