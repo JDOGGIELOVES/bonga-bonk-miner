@@ -7,6 +7,7 @@ import CategoryCard from '@/components/CategoryCard';
 import { categories } from '@/lib/categories';
 
 const featured = [
+  { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use. No sign-up required.", img: "/images/grok-50-best-prompts.jpg" },
   { title: "50 Best Grok Prompts", href: "/best-grok-prompts", desc: "Copy-paste ready grok prompts for productivity, coding, creativity and everyday tasks. Battle-tested 2026 collection.", img: "/images/grok-50-best-prompts.jpg" },
   { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested grok image prompts + tips for high-quality generation. Marketing visuals, concepts and creative control.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
   { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Honest 2026 grok vs chatgpt vs claude comparison: real-time search, coding, reasoning, pricing and best use cases.", img: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" },
@@ -16,7 +17,6 @@ const featured = [
   { title: "Ultimate Meme Machine", href: "/grok-for/ultimate-meme-machine", desc: "Generate viral memes, perfect captions, new formats, and unhinged humor. Grok as your personal meme factory.", img: "/images/grok-meme-unhinged.jpg" },
   { title: "Savage Roasts", href: "/grok-for/savage-roasts", desc: "Craft clever, brutal, and hilarious roasts and comebacks with Grok's signature wit. Perfect for group chats and epic clapbacks.", img: "/images/grok-meme-roast-mad.jpg" },
   { title: "Story Mode Activated", href: "/grok-for/story-mode-activated", desc: "Immersive storytelling, wild narratives, choose-your-own chaos, genre-bending adventures and plot twists.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
-  { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use.", img: "/images/grok-50-best-prompts.jpg" },
 ];
 
 export default function HomeSearch() {
@@ -61,6 +61,23 @@ export default function HomeSearch() {
           </div>
           <p className="mt-2 text-xs text-gray-500">Type to filter cards below in real time. Try “business”, “image”, or “research”</p>
         </div>
+      </div>
+
+      {/* Free Grok Tools Banner */}
+      <div className="max-w-6xl mx-auto px-6 pb-8">
+        <Link 
+          href="/free-grok-tools" 
+          className="block bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 md:p-5 hover:border-blue-300 transition group"
+        >
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+            <div className="text-center md:text-left">
+              <span className="inline-block bg-blue-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full mb-2">NEW HUB</span>
+              <span className="text-lg font-semibold text-gray-900 group-hover:text-blue-700">Free Grok Tools — All the best resources in one place</span>
+              <p className="text-sm text-gray-600 mt-0.5">Prompts • Image Generators • Meme Makers • Story Tools • More. 100% free.</p>
+            </div>
+            <span className="text-sm font-medium text-blue-600 group-hover:underline whitespace-nowrap">Explore Free Tools →</span>
+          </div>
+        </Link>
       </div>
 
       {/* Featured */}

@@ -88,8 +88,31 @@ export default function FreeGrokTools() {
           search tools, meme makers and creative resources — no sign-up required.
         </p>
         <p className="text-sm text-gray-500">
-          Everything here is free to use. Updated for 2026.
+          Everything here is free to use. Updated for 2026. No limits, no credit cards.
         </p>
+      </div>
+
+      {/* Why Free Grok Tools */}
+      <div className="mb-16 bg-white border rounded-3xl p-8">
+        <h2 className="text-2xl font-semibold mb-4">Why Free Grok Tools Are a Game-Changer</h2>
+        <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-700">
+          <div>
+            <strong className="block mb-1">No paywalls, ever.</strong>
+            Every prompt, generator, and guide on this site is 100% free to copy and use with Grok.
+          </div>
+          <div>
+            <strong className="block mb-1">Battle-tested for 2026.</strong>
+            These tools leverage Grok’s real-time X data, humor, and reasoning better than generic AI tools.
+          </div>
+          <div>
+            <strong className="block mb-1">Instant results.</strong>
+            No apps to install. Just paste into Grok and get professional-grade output in seconds.
+          </div>
+          <div>
+            <strong className="block mb-1">Works with free Grok accounts.</strong>
+            You don’t need Grok Premium or xAI API keys for most of these.
+          </div>
+        </div>
       </div>
 
       {/* Tools by Category */}
@@ -114,6 +137,38 @@ export default function FreeGrokTools() {
           </div>
         );
       })}
+
+      {/* How to Get the Most Out of Free Grok Tools */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-semibold mb-6">How to Get the Most Out of These Tools</h2>
+        <div className="prose max-w-none text-gray-700">
+          <ol className="list-decimal pl-6 space-y-3">
+            <li><strong>Replace brackets</strong> — Most prompts use [like this]. Swap in your real details for best results.</li>
+            <li><strong>Iterate</strong> — After Grok answers, reply with “Make this more [specific / funny / detailed]”.</li>
+            <li><strong>Combine tools</strong> — Use the Search tool to research, then feed results into a Prompt or Story tool.</li>
+            <li><strong>Save your favorites</strong> — Keep a note with the 5-10 tools you use most often.</li>
+            <li><strong>Share the love</strong> — These work great in group chats, client work, or content creation.</li>
+          </ol>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="mb-16">
+        <h2 className="text-2xl font-semibold mb-6">Frequently Asked Questions</h2>
+        <div className="space-y-4">
+          {[
+            ["Are these tools really free?", "Yes. Every single prompt and guide is free to use with any Grok account (free tier works for most)."],
+            ["Do I need Grok Premium?", "No. These are optimized for the free version of Grok, though Premium gives you more usage."],
+            ["Can I use these for commercial work?", "Yes. The outputs are yours to use however you like."],
+            ["How often are these updated?", "New tools and improved prompts are added regularly. Check the date on each page."],
+          ].map(([q, a], i) => (
+            <div key={i} className="bg-white border rounded-2xl p-5">
+              <div className="font-medium mb-1">{q}</div>
+              <div className="text-sm text-gray-600">{a}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* More Resources */}
       <div className="bg-white border rounded-3xl p-8 text-center">
