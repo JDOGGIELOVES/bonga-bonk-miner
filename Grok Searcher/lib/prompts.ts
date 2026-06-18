@@ -924,6 +924,50 @@ export const categoryContent: Record<string, CategoryContent> = {
       }
     ]
   },
+  websites: {
+    intro: "Grok is a powerful co-pilot for designing, building, and launching modern websites and web applications. Use these prompts for architecture, frontend code, UI/UX, SEO, performance, and deployment.",
+    useCases: [
+      { title: "Planning and information architecture", description: "Define site goals, user journeys, sitemap, and tech stack decisions before writing any code." },
+      { title: "Frontend development", description: "Generate clean HTML/CSS/JS, Tailwind, React, or Next.js components and pages that are responsive and accessible." },
+      { title: "Backend and data integration", description: "Build APIs, connect databases, add authentication, and handle forms and data fetching." },
+      { title: "SEO, performance, and deployment", description: "Optimize for search engines, Core Web Vitals, and deploy to Vercel, Netlify, or similar platforms." }
+    ],
+    sections: [
+      {
+        title: "Planning & Architecture",
+        prompts: [
+          { text: "Help me plan a [type of website, e.g. SaaS landing page / portfolio / e-commerce] for [target audience]. Suggest page structure, tech stack, and key features.", guidance: "This prompt helps define scope and make smart tech decisions early. Perfect starting point for any website project." },
+          { text: "Create a detailed sitemap and user flow for [website type]. Include navigation structure and main conversion paths.", guidance: "Use this to visualize the entire site before coding. Great for client projects or personal sites." }
+        ]
+      },
+      {
+        title: "Frontend & UI Development",
+        prompts: [
+          { text: "Build a responsive [component or page, e.g. hero section / pricing table / dashboard layout] using HTML, Tailwind CSS, and [React/Next.js if needed]. Make it mobile-first and accessible.", guidance: "Core frontend prompt. Specify exact design details or reference a style guide for better results." },
+          { text: "Convert this design description into clean, production-ready code: [paste description or Figma-like spec]. Use semantic HTML and modern CSS.", guidance: "Excellent for turning rough ideas into real code quickly." },
+          { text: "Create a reusable [component type] in React/Next.js with TypeScript, proper props, and Tailwind styling. Include example usage.", guidance: "Build your component library faster with consistent, typed components." }
+        ]
+      },
+      {
+        title: "Backend, Data & Integrations",
+        prompts: [
+          { text: "Design a simple API endpoint for [feature, e.g. contact form / user authentication / fetching blog posts]. Use [Next.js API routes / Node / whatever stack].", guidance: "Good for backend logic without over-engineering." },
+          { text: "Add form handling with validation to this [page/component]. Support [email / database] submission and show success/error states.", guidance: "Critical for real websites. Include client and server validation." },
+          { text: "Connect this frontend to [data source, e.g. Supabase / Airtable / custom API]. Include fetching, loading states, and error handling.", guidance: "Practical integration prompt for real-world data." }
+        ]
+      },
+      {
+        title: "SEO, Performance & Deployment",
+        prompts: [
+          { text: "Optimize this website for SEO and Core Web Vitals. Suggest improvements for [specific page or overall site].", guidance: "Helps rank better and load faster. Ask for Lighthouse audit tips too." },
+          { text: "Write meta tags, Open Graph, and structured data for [page type]. Include title, description, and social sharing best practices.", guidance: "Essential for visibility. Especially useful for new sites." },
+          { text: "Create a deployment checklist and configuration for deploying this [Next.js / static site] to Vercel. Include environment variables and CI tips.", guidance: "Get from code to live quickly and reliably." }
+        ]
+      }
+    ],
+    promptsGuidance: "Be specific about your tech stack (Next.js + Tailwind, plain HTML, etc.) and target audience for the best results. Paste code snippets for refactoring.",
+    useCasesIntro: "These workflows cover the full website building process from idea to live site."
+  },
   "zero-click-threats": {
     intro: "Zero-click threats can compromise your device with zero interaction. Use these Grok prompts to understand risks, harden your setup, detect issues early, and stay safe online.",
     useCases: [

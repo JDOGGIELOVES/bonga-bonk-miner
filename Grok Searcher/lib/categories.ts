@@ -82,6 +82,7 @@ export const categories: Category[] = [
   { slug: 'veterinarians', title: 'Grok for Veterinarians', description: 'Animal health diagnostics, treatment plans, client communication, and practice management.', image: '/images/grok-for-healthcare-2026.jpg' },
   { slug: 'videography', title: 'Grok for Videography', description: 'Video production, editing techniques, storytelling, and client projects.', image: '/images/grok-for-video-creators-2026.jpg' },
   { slug: 'web-design', title: 'Grok for Web Design', description: 'UI/UX for web, responsive design, SEO integration, and client briefs.', image: '/images/grok-for-product-managers-2026.jpg' },
+  { slug: 'websites', title: 'Grok for Websites', description: 'Plan, design, code, and launch full websites and web apps. Prompts for architecture, frontend, backend, SEO, and deployment.', image: '/images/grok-prompt-engineering-masterclass-2026.jpg' },
   { slug: 'writing-coaches', title: 'Grok for Writing Coaches', description: 'Feedback on writing, curriculum development, client workshops, and publishing advice.', image: '/images/grok-50-best-prompts.jpg' },
   { slug: 'x-strategy', title: 'Grok for X Strategy', description: 'Platform-specific content, engagement tactics, analytics, and growth on X.', image: '/images/grok-search-research-guide-2026.jpg' },
   { slug: 'x-analytics', title: 'Grok for X Analytics', description: 'Data analysis on X, trend monitoring, performance metrics, and reporting.', image: '/images/grok-for-data-analysts-2026.jpg' },
