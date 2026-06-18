@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import JsonLd from '@/components/JsonLd';
+import PromptCard from '@/components/PromptCard';
 
 export const metadata: Metadata = {
   title: "Free Grok Tools 2026 | Best Free Prompts, Generators & Guides",
@@ -77,6 +78,59 @@ const freeTools = [
 
 const categories = Array.from(new Set(freeTools.map(t => t.category)));
 
+const top10FreePrompts = [
+  {
+    title: "Explain It Simply",
+    text: "Explain [topic] like I'm a smart 15-year-old. Give 3 real-world examples and one common mistake people make.",
+    why: "Perfect for breaking down complex ideas quickly and clearly."
+  },
+  {
+    title: "Step-by-Step Problem Solver",
+    text: "Break down [complex problem] into the smallest possible logical steps, then solve it step by step. Show your reasoning.",
+    why: "Forces structured thinking and dramatically reduces errors on hard problems."
+  },
+  {
+    title: "Expert Review Mode",
+    text: "Act as an expert [profession]. Review this [thing] and tell me what's good, what's weak, and give specific improvements.",
+    why: "Get professional-level feedback on code, writing, plans, or any deliverable."
+  },
+  {
+    title: "Decision Comparison",
+    text: "Compare the pros and cons of [option A] vs [option B] for someone who [specific situation]. Give a clear recommendation.",
+    why: "Helps you make better decisions by weighing trade-offs with your real constraints."
+  },
+  {
+    title: "Meeting Action Plan",
+    text: "Turn this meeting note into a clear action plan with owners, deadlines and next steps.",
+    why: "Never lose track of decisions again. Turns vague discussions into trackable tasks."
+  },
+  {
+    title: "30-Day Goal Plan",
+    text: "Create a 30-day plan to achieve [goal]. Include daily/weekly habits and milestones.",
+    why: "Turns big goals into realistic daily systems you can actually follow."
+  },
+  {
+    title: "Code Review Assistant",
+    text: "Review this code for bugs, performance issues and readability. Suggest concrete refactors.",
+    why: "Catch issues early and get practical improvement suggestions instead of just criticism."
+  },
+  {
+    title: "Concept Explainer",
+    text: "Explain how [concept] works in [language/framework] with a minimal working example.",
+    why: "Learn or teach new tech fast with real, runnable code instead of abstract theory."
+  },
+  {
+    title: "Idea Brainstormer",
+    text: "Brainstorm 10 fresh, actionable ideas for [topic or goal] that most people haven't thought of.",
+    why: "Great for content, products, strategies, or solving creative blocks."
+  },
+  {
+    title: "Clear Communicator",
+    text: "Rewrite this [email / message / summary] to be much clearer, more professional, and concise while keeping the original meaning.",
+    why: "Instantly improve your writing for emails, posts, or reports."
+  }
+];
+
 export default function FreeGrokTools() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -113,6 +167,28 @@ export default function FreeGrokTools() {
             You don’t need Grok Premium or xAI API keys for most of these.
           </div>
         </div>
+      </div>
+
+      {/* Top 10 Free Grok Prompts */}
+      <div className="mb-16">
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold">Top 10 Free Grok Prompts</h2>
+            <p className="text-gray-600">Copy-paste these battle-tested prompts right now. These are the ones our users come back to the most.</p>
+          </div>
+          <Link href="/best-grok-prompts" className="text-sm text-blue-600 hover:underline">See all 50 →</Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {top10FreePrompts.map((p, i) => (
+            <div key={i} className="bg-white p-5 rounded-2xl border">
+              <div className="font-semibold mb-1 text-sm uppercase tracking-wide text-blue-600">{p.title}</div>
+              <p className="font-mono text-sm mb-3 text-gray-800 leading-relaxed border-l-2 border-gray-200 pl-3">{p.text}</p>
+              <p className="text-xs text-gray-600">{p.why}</p>
+              <div className="mt-3 text-[10px] text-gray-400">Select text above and copy • Paste directly into Grok</div>
+            </div>
+          ))}
+        </div>
+        <p className="mt-4 text-xs text-center text-gray-500">Pro tip: Replace the [brackets] with your actual details for much better results.</p>
       </div>
 
       {/* Tools by Category */}
