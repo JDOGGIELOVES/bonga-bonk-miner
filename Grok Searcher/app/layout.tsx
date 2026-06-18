@@ -12,22 +12,40 @@ export const metadata: Metadata = {
   },
   description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI. Best prompts for business, marketing, engineering, research and 50+ categories.",
   icons: {
-    icon: "/images/grok-50-best-prompts.jpg",
+    icon: [
+      { url: "/images/grok-50-best-prompts.jpg", sizes: "any" },
+    ],
+    shortcut: "/images/grok-50-best-prompts.jpg",
+    apple: "/images/grok-50-best-prompts.jpg",
   },
   openGraph: {
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     description: "Free copy-paste Grok prompts, guides and comparisons for every use case by xAI.",
-    images: [{ url: "/images/grok-50-best-prompts.jpg", alt: "Grok Searcher - Best Grok Prompts" }],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+      },
+    ],
     url: "https://groksearcher.com",
     siteName: "Grok Searcher",
     type: "website",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     description: "Free copy-paste Grok prompts, guides and comparisons for every use case by xAI.",
-    images: ["/images/grok-50-best-prompts.jpg"],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+      },
+    ],
     creator: "@groksearcher",
+    site: "@groksearcher",
   },
   alternates: {
     canonical: "https://groksearcher.com",

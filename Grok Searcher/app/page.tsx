@@ -7,13 +7,25 @@ export const metadata: Metadata = {
   title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
   description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI. Explore 50+ categories with practical, battle-tested prompts.",
   openGraph: {
-    images: [{ url: "/images/grok-50-best-prompts.jpg" }],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI.",
-    images: ["/images/grok-50-best-prompts.jpg"],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+      },
+    ],
   },
 };
 

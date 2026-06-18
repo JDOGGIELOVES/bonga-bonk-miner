@@ -22,13 +22,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: `${post.title} | Grok Searcher`,
       description: post.description,
-      images: [{ url: "/images/grok-search-research-guide-2026.jpg" }],
+      images: [
+        {
+          url: "/images/grok-search-research-guide-2026.jpg",
+          width: 1200,
+          height: 630,
+          alt: post.title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: post.title,
       description: post.description,
-      images: ["/images/grok-search-research-guide-2026.jpg"],
+      images: [
+        {
+          url: "/images/grok-search-research-guide-2026.jpg",
+          alt: post.title,
+        },
+      ],
     },
   };
 }

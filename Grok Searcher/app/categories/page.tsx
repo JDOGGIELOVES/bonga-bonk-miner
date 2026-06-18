@@ -9,13 +9,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Browse Grok Categories | Grok Searcher",
     description: "Explore 80+ specialized Grok prompt categories for every role and task.",
-    images: [{ url: "/images/grok-50-best-prompts.jpg" }],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Browse Grok Categories",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Browse Grok Categories | Grok Searcher",
     description: "Explore 80+ specialized Grok prompt categories for every role and task.",
-    images: ["/images/grok-50-best-prompts.jpg"],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        alt: "Browse Grok Categories",
+      },
+    ],
   },
 };
 

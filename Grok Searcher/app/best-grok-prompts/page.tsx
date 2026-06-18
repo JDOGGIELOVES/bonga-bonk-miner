@@ -9,13 +9,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "50 Best Grok Prompts (Copy-Paste) | Grok Searcher",
     description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined.",
-    images: [{ url: "/images/grok-50-best-prompts.jpg", alt: "50 Best Grok Prompts" }],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "50 Best Grok Prompts",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "50 Best Grok Prompts (Copy-Paste) | Grok Searcher",
     description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks.",
-    images: ["/images/grok-50-best-prompts.jpg"],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        alt: "50 Best Grok Prompts",
+      },
+    ],
   },
 };
 

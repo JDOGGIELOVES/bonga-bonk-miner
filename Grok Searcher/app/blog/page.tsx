@@ -8,13 +8,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Blog & Guides | Grok Searcher",
     description: "In-depth articles and guides about using Grok effectively for research, prompting, and workflows.",
-    images: [{ url: "/images/grok-search-research-guide-2026.jpg" }],
+    images: [
+      {
+        url: "/images/grok-search-research-guide-2026.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Blog & Guides",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Blog & Guides | Grok Searcher",
     description: "In-depth articles and guides about using Grok effectively for research, prompting, and workflows.",
-    images: ["/images/grok-search-research-guide-2026.jpg"],
+    images: [
+      {
+        url: "/images/grok-search-research-guide-2026.jpg",
+        alt: "Blog & Guides",
+      },
+    ],
   },
 };
 

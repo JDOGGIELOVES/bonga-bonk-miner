@@ -7,13 +7,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Best Grok Memes & 'I'm Tired Boss' Series | Grok Searcher",
     description: "Funny Grok memes and the viral 'I'm Tired Boss' series. Copy and share the best ones.",
-    images: [{ url: "/images/grok-meme-depressed-robot.jpg" }],
+    images: [
+      {
+        url: "/images/grok-meme-depressed-robot.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Best Grok Memes",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Best Grok Memes & 'I'm Tired Boss' Series | Grok Searcher",
     description: "Funny Grok memes and the viral 'I'm Tired Boss' series.",
-    images: ["/images/grok-meme-depressed-robot.jpg"],
+    images: [
+      {
+        url: "/images/grok-meme-depressed-robot.jpg",
+        alt: "Best Grok Memes",
+      },
+    ],
   },
 };
 

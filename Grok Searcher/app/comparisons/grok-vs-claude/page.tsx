@@ -7,13 +7,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Grok vs Claude 2026 | Grok Searcher",
     description: "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality.",
-    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg", alt: "Grok vs Claude" }],
+    images: [
+      {
+        url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Grok vs Claude",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok vs Claude 2026 | Grok Searcher",
     description: "Real-time X insights vs long-form reasoning and writing quality.",
-    images: ["/images/grok-vs-chatgpt-vs-claude-2026.jpg"],
+    images: [
+      {
+        url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        alt: "Grok vs Claude",
+      },
+    ],
   },
 };
 

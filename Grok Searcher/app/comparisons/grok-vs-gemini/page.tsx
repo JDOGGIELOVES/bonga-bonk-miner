@@ -7,13 +7,25 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Grok vs Gemini 2026 | Grok Searcher",
     description: "Grok vs Google Gemini comparison focusing on real-time capabilities and research use cases.",
-    images: [{ url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg", alt: "Grok vs Gemini" }],
+    images: [
+      {
+        url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Grok vs Gemini",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok vs Gemini 2026 | Grok Searcher",
     description: "Real-time X access vs Google's model for research and current events.",
-    images: ["/images/grok-vs-chatgpt-vs-claude-2026.jpg"],
+    images: [
+      {
+        url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        alt: "Grok vs Gemini",
+      },
+    ],
   },
 };
 
