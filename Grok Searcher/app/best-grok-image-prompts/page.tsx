@@ -5,10 +5,10 @@ import { imagePrompts } from '@/lib/prompts';
 
 export const metadata: Metadata = {
   title: "Best Grok Image Prompts 2026 (Copy-Paste)",
-  description: "Tested Grok image generation prompts for marketing visuals, product shots, concepts and creative work. 10+ ready-to-use prompts with guidance and example styles.",
+  description: "Tested Grok image generation prompts for marketing visuals, product shots, concepts and creative work. 30+ ready-to-use prompts with guidance and example styles.",
   openGraph: {
     title: "Best Grok Image Prompts 2026 | Grok Searcher",
-    description: "Tested Grok image generation prompts for marketing, concepts, products and creative work. 10+ copy-paste ready prompts.",
+    description: "Tested Grok image generation prompts for marketing, concepts, products and creative work. 30+ copy-paste ready prompts.",
     images: [
       {
         url: "/images/sample-cinematic-explorer.jpg",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Best Grok Image Prompts 2026 | Grok Searcher",
-    description: "Tested Grok image generation prompts for marketing, concepts, products and creative work. 10+ copy-paste ready prompts.",
+    description: "Tested Grok image generation prompts for marketing, concepts, products and creative work. 30+ copy-paste ready prompts.",
     images: [
       {
         url: "/images/sample-cinematic-explorer.jpg",
@@ -35,7 +35,7 @@ export default function ImagePrompts() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <h1 className="text-5xl font-bold mb-4">Best Grok Image Prompts</h1>
-      <p className="text-xl text-gray-600 mb-8">High-quality, copy-paste prompts for Grok&apos;s image generation.</p>
+      <p className="text-xl text-gray-600 mb-8">30+ high-quality, copy-paste prompts for Grok&apos;s image generation, with guidance and visual examples.</p>
 
       <div className="grid gap-4 md:grid-cols-2">
         {imagePrompts.map((p, i) => (

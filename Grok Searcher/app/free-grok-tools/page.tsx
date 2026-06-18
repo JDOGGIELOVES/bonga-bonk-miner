@@ -29,7 +29,7 @@ const freeTools = [
   {
     title: "Best Grok Image Prompts",
     href: "/best-grok-image-prompts",
-    desc: "High-quality image generation prompts for marketing visuals, concepts, products and creative work.",
+    desc: "30+ high-quality image generation prompts for marketing visuals, concepts, products and creative work, with examples.",
     category: "Creative Tools",
   },
   {
