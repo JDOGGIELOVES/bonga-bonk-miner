@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Browse Grok Categories",
       },
     ],
-    url: "https://groksearcher.com/categories",
+    url: "https://www.groksearcher.com/categories",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -54,11 +54,11 @@ export default function CategoriesPage() {
             "@type": "WebPage",
             "name": "Browse Grok Categories",
             "description": "Explore 80+ specialized Grok prompt categories for every role and task.",
-            "url": "https://groksearcher.com/categories",
+            "url": "https://www.groksearcher.com/categories",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           }
         ]

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           alt: `${cat.title} - Grok Prompts`,
         },
       ],
-      url: `https://groksearcher.com/grok-for/${params.slug}`,
+      url: `https://www.groksearcher.com/grok-for/${params.slug}`,
       siteName: "Grok Searcher",
       locale: "en_US",
       type: "article",
@@ -153,11 +153,11 @@ export default function GrokForCategory({ params }: Props) {
             "@type": "WebPage",
             "name": cat.title,
             "description": cat.description,
-            "url": `https://groksearcher.com/grok-for/${params.slug}`,
+            "url": `https://www.groksearcher.com/grok-for/${params.slug}`,
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
@@ -165,15 +165,15 @@ export default function GrokForCategory({ params }: Props) {
             "headline": cat.title,
             "description": cat.description,
             "author": { "@type": "Organization", "name": "Grok Searcher" },
-            "publisher": { "@type": "Organization", "name": "Grok Searcher", "url": "https://groksearcher.com" },
-            "url": `https://groksearcher.com/grok-for/${params.slug}`
+            "publisher": { "@type": "Organization", "name": "Grok Searcher", "url": "https://www.groksearcher.com" },
+            "url": `https://www.groksearcher.com/grok-for/${params.slug}`
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://groksearcher.com/categories" },
-              { "@type": "ListItem", "position": 3, "name": cat.title, "item": `https://groksearcher.com/grok-for/${params.slug}` }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://www.groksearcher.com/categories" },
+              { "@type": "ListItem", "position": 3, "name": cat.title, "item": `https://www.groksearcher.com/grok-for/${params.slug}` }
             ]
           },
           ...(content.faqs && content.faqs.length > 0 ? [{

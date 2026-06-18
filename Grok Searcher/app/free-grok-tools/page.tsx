@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Free Grok Tools",
       },
     ],
-    url: "https://groksearcher.com/free-grok-tools",
+    url: "https://www.groksearcher.com/free-grok-tools",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -351,11 +351,11 @@ export default function FreeGrokTools() {
             "@type": "WebPage",
             "name": "Free Grok Tools 2026",
             "description": "The best free Grok tools: prompts, image generators, search tools, meme makers and creative resources.",
-            "url": "https://groksearcher.com/free-grok-tools",
+            "url": "https://www.groksearcher.com/free-grok-tools",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
@@ -366,7 +366,7 @@ export default function FreeGrokTools() {
               "item": {
                 "@type": "WebPage",
                 "name": tool.title,
-                "url": `https://groksearcher.com${tool.href}`
+                "url": `https://www.groksearcher.com${tool.href}`
               }
             }))
           }

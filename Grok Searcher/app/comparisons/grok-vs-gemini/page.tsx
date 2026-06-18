@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         alt: "Grok vs Gemini",
       },
     ],
-    url: "https://groksearcher.com/comparisons/grok-vs-gemini",
+    url: "https://www.groksearcher.com/comparisons/grok-vs-gemini",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "article",
@@ -125,21 +125,21 @@ export default function GrokVsGemini() {
             "@type": "WebPage",
             "name": "Grok vs Gemini 2026",
             "description": "Grok vs Google Gemini comparison: real-time X access and research capabilities vs Google's latest model features in 2026.",
-            "url": "https://groksearcher.com/comparisons/grok-vs-gemini"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-gemini"
           },
           {
             "@type": "Article",
             "headline": "Grok vs Gemini 2026",
             "description": "Grok's native X access vs Gemini's search and multimodal strengths.",
             "author": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": "https://groksearcher.com/comparisons/grok-vs-gemini"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-gemini"
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" },
-              { "@type": "ListItem", "position": 3, "name": "Grok vs Gemini", "item": "https://groksearcher.com/comparisons/grok-vs-gemini" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://www.groksearcher.com/comparisons" },
+              { "@type": "ListItem", "position": 3, "name": "Grok vs Gemini", "item": "https://www.groksearcher.com/comparisons/grok-vs-gemini" }
             ]
           }
         ]

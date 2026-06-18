@@ -3,7 +3,7 @@ import { categories } from '@/lib/categories';
 import { blogPosts } from '@/lib/blog';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://groksearcher.com';
+  const base = 'https://www.groksearcher.com';
 
   const staticRoutes = [
     '',

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Blog & Guides",
       },
     ],
-    url: "https://groksearcher.com/blog",
+    url: "https://www.groksearcher.com/blog",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -68,11 +68,11 @@ export default function BlogIndex() {
             "@type": "WebPage",
             "name": "Blog & Guides",
             "description": "In-depth articles and guides about using Grok effectively for research, prompting, real-time search, and AI workflows.",
-            "url": "https://groksearcher.com/blog",
+            "url": "https://www.groksearcher.com/blog",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           }
         ]

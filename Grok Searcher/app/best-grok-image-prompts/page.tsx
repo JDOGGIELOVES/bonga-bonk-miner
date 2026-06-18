@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Dynamic artistic image example created with Grok image prompts",
       },
     ],
-    url: "https://groksearcher.com/best-grok-image-prompts",
+    url: "https://www.groksearcher.com/best-grok-image-prompts",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -83,18 +83,18 @@ export default function ImagePrompts() {
             "@type": "WebPage",
             "name": "Best Grok Image Prompts 2026",
             "description": "Tested Grok image generation prompts for marketing, concepts, products and creative work.",
-            "url": "https://groksearcher.com/best-grok-image-prompts",
+            "url": "https://www.groksearcher.com/best-grok-image-prompts",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Best Grok Image Prompts", "item": "https://groksearcher.com/best-grok-image-prompts" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Best Grok Image Prompts", "item": "https://www.groksearcher.com/best-grok-image-prompts" }
             ]
           }
         ]

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
         alt: "Best Grok Memes",
       },
     ],
-    url: "https://groksearcher.com/memes",
+    url: "https://www.groksearcher.com/memes",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -219,18 +219,18 @@ export default function Memes() {
             "@type": "WebPage",
             "name": "Best Grok Memes & 'I'm Tired Boss' Series",
             "description": "Funny Grok memes and the viral 'I'm Tired Boss' series. Plus prompts to generate your own.",
-            "url": "https://groksearcher.com/memes",
+            "url": "https://www.groksearcher.com/memes",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Grok Memes", "item": "https://groksearcher.com/memes" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Grok Memes", "item": "https://www.groksearcher.com/memes" }
             ]
           }
         ]

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Upload Grok Prompts",
       },
     ],
-    url: "https://groksearcher.com/upload-prompt",
+    url: "https://www.groksearcher.com/upload-prompt",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -62,11 +62,11 @@ export default function UploadPromptPage() {
             "@type": "WebPage",
             "name": "Upload Your Favorite Grok Prompt",
             "description": "Share your best Grok prompts with the community.",
-            "url": "https://groksearcher.com/upload-prompt",
+            "url": "https://www.groksearcher.com/upload-prompt",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           }
         ]

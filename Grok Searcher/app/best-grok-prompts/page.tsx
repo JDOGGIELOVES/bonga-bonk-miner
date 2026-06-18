@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "50 Best Grok Prompts",
       },
     ],
-    url: "https://groksearcher.com/best-grok-prompts",
+    url: "https://www.groksearcher.com/best-grok-prompts",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -65,11 +65,11 @@ export default function BestGrokPrompts() {
             "@type": "WebPage",
             "name": "50 Best Grok Prompts (Copy-Paste)",
             "description": "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks.",
-            "url": "https://groksearcher.com/best-grok-prompts",
+            "url": "https://www.groksearcher.com/best-grok-prompts",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
@@ -78,13 +78,13 @@ export default function BestGrokPrompts() {
             "description": "Battle-tested collection of copy-paste Grok prompts.",
             "author": { "@type": "Organization", "name": "Grok Searcher" },
             "publisher": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": "https://groksearcher.com/best-grok-prompts"
+            "url": "https://www.groksearcher.com/best-grok-prompts"
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "50 Best Grok Prompts", "item": "https://groksearcher.com/best-grok-prompts" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "50 Best Grok Prompts", "item": "https://www.groksearcher.com/best-grok-prompts" }
             ]
           },
           {

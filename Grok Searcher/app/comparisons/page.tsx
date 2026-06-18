@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         alt: "Grok vs ChatGPT vs Claude & More",
       },
     ],
-    url: "https://groksearcher.com/comparisons",
+    url: "https://www.groksearcher.com/comparisons",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -64,18 +64,18 @@ export default function ComparisonsHub() {
             "@type": "WebPage",
             "name": "Grok vs ChatGPT vs Claude & More Comparisons",
             "description": "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
-            "url": "https://groksearcher.com/comparisons",
+            "url": "https://www.groksearcher.com/comparisons",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://www.groksearcher.com/comparisons" }
             ]
           }
         ]

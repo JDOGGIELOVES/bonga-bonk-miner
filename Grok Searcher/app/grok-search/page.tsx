@@ -16,7 +16,7 @@ export const metadata: Metadata = {
         alt: "How to Search with Grok",
       },
     ],
-    url: "https://groksearcher.com/grok-search",
+    url: "https://www.groksearcher.com/grok-search",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -62,11 +62,11 @@ export default function GrokSearchGuide() {
             "@type": "WebPage",
             "name": "How to Search with Grok: Complete 2026 Guide",
             "description": "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights.",
-            "url": "https://groksearcher.com/grok-search",
+            "url": "https://www.groksearcher.com/grok-search",
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
@@ -74,13 +74,13 @@ export default function GrokSearchGuide() {
             "headline": "How to Search with Grok",
             "description": "Unlock Grok's real-time X search power for research, trends, SEO keyword ideas, and traffic insights.",
             "author": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": "https://groksearcher.com/grok-search"
+            "url": "https://www.groksearcher.com/grok-search"
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "How to Search with Grok", "item": "https://groksearcher.com/grok-search" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "How to Search with Grok", "item": "https://www.groksearcher.com/grok-search" }
             ]
           }
         ]

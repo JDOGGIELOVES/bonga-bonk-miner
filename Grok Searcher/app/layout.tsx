@@ -5,7 +5,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://groksearcher.com'),
+  metadataBase: new URL('https://www.groksearcher.com'),
   title: {
     default: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
     template: "%s | Grok Searcher",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
         alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
       },
     ],
-    url: "https://groksearcher.com",
+    url: "https://www.groksearcher.com",
     siteName: "Grok Searcher",
     type: "website",
     locale: "en_US",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     site: "@groksearcher",
   },
   alternates: {
-    canonical: "https://groksearcher.com",
+    canonical: "https://www.groksearcher.com",
   },
 };
 

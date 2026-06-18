@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           alt: post.title,
         },
       ],
-      url: `https://groksearcher.com/blog/${params.slug}`,
+      url: `https://www.groksearcher.com/blog/${params.slug}`,
       siteName: "Grok Searcher",
       locale: "en_US",
       type: "article",
@@ -79,11 +79,11 @@ export default function BlogPost({ params }: Props) {
             "@type": "WebPage",
             "name": post.title,
             "description": post.description,
-            "url": `https://groksearcher.com/blog/${params.slug}`,
+            "url": `https://www.groksearcher.com/blog/${params.slug}`,
             "isPartOf": {
               "@type": "WebSite",
               "name": "Grok Searcher",
-              "url": "https://groksearcher.com"
+              "url": "https://www.groksearcher.com"
             }
           },
           {
@@ -92,14 +92,14 @@ export default function BlogPost({ params }: Props) {
             "description": post.description,
             "author": { "@type": "Organization", "name": "Grok Searcher" },
             "publisher": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": `https://groksearcher.com/blog/${params.slug}`
+            "url": `https://www.groksearcher.com/blog/${params.slug}`
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://groksearcher.com/blog" },
-              { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://groksearcher.com/blog/${params.slug}` }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://www.groksearcher.com/blog" },
+              { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://www.groksearcher.com/blog/${params.slug}` }
             ]
           }
         ]

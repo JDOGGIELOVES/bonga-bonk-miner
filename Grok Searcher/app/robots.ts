@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://groksearcher.com/sitemap.xml',
+    sitemap: 'https://www.groksearcher.com/sitemap.xml',
   };
 }

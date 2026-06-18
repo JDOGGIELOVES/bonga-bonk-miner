@@ -17,7 +17,7 @@ export const metadata: Metadata = {
         alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
       },
     ],
-    url: "https://groksearcher.com",
+    url: "https://www.groksearcher.com",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "website",
@@ -59,18 +59,18 @@ export default function Home() {
           {
             "@type": "WebSite",
             "name": "Grok Searcher",
-            "url": "https://groksearcher.com",
+            "url": "https://www.groksearcher.com",
             "description": "Free copy-paste Grok prompts, guides and comparisons for every use case.",
             "potentialAction": {
               "@type": "SearchAction",
-              "target": "https://groksearcher.com/categories?search={search_term_string}",
+              "target": "https://www.groksearcher.com/categories?search={search_term_string}",
               "query-input": "required name=search_term_string"
             }
           },
           {
             "@type": "Organization",
             "name": "Grok Searcher",
-            "url": "https://groksearcher.com",
+            "url": "https://www.groksearcher.com",
             "sameAs": ["https://x.com/grok"]
           }
         ]

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         alt: "Grok vs Claude",
       },
     ],
-    url: "https://groksearcher.com/comparisons/grok-vs-claude",
+    url: "https://www.groksearcher.com/comparisons/grok-vs-claude",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "article",
@@ -125,21 +125,21 @@ export default function GrokVsClaude() {
             "@type": "WebPage",
             "name": "Grok vs Claude 2026",
             "description": "Grok vs Claude comparison: real-time X insights vs superior long-form reasoning and writing quality.",
-            "url": "https://groksearcher.com/comparisons/grok-vs-claude"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-claude"
           },
           {
             "@type": "Article",
             "headline": "Grok vs Claude 2026",
             "description": "Full comparison of real-time X intelligence vs long-context reasoning and writing quality, with example prompts.",
             "author": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": "https://groksearcher.com/comparisons/grok-vs-claude"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-claude"
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" },
-              { "@type": "ListItem", "position": 3, "name": "Grok vs Claude", "item": "https://groksearcher.com/comparisons/grok-vs-claude" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://www.groksearcher.com/comparisons" },
+              { "@type": "ListItem", "position": 3, "name": "Grok vs Claude", "item": "https://www.groksearcher.com/comparisons/grok-vs-claude" }
             ]
           }
         ]

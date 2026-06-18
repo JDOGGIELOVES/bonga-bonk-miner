@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         alt: "Grok vs ChatGPT vs Claude",
       },
     ],
-    url: "https://groksearcher.com/comparisons/grok-vs-chatgpt",
+    url: "https://www.groksearcher.com/comparisons/grok-vs-chatgpt",
     siteName: "Grok Searcher",
     locale: "en_US",
     type: "article",
@@ -89,21 +89,21 @@ export default function GrokVsChatGPT() {
             "@type": "WebPage",
             "name": "Grok vs ChatGPT vs Claude 2026",
             "description": "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing.",
-            "url": "https://groksearcher.com/comparisons/grok-vs-chatgpt"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-chatgpt"
           },
           {
             "@type": "Article",
             "headline": "Grok vs ChatGPT vs Claude 2026",
             "description": "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
             "author": { "@type": "Organization", "name": "Grok Searcher" },
-            "url": "https://groksearcher.com/comparisons/grok-vs-chatgpt"
+            "url": "https://www.groksearcher.com/comparisons/grok-vs-chatgpt"
           },
           {
             "@type": "BreadcrumbList",
             "itemListElement": [
-              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://groksearcher.com" },
-              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://groksearcher.com/comparisons" },
-              { "@type": "ListItem", "position": 3, "name": "Grok vs ChatGPT vs Claude", "item": "https://groksearcher.com/comparisons/grok-vs-chatgpt" }
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.groksearcher.com" },
+              { "@type": "ListItem", "position": 2, "name": "Comparisons", "item": "https://www.groksearcher.com/comparisons" },
+              { "@type": "ListItem", "position": 3, "name": "Grok vs ChatGPT vs Claude", "item": "https://www.groksearcher.com/comparisons/grok-vs-chatgpt" }
             ]
           }
         ]
