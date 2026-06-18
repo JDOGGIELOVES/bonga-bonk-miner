@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/free-grok-tools', label: 'Free Tools' },
+  { href: '/upload-prompt', label: 'Upload Prompt' },
   { href: '/best-grok-prompts', label: 'Best Prompts' },
   { href: '/best-grok-image-prompts', label: 'Image Prompts' },
   { href: '/comparisons', label: 'Comparisons' },

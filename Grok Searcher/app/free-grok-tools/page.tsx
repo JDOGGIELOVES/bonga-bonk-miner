@@ -259,6 +259,22 @@ export default function FreeGrokTools() {
         </Link>
       </div>
 
+      {/* Contribute / Upload Section */}
+      <div className="mt-16 bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-3xl p-8 text-center">
+        <h3 className="text-2xl font-semibold mb-3">Help Grow the Library</h3>
+        <p className="text-gray-600 mb-6 max-w-lg mx-auto">
+          Have a prompt that works amazingly well with Grok? Upload it and help thousands of others get better results.
+          The best submissions will be featured in our public collection.
+        </p>
+        <Link 
+          href="/upload-prompt" 
+          className="inline-block bg-blue-600 text-white px-8 py-3 rounded-2xl hover:bg-blue-700 transition font-medium"
+        >
+          Upload Your Favorite Prompt →
+        </Link>
+        <p className="mt-4 text-xs text-gray-500">It's free and takes less than a minute.</p>
+      </div>
+
       <JsonLd data={{
         "@context": "https://schema.org",
         "@type": "WebPage",
