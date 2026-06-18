@@ -50,6 +50,9 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.groksearcher.com",
   },
+  verification: {
+    google: 'google2eb975f867d5451b',
+  },
 };
 
 export default function RootLayout({

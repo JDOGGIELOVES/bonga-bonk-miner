@@ -84,6 +84,10 @@ export function middleware(request: NextRequest) {
 
   // Handle old .html links from previous static site (Google indexed)
   if (pathname.endsWith('.html')) {
+    // Allow Google Search Console (and similar) verification files to be served statically from /public
+    if (/^\/google[a-z0-9_-]+\.html$/i.test(pathname)) {
+      return NextResponse.next();
+    }
     let redirectTo = oldToNew[pathname];
 
     if (!redirectTo) {
