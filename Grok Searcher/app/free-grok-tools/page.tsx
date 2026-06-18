@@ -4,18 +4,36 @@ import JsonLd from '@/components/JsonLd';
 import PromptCard from '@/components/PromptCard';
 
 export const metadata: Metadata = {
-  title: "Free Grok Tools 2026 | Best Free Prompts, Generators & Guides",
+  title: "Free Grok Tools 2026",
   description: "The best free Grok tools for 2026. Copy-paste prompts, image generators, search tools, meme makers, story tools, roasts and more. All completely free.",
   openGraph: {
     title: "Free Grok Tools 2026 | Grok Searcher",
     description: "Best free Grok AI tools: prompts, image generators, real-time search, meme tools, storytelling and more. 100% free to use.",
-    images: [{ url: "/images/grok-50-best-prompts.jpg" }],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Free Grok Tools",
+      },
+    ],
+    url: "https://groksearcher.com/free-grok-tools",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Free Grok Tools 2026 | Grok Searcher",
     description: "The best free Grok tools: prompts, generators, search tools, meme makers and creative resources.",
-    images: ["/images/grok-50-best-prompts.jpg"],
+    images: [
+      {
+        url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Free Grok Tools",
+      },
+    ],
   },
 };
 
@@ -328,22 +346,31 @@ export default function FreeGrokTools() {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Free Grok Tools 2026",
-        "description": "The best free Grok tools: prompts, image generators, search tools, meme makers and creative resources.",
-        "url": "https://groksearcher.com/free-grok-tools",
-        "mainEntity": {
-          "@type": "ItemList",
-          "itemListElement": freeTools.map((tool, i) => ({
-            "@type": "ListItem",
-            "position": i + 1,
-            "item": {
-              "@type": "WebPage",
-              "name": tool.title,
-              "url": `https://groksearcher.com${tool.href}`
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Free Grok Tools 2026",
+            "description": "The best free Grok tools: prompts, image generators, search tools, meme makers and creative resources.",
+            "url": "https://groksearcher.com/free-grok-tools",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
             }
-          }))
-        }
+          },
+          {
+            "@type": "ItemList",
+            "itemListElement": freeTools.map((tool, i) => ({
+              "@type": "ListItem",
+              "position": i + 1,
+              "item": {
+                "@type": "WebPage",
+                "name": tool.title,
+                "url": `https://groksearcher.com${tool.href}`
+              }
+            }))
+          }
+        ]
       }} />
     </div>
   );

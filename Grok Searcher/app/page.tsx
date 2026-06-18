@@ -4,9 +4,11 @@ import HomeSearch from '@/components/HomeSearch';
 import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
-  title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+  title: "Best Grok Prompts, Guides & Comparisons",
   description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI. Explore 50+ categories with practical, battle-tested prompts.",
   openGraph: {
+    title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
+    description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI. Explore 50+ categories with practical, battle-tested prompts.",
     images: [
       {
         url: "/images/grok-50-best-prompts.jpg",
@@ -15,14 +17,20 @@ export const metadata: Metadata = {
         alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
       },
     ],
+    url: "https://groksearcher.com",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
-    description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI.",
+    description: "Free copy-paste Grok prompts, in-depth guides, comparisons and tools for Grok by xAI. Explore 50+ categories with practical, battle-tested prompts.",
     images: [
       {
         url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
         alt: "Grok Searcher - Best Grok Prompts, Guides & Comparisons",
       },
     ],

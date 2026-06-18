@@ -16,6 +16,10 @@ export const metadata: Metadata = {
         alt: "How to Search with Grok",
       },
     ],
+    url: "https://groksearcher.com/grok-search",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -24,6 +28,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-search-research-guide-2026.jpg",
+        width: 1200,
+        height: 630,
         alt: "How to Search with Grok",
       },
     ],
@@ -56,7 +62,12 @@ export default function GrokSearchGuide() {
             "@type": "WebPage",
             "name": "How to Search with Grok: Complete 2026 Guide",
             "description": "Master real-time X searches, research prompts, and using Grok for traffic & SEO insights.",
-            "url": "https://groksearcher.com/grok-search"
+            "url": "https://groksearcher.com/grok-search",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "Article",

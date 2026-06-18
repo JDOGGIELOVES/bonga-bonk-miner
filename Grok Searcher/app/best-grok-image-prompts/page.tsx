@@ -17,6 +17,10 @@ export const metadata: Metadata = {
         alt: "Dynamic artistic image example created with Grok image prompts",
       },
     ],
+    url: "https://groksearcher.com/best-grok-image-prompts",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -25,6 +29,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/sample-cinematic-explorer.jpg",
+        width: 1200,
+        height: 630,
         alt: "Dynamic artistic image example created with Grok image prompts",
       },
     ],
@@ -77,7 +83,12 @@ export default function ImagePrompts() {
             "@type": "WebPage",
             "name": "Best Grok Image Prompts 2026",
             "description": "Tested Grok image generation prompts for marketing, concepts, products and creative work.",
-            "url": "https://groksearcher.com/best-grok-image-prompts"
+            "url": "https://groksearcher.com/best-grok-image-prompts",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "BreadcrumbList",

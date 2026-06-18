@@ -17,6 +17,10 @@ export const metadata: Metadata = {
         alt: "50 Best Grok Prompts",
       },
     ],
+    url: "https://groksearcher.com/best-grok-prompts",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -25,6 +29,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
         alt: "50 Best Grok Prompts",
       },
     ],
@@ -59,7 +65,12 @@ export default function BestGrokPrompts() {
             "@type": "WebPage",
             "name": "50 Best Grok Prompts (Copy-Paste)",
             "description": "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks.",
-            "url": "https://groksearcher.com/best-grok-prompts"
+            "url": "https://groksearcher.com/best-grok-prompts",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "Article",

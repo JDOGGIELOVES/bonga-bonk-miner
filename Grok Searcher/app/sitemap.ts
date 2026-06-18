@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { categories } from '@/lib/categories';
+import { blogPosts } from '@/lib/blog';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = 'https://groksearcher.com';
@@ -22,6 +23,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === '' ? 1 : 0.8,
   }));
 
+  const blogRoutes = blogPosts.map((post) => ({
+    url: `${base}/blog/${post.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
+    priority: 0.6,
+  }));
+
   const categoryRoutes = categories.map((cat) => ({
     url: `${base}/grok-for/${cat.slug}`,
     lastModified: new Date(),
@@ -29,5 +37,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...blogRoutes];
 }

@@ -17,33 +17,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const cat = getCategoryBySlug(params.slug);
   if (!cat) return { title: 'Category Not Found' };
 
+  const base = cat.title.replace('Grok for ', '');
   const pageTitle = `${cat.title} Prompts & Guides`;
-  const desc = cat.description || `Expert Grok prompts and guides for ${cat.title.replace('Grok for ', '')}. Copy-paste ready use cases and examples.`;
+  const ogTitle = `${cat.title} | Grok Searcher`;
+  const desc = cat.description || `Expert Grok prompts and guides for ${base}. Copy-paste ready use cases and examples.`;
   const imageUrl = cat.image || '/images/grok-50-best-prompts.jpg';
 
   return {
     title: pageTitle,
     description: desc,
     openGraph: {
-      title: pageTitle,
+      title: ogTitle,
       description: desc,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: cat.title,
+          alt: `${cat.title} - Grok Prompts`,
         },
       ],
+      url: `https://groksearcher.com/grok-for/${params.slug}`,
+      siteName: "Grok Searcher",
+      locale: "en_US",
+      type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: pageTitle,
+      title: ogTitle,
       description: desc,
       images: [
         {
           url: imageUrl,
-          alt: cat.title,
+          width: 1200,
+          height: 630,
+          alt: `${cat.title} - Grok Prompts`,
         },
       ],
     },

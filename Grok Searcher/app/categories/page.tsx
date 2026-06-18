@@ -17,6 +17,10 @@ export const metadata: Metadata = {
         alt: "Browse Grok Categories",
       },
     ],
+    url: "https://groksearcher.com/categories",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -25,6 +29,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-50-best-prompts.jpg",
+        width: 1200,
+        height: 630,
         alt: "Browse Grok Categories",
       },
     ],
@@ -43,10 +49,19 @@ export default function CategoriesPage() {
 
       <JsonLd data={{
         "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Browse Grok Categories",
-        "description": "Explore 80+ specialized Grok prompt categories for every role and task.",
-        "url": "https://groksearcher.com/categories"
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Browse Grok Categories",
+            "description": "Explore 80+ specialized Grok prompt categories for every role and task.",
+            "url": "https://groksearcher.com/categories",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
+          }
+        ]
       }} />
     </div>
   );

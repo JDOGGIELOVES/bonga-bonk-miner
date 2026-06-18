@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { blogPosts } from '@/lib/blog';
+import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Blog & Guides - Grok Tips, Research & Prompting",
@@ -16,6 +17,10 @@ export const metadata: Metadata = {
         alt: "Blog & Guides",
       },
     ],
+    url: "https://groksearcher.com/blog",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -24,6 +29,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-search-research-guide-2026.jpg",
+        width: 1200,
+        height: 630,
         alt: "Blog & Guides",
       },
     ],
@@ -53,6 +60,23 @@ export default function BlogIndex() {
           <p className="text-sm text-gray-600 mt-1">Real-time research, SEO, and traffic tactics using Grok&apos;s X integration.</p>
         </Link>
       </div>
+
+      <JsonLd data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebPage",
+            "name": "Blog & Guides",
+            "description": "In-depth articles and guides about using Grok effectively for research, prompting, real-time search, and AI workflows.",
+            "url": "https://groksearcher.com/blog",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
+          }
+        ]
+      }} />
     </div>
   );
 }

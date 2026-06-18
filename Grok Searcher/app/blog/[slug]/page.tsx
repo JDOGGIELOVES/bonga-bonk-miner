@@ -16,11 +16,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = blogPosts.find(p => p.slug === params.slug);
   if (!post) return { title: 'Post Not Found' };
 
+  const ogTitle = `${post.title} | Grok Searcher`;
+
   return {
     title: post.title,
     description: post.description,
     openGraph: {
-      title: `${post.title} | Grok Searcher`,
+      title: ogTitle,
       description: post.description,
       images: [
         {
@@ -30,14 +32,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           alt: post.title,
         },
       ],
+      url: `https://groksearcher.com/blog/${params.slug}`,
+      siteName: "Grok Searcher",
+      locale: "en_US",
+      type: "article",
     },
     twitter: {
       card: "summary_large_image",
-      title: post.title,
+      title: ogTitle,
       description: post.description,
       images: [
         {
           url: "/images/grok-search-research-guide-2026.jpg",
+          width: 1200,
+          height: 630,
           alt: post.title,
         },
       ],
@@ -71,7 +79,12 @@ export default function BlogPost({ params }: Props) {
             "@type": "WebPage",
             "name": post.title,
             "description": post.description,
-            "url": `https://groksearcher.com/blog/${params.slug}`
+            "url": `https://groksearcher.com/blog/${params.slug}`,
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "Article",

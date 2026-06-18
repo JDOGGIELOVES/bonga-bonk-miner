@@ -15,6 +15,10 @@ export const metadata: Metadata = {
         alt: "Grok vs Claude",
       },
     ],
+    url: "https://groksearcher.com/comparisons/grok-vs-claude",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "article",
   },
   twitter: {
     card: "summary_large_image",
@@ -23,6 +27,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        width: 1200,
+        height: 630,
         alt: "Grok vs Claude",
       },
     ],

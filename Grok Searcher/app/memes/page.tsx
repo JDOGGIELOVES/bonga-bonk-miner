@@ -18,6 +18,10 @@ export const metadata: Metadata = {
         alt: "Best Grok Memes",
       },
     ],
+    url: "https://groksearcher.com/memes",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -26,6 +30,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-meme-depressed-robot.jpg",
+        width: 1200,
+        height: 630,
         alt: "Best Grok Memes",
       },
     ],
@@ -66,8 +72,8 @@ export default function Memes() {
     },
     {
       text: '"I asked Grok for a quick joke. Now my entire timeline is a 14-part saga with lore."',
-      img: '/images/grok-meme-essay-loop.jpg',
-      alt: 'Grok turning joke into epic saga meme',
+      img: '/images/grok-meme-unhinged-report.jpg',
+      alt: 'Grok turning a quick joke into a massive saga with lore meme',
     },
     {
       text: '"Grok in 2026: turns your 3-word prompt into 9 viral formats and 2 rival fandoms."',
@@ -185,10 +191,10 @@ export default function Memes() {
           <h3 className="text-xl font-semibold mb-4 text-center">Real Examples Generated with These Prompts</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { img: '/images/grok-meme-unhinged.jpg', caption: 'Unhinged prompt result' },
-              { img: '/images/grok-meme-viral.jpg', caption: 'Viral format explosion' },
-              { img: '/images/grok-meme-roast-mad.jpg', caption: 'Savage roast meme' },
-              { img: '/images/grok-meme-cat-chaos.jpg', caption: 'Chaotic group chat energy' },
+              { img: '/images/grok-meme-3am-x.jpg', caption: 'Unhinged prompt result' },
+              { img: '/images/grok-meme-based-offended.jpg', caption: 'Viral format explosion' },
+              { img: '/images/grok-meme-mars.jpg', caption: 'Savage roast meme' },
+              { img: '/images/grok-meme-training-data.jpg', caption: 'Chaotic group chat energy' },
             ].map((ex, idx) => (
               <div key={idx} className="bg-white rounded-xl border overflow-hidden">
                 <div className="relative w-full h-40 bg-gray-100">
@@ -213,7 +219,12 @@ export default function Memes() {
             "@type": "WebPage",
             "name": "Best Grok Memes & 'I'm Tired Boss' Series",
             "description": "Funny Grok memes and the viral 'I'm Tired Boss' series. Plus prompts to generate your own.",
-            "url": "https://groksearcher.com/memes"
+            "url": "https://groksearcher.com/memes",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "BreadcrumbList",

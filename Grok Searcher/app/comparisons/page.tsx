@@ -16,6 +16,10 @@ export const metadata: Metadata = {
         alt: "Grok vs ChatGPT vs Claude & More",
       },
     ],
+    url: "https://groksearcher.com/comparisons",
+    siteName: "Grok Searcher",
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
     card: "summary_large_image",
@@ -24,6 +28,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
+        width: 1200,
+        height: 630,
         alt: "Grok vs ChatGPT vs Claude & More",
       },
     ],
@@ -58,7 +64,12 @@ export default function ComparisonsHub() {
             "@type": "WebPage",
             "name": "Grok vs ChatGPT vs Claude & More Comparisons",
             "description": "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
-            "url": "https://groksearcher.com/comparisons"
+            "url": "https://groksearcher.com/comparisons",
+            "isPartOf": {
+              "@type": "WebSite",
+              "name": "Grok Searcher",
+              "url": "https://groksearcher.com"
+            }
           },
           {
             "@type": "BreadcrumbList",
