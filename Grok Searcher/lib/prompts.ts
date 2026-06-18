@@ -932,6 +932,146 @@ export const categoryContent: Record<string, CategoryContent> = {
         "a": "Often the signs are subtle. Regular updates, avoiding suspicious messages, and monitoring for unusual behavior are more practical than paid 'anti-zero-click' tools."
       }
     ]
+  },
+  "ultimate-meme-machine": {
+    intro: "Grok is the ultimate meme machine. Turn any situation, trend, or idea into viral, unhinged, or perfectly timed memes and captions.",
+    useCases: [
+      { title: "Viral meme generation", description: "Create fresh meme formats and captions that ride current trends while feeling original and shareable." },
+      { title: "Caption crafting", description: "Write hilarious, relatable, or savage captions for any image or situation that hit different." },
+      { title: "Format invention", description: "Invent new meme templates or twist old classics into something fresh and unexpected." },
+      { title: "Humor escalation", description: "Take a basic joke or scenario and crank it up to unhinged, multi-layer meme territory." }
+    ],
+    sections: [
+      {
+        title: "Meme Creation & Captions",
+        prompts: [
+          { text: "Turn this situation into 5 different meme formats with perfect captions: [describe situation or paste text].", guidance: "Core grok meme prompt. Great for quickly producing multiple options with different vibes and formats." },
+          { text: "Write 8 savage or wholesome captions for this image/concept that would actually perform on X.", guidance: "This prompt for ultimate meme machine helps you nail tone and timing for maximum engagement." },
+          { text: "Create a brand new meme template based on [absurd premise]. Give it a name and 6 example uses.", guidance: "Use this when you want Grok to invent original formats instead of recycling old ones." },
+          { text: "Generate 7 variations of this meme idea, each in a completely different format (e.g. drake, expanding brain, one does not simply).", guidance: "Rapid prototyping for meme lords who want options fast." }
+        ]
+      },
+      {
+        title: "Trend Surfing & Roasts",
+        prompts: [
+          { text: "Roast [person/thing/trend] using only current meme formats and references. Keep it funny not mean.", guidance: "Excellent for savage meme-style roasts that feel fresh." },
+          { text: "Turn this boring fact into the most viral possible meme thread on X. Include hooks and punchlines.", guidance: "Perfect for turning dry topics into meme gold with Grok's real-time awareness." },
+          { text: "Create a full 6-tweet meme thread that turns [boring topic] into the funniest thing on the timeline.", guidance: "Thread mode for maximum virality and engagement." }
+        ]
+      },
+      {
+        title: "Advanced Meme Strategies",
+        prompts: [
+          { text: "Analyze this meme and improve it: [paste meme or describe]. Make it 10x funnier with better structure and timing.", guidance: "Meta prompt for iterating on your own meme game." },
+          { text: "Invent a meme format that combines [two unrelated things] and give 4 killer examples with captions.", guidance: "For when you want original, never-seen-before meme formats." }
+        ]
+      }
+    ],
+    faqs: [
+      { q: "Can Grok actually make memes that go viral?", a: "Grok is great at capturing timing, absurdity, and cultural references. Pair the output with good visuals and post at the right moment for best results." },
+      { q: "How do I make my memes less cringe?", a: "Use specific context, lean into the absurdity, and avoid over-explaining. Grok's prompts above are designed to help with that." }
+    ],
+    promptsGuidance: "Drop these into Grok with your specific situation, image description, or trend. The more ridiculous or timely the input, the better the output.",
+    useCasesIntro: "These are the high-impact ways people use Grok as their personal meme factory for X, group chats, and content."
+  },
+  "savage-roasts": {
+    intro: "Activate Grok's inner savage. Get perfectly timed, clever, and brutal roasts without crossing into actual cruelty.",
+    useCases: [
+      { title: "Comeback generation", description: "Instantly craft witty, layered roasts and clapbacks tailored to any insult or situation." },
+      { title: "Friendly roasts", description: "Create hilarious but affectionate roasts for friends, coworkers, or yourself that land perfectly." },
+      { title: "Public figure roasts", description: "Build clever, reference-heavy roasts of celebrities, politicians, or trends with current context." },
+      { title: "Self-roast therapy", description: "Turn your own flaws or embarrassing moments into funny, self-deprecating material." }
+    ],
+    sections: [
+      {
+        title: "Classic & Savage Roasts",
+        prompts: [
+          { text: "Roast [person or thing] in the style of a stand-up comedian but keep it clever and not mean. Use 5 short punchy lines.", guidance: "This classic savage roast prompt gives you quick, quotable material." },
+          { text: "Write a multi-layered roast for [target] that starts light and gets increasingly unhinged. End with a twist.", guidance: "Use for longer roast sessions or when you want escalating comedy." },
+          { text: "Create 7 savage but affectionate roasts for my friend who [specific trait or habit].", guidance: "Great for group chats and keeping things fun among friends." }
+        ]
+      },
+      {
+        title: "Trend & Situational Roasts",
+        prompts: [
+          { text: "Roast this current trend or news story using only memes and pop culture references: [paste or describe].", guidance: "Leverages Grok's real-time knowledge for timely savage burns." },
+          { text: "Turn my embarrassing story into a roast I can tell on myself that actually gets laughs.", guidance: "Self-roast prompt that turns vulnerability into comedy gold." }
+        ]
+      }
+    ],
+    faqs: [
+      { q: "How do I keep roasts funny instead of just mean?", a: "Focus on exaggeration, wordplay, and shared references rather than attacking real insecurities. Grok's prompts are tuned for clever over cruel." },
+      { q: "Can I use these for work or should they stay personal?", a: "Light friendly roasts can work in the right office culture. Always read the room and avoid anything that could be HR material." }
+    ]
+  },
+  "story-mode-activated": {
+    intro: "Flip the switch. Grok becomes your personal storyteller, worldbuilder, and chaotic narrative engine.",
+    useCases: [
+      { title: "Interactive storytelling", description: "Create choose-your-own-adventure style stories or collaborative narratives that branch in wild directions." },
+      { title: "Character & world building", description: "Develop rich, consistent characters and worlds with Grok's help that feel alive and full of surprises." },
+      { title: "Genre bending", description: "Mix genres in ridiculous or brilliant ways: horror-comedy, cyberpunk romance, sci-fi western, etc." },
+      { title: "Plot twisting", description: "Generate unexpected but satisfying twists, endings, and story arcs that subvert expectations." }
+    ],
+    sections: [
+      {
+        title: "Story Starters & Branching",
+        prompts: [
+          { text: "Start a [genre] story in [setting]. At the end of each section give me 3 choices for what happens next.", guidance: "Classic story mode prompt for interactive, replayable narratives." },
+          { text: "Create a high-concept premise for a story where [wild premise]. Give me the first chapter and 4 possible directions.", guidance: "Good for kicking off longer collaborative storytelling sessions." },
+          { text: "Write an opening scene for a story called '[title]'. End it on a cliffhanger that forces the reader to continue.", guidance: "Perfect for grabbing attention and starting collaborative writing." }
+        ]
+      },
+      {
+        title: "Worldbuilding & Characters",
+        prompts: [
+          { text: "Build a weird but consistent world where [core rule or absurdity]. Include factions, daily life, and one major conflict.", guidance: "Excellent for deep lore and setting that feels real despite being unhinged." },
+          { text: "Create a morally gray protagonist with [quirk]. Show me 3 scenes that reveal different sides of them.", guidance: "Helps you develop layered characters instead of one-note heroes." },
+          { text: "Rewrite this basic plot as a [different genre] version with completely different tone and stakes.", guidance: "Great remix prompt for seeing how stories change with genre shifts." },
+          { text: "Design 5 unforgettable side characters for a story about [main premise]. Give each a secret and a flaw.", guidance: "Builds rich ensemble casts fast." }
+        ]
+      },
+      {
+        title: "Plot Twists & Endings",
+        prompts: [
+          { text: "Generate 3 shocking but fair plot twists for a story where [current plot point].", guidance: "Story mode activated for those 'no way' moments that still make sense." }
+        ]
+      }
+    ],
+    faqs: [
+      { q: "Can Grok remember long stories across messages?", a: "Grok has a large context window but it's best to paste key previous details or summaries when continuing long narratives." },
+      { q: "How do I steer the story without it getting too silly?", a: "Be specific in your prompts about tone, stakes, and constraints. You can always say 'keep it grounded' or 'make it darker'." }
+    ],
+    promptsGuidance: "The more specific and unhinged your constraints, the better Grok's story mode performs. Use 'continue in the style of...' to keep consistency."
+  },
+  "wild-image-ideas": {
+    intro: "Let Grok off the leash for image generation. These prompts produce the weird, hilarious, and completely unfiltered visuals.",
+    useCases: [
+      { title: "Absurd concept generation", description: "Create prompts that combine unrelated ideas into gloriously chaotic and funny images." },
+      { title: "Meme-to-image", description: "Turn existing memes, jokes, or text into visual prompts that capture the energy perfectly." },
+      { title: "Surreal & unhinged art", description: "Generate prompts for bizarre, dreamlike, or nightmare-fuel images that still have artistic merit." },
+      { title: "Character & scene remixing", description: "Take normal subjects and throw them into wildly inappropriate or hilarious situations and styles." }
+    ],
+    sections: [
+      {
+        title: "Chaotic & Funny Prompts",
+        prompts: [
+          { text: "A [normal thing] but it's [absurd twist] in the style of [artist or aesthetic]. Highly detailed, cinematic lighting.", guidance: "This wild image prompt template is reliable for creating shareable, laugh-out-loud concepts." },
+          { text: "Generate 5 completely unhinged image prompts based on this idea: [your seed concept]. Make them increasingly ridiculous.", guidance: "Use when you want Grok to escalate the weirdness for you." },
+          { text: "Turn this meme or joke into a detailed image prompt that would make the perfect visual: [paste meme or joke].", guidance: "Excellent bridge between text humor and actual image generation." }
+        ]
+      },
+      {
+        title: "Style & Situation Remixes",
+        prompts: [
+          { text: "A [profession or animal] having an existential crisis in [unexpected location], photorealistic, dramatic lighting.", guidance: "Reliable formula for funny yet high-quality wild images." },
+          { text: "Create a prompt for an image that perfectly captures the feeling of [emotion or vibe] but in the most over-the-top way possible.", guidance: "Good for emotional concepts turned visually extreme." }
+        ]
+      }
+    ],
+    faqs: [
+      { q: "How do I make Grok image prompts actually good?", a: "Be specific about style, lighting, composition, and mood. Reference artists or aesthetics you like. The wilder the concept, the more detailed the description should be." },
+      { q: "Can these be used for commercial stuff?", a: "Check the terms of the image model you're using (Grok's image gen or others). These prompts are designed for creative/fun use." }
+    ]
   }
 };
 
