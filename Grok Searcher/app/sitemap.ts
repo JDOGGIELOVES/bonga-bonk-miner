@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes = [
     '',
+    '/free-grok-tools',
     '/best-grok-prompts',
     '/best-grok-image-prompts',
     '/comparisons',

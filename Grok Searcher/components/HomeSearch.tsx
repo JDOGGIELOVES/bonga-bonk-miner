@@ -16,6 +16,7 @@ const featured = [
   { title: "Ultimate Meme Machine", href: "/grok-for/ultimate-meme-machine", desc: "Generate viral memes, perfect captions, new formats, and unhinged humor. Grok as your personal meme factory.", img: "/images/grok-meme-unhinged.jpg" },
   { title: "Savage Roasts", href: "/grok-for/savage-roasts", desc: "Craft clever, brutal, and hilarious roasts and comebacks with Grok's signature wit. Perfect for group chats and epic clapbacks.", img: "/images/grok-meme-roast-mad.jpg" },
   { title: "Story Mode Activated", href: "/grok-for/story-mode-activated", desc: "Immersive storytelling, wild narratives, choose-your-own chaos, genre-bending adventures and plot twists.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
+  { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use.", img: "/images/grok-50-best-prompts.jpg" },
 ];
 
 export default function HomeSearch() {
@@ -39,7 +40,7 @@ export default function HomeSearch() {
       <div className="max-w-4xl mx-auto text-center pt-16 pb-10 px-6">
         <h1 className="text-5xl font-bold mb-4 tracking-tight">Grok Searcher</h1>
         <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Free, high-quality prompts, guides and comparisons for Grok by xAI.
+          Free Grok tools, prompts, generators and guides. The best free resources for Grok by xAI.
         </p>
 
         <div className="max-w-[640px] mx-auto">
