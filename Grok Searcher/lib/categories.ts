@@ -90,6 +90,12 @@ export const categories: Category[] = [
   { slug: 'zero-trust', title: 'Grok for Zero Trust Security', description: 'Security frameworks, implementation guides, compliance, and risk mitigation.', image: '/images/grok-for-engineers-2026.jpg' },
   { slug: 'zero-waste', title: 'Grok for Zero Waste Initiatives', description: 'Sustainability planning, waste reduction strategies, community programs, and reporting.', image: '/images/grok-for-engineers-2026.jpg' },
   { slug: 'zero-click-threats', title: 'Grok for Zero-Click Threats', description: 'Detect, prevent, and respond to zero-click attacks with Grok prompts to keep your devices and data safe.', image: '/images/grok-for-engineers-2026.jpg' },
+
+  // Fun & creative meme/humor focused categories
+  { slug: 'ultimate-meme-machine', title: 'Grok for Ultimate Meme Machine', description: 'Generate viral memes, perfect captions, formats, and unhinged humor that actually slaps.', image: '/images/grok-meme-unhinged.jpg' },
+  { slug: 'savage-roasts', title: 'Grok for Savage Roasts', description: 'Craft clever, brutal, and hilarious roasts and comebacks with Grok\'s signature wit.', image: '/images/grok-meme-roast-mad.jpg' },
+  { slug: 'story-mode-activated', title: 'Grok for Story Mode Activated', description: 'Dive into immersive storytelling, wild narratives, adventures, and choose-your-own chaos with Grok.', image: '/images/grok-story-mode-rapunzel.jpg' },
+  { slug: 'wild-image-ideas', title: 'Grok for Wild Image Ideas', description: 'Unleash absurd, hilarious, surreal, and completely unhinged image generation prompts.', image: '/images/grok-meme-image-prompts.jpg' },
 ];
 
 export function getCategoryBySlug(slug: string) {
