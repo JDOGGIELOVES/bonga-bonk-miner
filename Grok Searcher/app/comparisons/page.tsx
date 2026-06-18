@@ -4,10 +4,10 @@ import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Grok vs ChatGPT vs Claude & More Comparisons",
-  description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini. Find out which AI is best for research, coding, writing and real-time insights in 2026.",
+  description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini. Full detailed breakdowns with example prompts for 2026.",
   openGraph: {
     title: "Grok vs ChatGPT vs Claude & More Comparisons | Grok Searcher",
-    description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
+    description: "Full Grok vs ChatGPT, Claude, and Gemini comparisons with example prompts.",
     images: [
       {
         url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Grok vs ChatGPT vs Claude & More Comparisons | Grok Searcher",
-    description: "Honest comparisons of Grok against ChatGPT, Claude and Gemini.",
+    description: "Full Grok vs ChatGPT, Claude, and Gemini comparisons with example prompts.",
     images: [
       {
         url: "/images/grok-vs-chatgpt-vs-claude-2026.jpg",
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
 
 const comparisons = [
   { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Feature-by-feature breakdown of speed, search, reasoning and pricing." },
-  { title: "Grok vs Claude", href: "/comparisons/grok-vs-claude", desc: "Real-time X insights vs superior long-form reasoning and writing quality." },
-  { title: "Grok vs Gemini", href: "/comparisons/grok-vs-gemini", desc: "How Grok's real-time X access stacks up against Google's latest model." },
+  { title: "Grok vs Claude", href: "/comparisons/grok-vs-claude", desc: "Real-time X insights vs deep reasoning and writing craft. Full comparison with example prompts." },
+  { title: "Grok vs Gemini", href: "/comparisons/grok-vs-gemini", desc: "Grok's native X access vs Google's search and multimodal strengths. Full comparison with prompts." },
 ];
 
 export default function ComparisonsHub() {
