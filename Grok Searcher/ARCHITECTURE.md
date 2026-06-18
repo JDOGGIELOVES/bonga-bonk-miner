@@ -86,7 +86,7 @@ We will seed from the best existing HTMLs first, then expand.
 ## Components
 
 - `components/Nav.tsx`
-- `components/Footer.tsx` (links + "Last updated: October 2025" or build-time)
+- `components/Footer.tsx` (links + "Last updated: January 2026" or build-time)
 - `components/PromptCard.tsx` (copy to clipboard + nice UI)
 - `components/CategoryCard.tsx`
 - `components/JsonLd.tsx` (reusable for structured data)

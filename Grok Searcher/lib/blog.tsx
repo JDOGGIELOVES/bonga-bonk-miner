@@ -11,7 +11,7 @@ export const blogPosts: BlogPost[] = [
     slug: 'prompt-engineering-masterclass',
     title: 'Grok Prompt Engineering Masterclass',
     description: 'Advanced patterns including chain-of-thought, few-shot, meta-prompting, and evaluation loops.',
-    date: 'October 2025',
+    date: 'January 2026',
     content: (
       <>
         <p>Mastering Grok requires going beyond basic instructions. Here are the techniques that consistently deliver dramatically better outputs.</p>
@@ -31,7 +31,7 @@ export const blogPosts: BlogPost[] = [
     slug: 'real-time-research',
     title: 'How Grok Changes Real-Time Research',
     description: 'Leverage Grok’s X integration for fresher insights than Google or other AIs can provide.',
-    date: 'October 2025',
+    date: 'January 2026',
     content: (
       <>
         <p>Traditional search engines lag. Grok gives you direct access to what people are saying right now on X.</p>
@@ -51,19 +51,84 @@ export const blogPosts: BlogPost[] = [
     slug: 'grok-for-business-workflows',
     title: 'Grok for Business: 2026 Workflows That Actually Work',
     description: 'Practical systems teams are using to get more done with Grok every week.',
-    date: 'October 2025',
+    date: 'January 2026',
     content: (
       <>
-        <p>Don’t just use Grok for one-off questions. Build repeatable workflows.</p>
+        <p>Don’t just use Grok for one-off questions. Build repeatable workflows that compound over time. Here are the systems high-performing teams are actually running in 2026.</p>
         
-        <h2 className="text-2xl font-semibold mt-8 mb-3">Weekly Intelligence Routine</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-3">1. Weekly Intelligence Routine</h2>
+        <p>Every week, treat Grok as your always-on market radar.</p>
         <ol className="list-decimal pl-6 space-y-2">
-          <li>Monday: Pull top X conversations in your industry</li>
-          <li>Wednesday: Competitor and trend deep-dive</li>
-          <li>Friday: Summarize wins/losses and generate next week plan</li>
+          <li><strong>Monday – X Pulse Check:</strong> Pull the top conversations in your industry.</li>
+          <li><strong>Wednesday – Competitive Deep Dive:</strong> Analyze what competitors are saying and doing on X.</li>
+          <li><strong>Friday – Weekly Synthesis &amp; Planning:</strong> Turn the week’s signals into a clear plan.</li>
         </ol>
+
+        <h3 className="text-xl font-semibold mt-6 mb-2">Copy-Paste Prompts for Weekly Routine</h3>
         
-        <p className="mt-6">The business category page has dozens of ready-made prompts for these workflows.</p>
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Monday – X Pulse Check</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Find the most interesting conversations on X right now about [your industry or topic]. Summarize the top 5 unique angles and who is driving the discussion.</pre>
+          <p className="text-xs text-gray-500 mt-1">Use this every Monday morning to stay ahead of the narrative.</p>
+        </div>
+
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Wednesday – Competitor Intel</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Analyze this competitor based on recent X posts and news. Give their current strengths, weaknesses, and any emerging opportunities or threats.</pre>
+        </div>
+
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Friday – Weekly Planning</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Summarize this week’s key signals, wins, and risks. Then generate a prioritized 3-bucket plan for next week (Must Do / Should Do / Nice to Have).</pre>
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-10 mb-3">2. Daily Meeting &amp; Decision Acceleration</h2>
+        <p>Stop letting meetings disappear into the void.</p>
+        
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Post-Meeting Action Extractor</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Summarize this meeting transcript into key decisions, action items with owners, deadlines, and any open questions. Flag anything that needs follow-up before EOD Friday.</pre>
+        </div>
+
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Pre-Meeting Prep</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Generate 5 tough questions the other side (board, client, leadership) might ask about [initiative] and strong, concise responses backed by data or logic.</pre>
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-10 mb-3">3. Real-Time Competitive &amp; Market Monitoring</h2>
+        <p>Use Grok as your always-on competitive radar.</p>
+        
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Daily Competitor Signal Scan</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Scan recent X posts and news for [competitor name]. Summarize any new product mentions, customer complaints, hiring signals, or strategic moves in the last 48 hours.</pre>
+        </div>
+
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Emerging Threat / Opportunity Spotter</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Based on the latest conversations on X in [industry], what new threats or opportunities are emerging that our competitors might not have noticed yet?</pre>
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-10 mb-3">4. Stakeholder Communication Workflow</h2>
+        
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Leadership Briefing Generator</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Turn these notes into a concise leadership briefing. Structure it as: 1) What happened, 2) What it means, 3) Risks &amp; opportunities, 4) Recommended decisions.</pre>
+        </div>
+
+        <div className="bg-white border p-4 rounded-xl my-4">
+          <p className="font-semibold mb-1">Status Update That Actually Gets Read</p>
+          <pre className="text-sm bg-gray-50 p-3 rounded overflow-x-auto">Rewrite this project update so it is clear, concise, and highlights the decisions the recipient needs to make.</pre>
+        </div>
+
+        <h2 className="text-2xl font-semibold mt-10 mb-3">Pro Tips for Building Business Workflows with Grok</h2>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Save your best prompts in a personal “Grok Business Playbook” document.</li>
+          <li>Always give Grok context: paste recent X links, meeting notes, or competitor names.</li>
+          <li>Iterate: after the first answer, say “Make this more executive-friendly” or “Add specific risks.”</li>
+          <li>Chain workflows: Use the search tool first, then feed results into a summarization or planning prompt.</li>
+        </ul>
+
+        <p className="mt-8">All of these prompts (and many more) live in the <a href="/grok-for/business" className="text-blue-600 underline">Grok for Business</a> category. Go there for the full library.</p>
       </>
     )
   },
@@ -71,7 +136,7 @@ export const blogPosts: BlogPost[] = [
     slug: 'best-free-grok-tools-2026',
     title: 'The Best Free Grok Tools in 2026 (No Sign-Up Required)',
     description: 'A complete guide to the most powerful free tools for Grok, from prompts to generators and everything in between.',
-    date: 'October 2025',
+    date: 'January 2026',
     content: (
       <>
         <p>If you’re using Grok, you probably want the best free tools to get more out of it. Here’s the ultimate curated list.</p>
@@ -98,7 +163,7 @@ export const blogPosts: BlogPost[] = [
     slug: 'build-your-free-grok-toolkit',
     title: 'How to Build Your Own Free Grok Toolkit',
     description: 'Create a personal library of Grok prompts and workflows that saves you hours every week.',
-    date: 'October 2025',
+    date: 'January 2026',
     content: (
       <>
         <p>Don’t just use Grok randomly. Build a repeatable toolkit around it.</p>

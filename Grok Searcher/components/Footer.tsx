@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 export default function Footer() {
-  const lastUpdated = 'October 2025';
+  const lastUpdated = 'January 2026';
 
   return (
     <footer className="bg-white border-t mt-16">
