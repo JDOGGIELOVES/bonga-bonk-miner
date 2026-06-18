@@ -14,6 +14,7 @@ const featured = [
   { title: "Grok for Business 2026", href: "/grok-for/business", desc: "Practical grok business prompts 2026 for meetings, strategy, research, content and sales. Move faster with real-time X insights.", img: "/images/grok-for-business-2026.jpg" },
   { title: "Grok Memes (I'm Tired Boss)", href: "/memes", desc: "Viral funny grok memes and the 'I'm Tired Boss' series. Copy & share relatable AI humor.", img: "/images/grok-meme-depressed-robot.jpg" },
   { title: "Ultimate Meme Machine", href: "/grok-for/ultimate-meme-machine", desc: "Generate viral memes, perfect captions, new formats, and unhinged humor. Grok as your personal meme factory.", img: "/images/grok-meme-unhinged.jpg" },
+  { title: "Savage Roasts", href: "/grok-for/savage-roasts", desc: "Craft clever, brutal, and hilarious roasts and comebacks with Grok's signature wit. Perfect for group chats and epic clapbacks.", img: "/images/grok-meme-roast-mad.jpg" },
   { title: "Story Mode Activated", href: "/grok-for/story-mode-activated", desc: "Immersive storytelling, wild narratives, choose-your-own chaos, genre-bending adventures and plot twists.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
 ];
 
