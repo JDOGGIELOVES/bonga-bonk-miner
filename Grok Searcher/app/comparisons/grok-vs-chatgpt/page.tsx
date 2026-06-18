@@ -3,7 +3,7 @@ import JsonLd from '@/components/JsonLd';
 
 export const metadata: Metadata = {
   title: "Grok vs ChatGPT vs Claude 2026",
-  description: "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
+  description: "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model. Includes example prompts to test the differences.",
   openGraph: {
     title: "Grok vs ChatGPT vs Claude 2026 | Grok Searcher",
     description: "Detailed comparison of Grok, ChatGPT and Claude across real-time search, coding, writing, pricing and when to choose each model.",
@@ -51,6 +51,29 @@ export default function GrokVsChatGPT() {
           <li>You're doing competitive or cultural research</li>
           <li>You want more personality and less corporate filter</li>
         </ul>
+      </div>
+
+      {/* Example Prompts Section */}
+      <div className="mt-12">
+        <h3 className="font-semibold text-lg mb-3">Example Prompts to Test the Differences</h3>
+        <p className="text-sm text-gray-600 mb-4">Copy these into each model to see where Grok shines (real-time X data, humor, speed) vs Claude (depth) vs ChatGPT (structure).</p>
+        
+        <div className="space-y-6">
+          {[
+            { title: "Real-time Trends", text: "What are the top 5 most interesting conversations on X right now about [topic]? Summarize unique angles and influential voices.", note: "Grok excels here with live X access." },
+            { title: "Current Events Analysis", text: "Analyze the latest reactions on X to [recent event]. What are the dominant narratives and counterpoints?", note: "Grok pulls fresh social signals instantly." },
+            { title: "Humor & Personality", text: "Roast [topic or person] in the style of a stand-up comedian but keep it clever and not mean. 5 short punchy lines.", note: "Grok's wit and less-filtered style often wins." },
+            { title: "Long Context Reasoning", text: "Read this [long document or code] and create a detailed structured summary with key risks, opportunities, and recommended next steps.", note: "Claude usually leads on very long documents." },
+            { title: "Creative Brainstorm", text: "Brainstorm 8 completely original marketing campaign ideas for [product] targeting [audience]. Include hooks and unexpected twists.", note: "All models are strong; Grok often adds more personality." },
+            { title: "Technical Explanation", text: "Explain how [complex concept] works with a minimal working example and common pitfalls for a smart beginner.", note: "Grok and ChatGPT are great for quick practical examples." },
+          ].map((ex, i) => (
+            <div key={i} className="bg-white p-5 rounded-2xl border">
+              <div className="font-medium mb-1">{ex.title}</div>
+              <p className="font-mono text-sm mb-2 text-gray-800 bg-gray-50 p-3 rounded">{ex.text}</p>
+              <p className="text-xs text-gray-600"><strong>Best for:</strong> {ex.note}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <JsonLd data={{

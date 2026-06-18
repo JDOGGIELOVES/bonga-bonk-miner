@@ -10,20 +10,33 @@ export const bestPrompts: Record<string, Prompt[]> = {
     { text: "Act as an expert [profession]. Review this [thing] and tell me what's good, what's weak, and give specific improvements.", guidance: "Versatile grok prompt that gives structured feedback. Perfect for code reviews, writing critiques, business plans, or any deliverable." },
     { text: "Break down [complex problem] into the smallest possible logical steps, then solve it step by step. Show your reasoning.", guidance: "Powerful chain-of-thought grok prompt that dramatically improves accuracy on hard problems. Forces transparent thinking." },
     { text: "Compare the pros and cons of [option A] vs [option B] for someone who [specific situation]. Give a clear recommendation.", guidance: "Excellent grok prompt for decision making. Helps weigh tradeoffs and land on the best choice based on your actual constraints." },
+    { text: "Brainstorm 10 unconventional ideas for [problem or goal]. Make at least 3 of them completely wild.", guidance: "Great for breaking out of conventional thinking in brainstorming sessions." },
+    { text: "Write a step-by-step guide on how to [task] that even a complete beginner can follow.", guidance: "Excellent for creating accessible tutorials or onboarding docs." },
   ],
   productivity: [
     { text: "Turn this meeting note into a clear action plan with owners, deadlines and next steps.", guidance: "Go-to grok productivity prompt after every meeting. Turns vague discussions into trackable tasks that actually get done." },
     { text: "Create a 30-day plan to achieve [goal]. Include daily/weekly habits and milestones.", guidance: "Solid grok prompt for turning big goals into realistic daily systems. Great for habit building and long-term progress tracking." },
+    { text: "Prioritize this list of tasks for someone with limited time. Explain the reasoning and suggest what to delegate or delete.", guidance: "Excellent for decision paralysis and ruthless prioritization." },
   ],
   coding: [
     { text: "Review this code for bugs, performance issues and readability. Suggest concrete refactors.", guidance: "Core grok prompt for developers doing code reviews. Catches issues and suggests practical improvements instead of just pointing out problems." },
     { text: "Explain how [concept] works in [language/framework] with a minimal working example.", guidance: "Best grok prompt for learning or teaching new tech. Gives working code instead of abstract theory." },
+    { text: "Debug this error: [paste error + code snippet]. Explain the root cause and give 3 possible fixes.", guidance: "Highly effective for real debugging sessions with clear reasoning." },
+    { text: "Write a clean, well-commented [language] function that does [specific task]. Follow best practices.", guidance: "Great starting point for boilerplate and clean code generation." },
   ],
 };
 
 export const imagePrompts: Prompt[] = [
   { text: "A cinematic wide shot of [subject] at golden hour, dramatic lighting, highly detailed, in the style of [director]", guidance: "Strong starting grok image prompt for cinematic or storytelling visuals. Add specific lighting, mood, or camera angles for better results." },
   { text: "Minimalist product shot of [product] on a clean background, soft shadows, studio lighting, modern aesthetic", guidance: "Reliable grok image prompt for clean product or marketing visuals. Great for e-commerce, social ads, or brand assets." },
+  { text: "Surreal floating islands with waterfalls, ethereal lighting, fantasy art style by [artist], ultra detailed, 8k", guidance: "Perfect for wild, imaginative scenes. Great for creative concepts and book covers." },
+  { text: "Cyberpunk street at night, neon reflections on wet pavement, flying cars, moody atmosphere, blade runner style", guidance: "Excellent for sci-fi and dystopian vibes. Specify character or vehicle for more focus." },
+  { text: "Elegant portrait of a [person description] in [outfit], soft window light, renaissance painting style, intricate details", guidance: "Ideal for character concepts, fashion, or editorial-style images." },
+  { text: "Whimsical cartoon fox in a magical forest, vibrant colors, storybook illustration style, playful expression", guidance: "Great for kids' content, memes, or light-hearted branding." },
+  { text: "Abstract geometric cityscape made of glowing crystals, vibrant colors, futuristic minimalism", guidance: "Use for modern art, tech branding, or wallpaper-style visuals." },
+  { text: "Epic battle scene between [creatures], dramatic clouds, cinematic composition, in the style of [famous artist]", guidance: "Strong for fantasy and action concepts. Great for game art or thumbnails." },
+  { text: "Cozy cabin in the snow at twilight, warm window lights, pine trees, peaceful winter wonderland", guidance: "Perfect for lifestyle, travel, or holiday marketing visuals." },
+  { text: "Hyper-realistic close-up of [food item], steam rising, fresh ingredients, food photography style", guidance: "Excellent for recipe books, restaurant menus, or product shots." },
 ];
 
 // Rich category-specific prompt data

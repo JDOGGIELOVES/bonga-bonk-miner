@@ -5,7 +5,7 @@ import { bestPrompts } from '@/lib/prompts';
 
 export const metadata: Metadata = {
   title: "50 Best Grok Prompts (Copy-Paste)",
-  description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined. Free 2026 collection.",
+  description: "Curated collection of the best Grok prompts for productivity, creative writing, coding, research and everyday tasks. Plus 80+ category-specific prompt libraries. All free.",
   openGraph: {
     title: "50 Best Grok Prompts (Copy-Paste) | Grok Searcher",
     description: "Copy-paste ready Grok prompts for productivity, creative writing, coding, research, image generation and everyday tasks. Tested and refined.",
@@ -48,8 +48,8 @@ export default function BestGrokPrompts() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       <div className="max-w-3xl mx-auto text-center mb-12">
         <h1 className="text-5xl font-bold mb-4">50 Best Grok Prompts</h1>
-        <p className="text-xl text-gray-600">Copy-paste ready prompts that actually work with Grok by xAI. Categorized for easy browsing.</p>
-        <p className="mt-2 text-sm text-gray-500">Updated 2026 • All prompts tested and refined</p>
+        <p className="text-xl text-gray-600">Copy-paste ready prompts that actually work with Grok by xAI. These are the highest-impact starters — explore 80+ specialized categories for hundreds more.</p>
+        <p className="mt-2 text-sm text-gray-500">Updated 2026 • Starter set + 80+ deep category libraries with hundreds of specialized prompts</p>
       </div>
 
       <JsonLd data={{
