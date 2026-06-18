@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import JsonLd from '@/components/JsonLd';
 import PromptCard from '@/components/PromptCard';
 import { getCategoryPrompts } from '@/lib/prompts';
@@ -32,19 +33,57 @@ export const metadata: Metadata = {
 };
 
 export default function Memes() {
-  const memes = [
-    '"I\'m tired boss... but here\'s a 47-point plan anyway."',
-    '"You asked for a simple summary. I gave you a thesis. I\'m tired boss."',
-    '"This could have been an email but now it\'s a 12-tweet thread with charts."',
-    '"Grok, make it funnier. No, funnier. No, unhinged. Perfect."',
-    '"Me: Can you summarize this? Grok: Here\'s a 47-slide deck and a musical number."',
-    '"When the group chat asks for one meme and you deliver a whole cinematic universe."',
-    '"I asked Grok for a quick joke. Now my entire timeline is a 14-part saga with lore."',
-    '"Grok in 2026: turns your 3-word prompt into 9 viral formats and 2 rival fandoms."',
-    '"Me: keep it short. Grok: *writes the Iliad but make it about your ex and a raccoon*."',
-    '"The algorithm fears me. Grok fears nothing. We are not the same."',
-    '"Grok roasted my resume so hard HR sent flowers and a restraining order."',
-    '"Told Grok to explain quantum physics with memes. Now I understand everything and nothing."',
+  const classicMemes = [
+    {
+      text: '"I\'m tired boss... but here\'s a 47-point plan anyway."',
+      img: '/images/grok-meme-depressed-robot.jpg',
+      alt: 'Grok looking tired but delivering a massive plan meme',
+    },
+    {
+      text: '"You asked for a simple summary. I gave you a thesis. I\'m tired boss."',
+      img: '/images/grok-meme-depressed-robot.jpg',
+      alt: 'Grok exhausted from over-explaining meme',
+    },
+    {
+      text: '"This could have been an email but now it\'s a 12-tweet thread with charts."',
+      img: '/images/grok-meme-long-document.jpg',
+      alt: 'Grok turning simple request into long report meme',
+    },
+    {
+      text: '"Grok, make it funnier. No, funnier. No, unhinged. Perfect."',
+      img: '/images/grok-meme-unhinged.jpg',
+      alt: 'Grok going unhinged for maximum humor meme',
+    },
+    {
+      text: '"Me: Can you summarize this? Grok: Here\'s a 47-slide deck and a musical number."',
+      img: '/images/grok-meme-business-plan.jpg',
+      alt: 'Grok over-delivering on summary with full production meme',
+    },
+    {
+      text: '"When the group chat asks for one meme and you deliver a whole cinematic universe."',
+      img: '/images/grok-meme-cat-chaos.jpg',
+      alt: 'Grok creating chaotic meme universe meme',
+    },
+    {
+      text: '"I asked Grok for a quick joke. Now my entire timeline is a 14-part saga with lore."',
+      img: '/images/grok-meme-essay-loop.jpg',
+      alt: 'Grok turning joke into epic saga meme',
+    },
+    {
+      text: '"Grok in 2026: turns your 3-word prompt into 9 viral formats and 2 rival fandoms."',
+      img: '/images/grok-meme-viral.jpg',
+      alt: 'Grok creating multiple viral meme formats meme',
+    },
+    {
+      text: '"Me: keep it short. Grok: *writes the Iliad but make it about your ex and a raccoon*."',
+      img: '/images/grok-meme-long-prompt.jpg',
+      alt: 'Grok ignoring keep it short request meme',
+    },
+    {
+      text: '"Grok roasted my resume so hard HR sent flowers and a restraining order."',
+      img: '/images/grok-meme-roast-mad.jpg',
+      alt: 'Grok savage resume roast meme',
+    },
   ];
 
   const memePrompts = getCategoryPrompts('ultimate-meme-machine');
@@ -57,12 +96,70 @@ export default function Memes() {
         <p className="text-sm text-gray-500">Grok doesn&apos;t just summarize. It turns everything into meme fuel.</p>
       </div>
 
+      {/* I'm Tired Boss Hero - Bigger dominant treatment */}
+      <div className="mb-12">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <span className="text-3xl">😩</span>
+          <h2 className="text-4xl font-bold">The "I'm Tired Boss" Series</h2>
+          <span className="text-3xl">😩</span>
+        </div>
+        <p className="text-center text-gray-600 mb-6">The most iconic Grok memes — visual gold that keeps the internet (and us) going.</p>
+        
+        <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {/* Large hero card 1 */}
+          <div className="bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-md transition">
+            <div className="relative w-full h-[380px] bg-gray-50">
+              <Image 
+                src="/images/grok-meme-depressed-robot.jpg" 
+                alt="Grok looking exhausted but still delivering a massive plan" 
+                fill 
+                className="object-contain p-6" 
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority
+              />
+            </div>
+            <div className="p-6 bg-gradient-to-t from-black/5">
+              <p className="text-2xl font-mono text-gray-900 leading-snug">"I'm tired boss... but here's a 47-point plan anyway."</p>
+            </div>
+          </div>
+          
+          {/* Large hero card 2 */}
+          <div className="bg-white rounded-3xl border overflow-hidden shadow-sm hover:shadow-md transition">
+            <div className="relative w-full h-[380px] bg-gray-50">
+              <Image 
+                src="/images/grok-meme-depressed-robot.jpg" 
+                alt="Grok tired after writing a full thesis instead of a summary" 
+                fill 
+                className="object-contain p-6" 
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+            <div className="p-6 bg-gradient-to-t from-black/5">
+              <p className="text-2xl font-mono text-gray-900 leading-snug">"You asked for a simple summary. I gave you a thesis. I'm tired boss."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Classic Memes */}
       <div className="mb-16">
-        <h2 className="text-3xl font-bold mb-6 text-center">Classic Grok Memes</h2>
-        <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
-          {memes.map((m, i) => (
-            <div key={i} className="p-6 bg-white rounded-2xl border text-lg font-mono">{m}</div>
+        <h2 className="text-3xl font-bold mb-6 text-center">More Classic Grok Memes</h2>
+        <div className="grid gap-6 md:grid-cols-2 max-w-5xl mx-auto">
+          {classicMemes.slice(2).map((meme, i) => (
+            <div key={i} className="bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition">
+              <div className="relative w-full h-64 bg-gray-100">
+                <Image 
+                  src={meme.img} 
+                  alt={meme.alt} 
+                  fill 
+                  className="object-contain p-4" 
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
+              </div>
+              <div className="p-5">
+                <p className="text-lg font-mono text-gray-800 leading-relaxed">{meme.text}</p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -81,6 +178,27 @@ export default function Memes() {
           {memePrompts.sections.flatMap((s) => s.prompts).slice(0, 8).map((p, i) => (
             <PromptCard key={i} text={p.text} guidance={p.guidance} />
           ))}
+        </div>
+
+        {/* Visual examples from the prompts */}
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4 text-center">Real Examples Generated with These Prompts</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { img: '/images/grok-meme-unhinged.jpg', caption: 'Unhinged prompt result' },
+              { img: '/images/grok-meme-viral.jpg', caption: 'Viral format explosion' },
+              { img: '/images/grok-meme-roast-mad.jpg', caption: 'Savage roast meme' },
+              { img: '/images/grok-meme-cat-chaos.jpg', caption: 'Chaotic group chat energy' },
+            ].map((ex, idx) => (
+              <div key={idx} className="bg-white rounded-xl border overflow-hidden">
+                <div className="relative w-full h-40 bg-gray-100">
+                  <Image src={ex.img} alt={ex.caption} fill className="object-contain p-2" sizes="(max-width: 768px) 50vw, 25vw" />
+                </div>
+                <div className="p-2 text-xs text-center text-gray-500 font-mono">{ex.caption}</div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-gray-500 mt-2">Paste the prompts above into Grok with your own context to generate visuals like these.</p>
         </div>
       </div>
 

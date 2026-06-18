@@ -7,8 +7,8 @@ import CategoryCard from '@/components/CategoryCard';
 import { categories } from '@/lib/categories';
 
 const featured = [
-  { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use. No sign-up required.", img: "/images/grok-50-best-prompts.jpg" },
   { title: "50 Best Grok Prompts", href: "/best-grok-prompts", desc: "Copy-paste ready grok prompts for productivity, coding, creativity and everyday tasks. Battle-tested 2026 collection.", img: "/images/grok-50-best-prompts.jpg" },
+  { title: "Free Grok Tools", href: "/free-grok-tools", desc: "Best free Grok tools: prompts, image generators, search tools, meme makers, roasts and more. All 100% free to use. No sign-up required.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
   { title: "Best Grok Image Prompts", href: "/best-grok-image-prompts", desc: "Dozens of tested grok image prompts + tips for high-quality generation. Marketing visuals, concepts and creative control.", img: "/images/grok-prompt-engineering-masterclass-2026.jpg" },
   { title: "Grok vs ChatGPT vs Claude", href: "/comparisons/grok-vs-chatgpt", desc: "Honest 2026 grok vs chatgpt vs claude comparison: real-time search, coding, reasoning, pricing and best use cases.", img: "/images/grok-vs-chatgpt-vs-claude-2026.jpg" },
   { title: "How to Search with Grok", href: "/grok-search", desc: "Unlock grok real-time X search for research, trends, SEO keyword ideas and traffic insights. Complete with copy-paste prompts.", img: "/images/grok-search-research-guide-2026.jpg" },
