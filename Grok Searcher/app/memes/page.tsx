@@ -182,7 +182,7 @@ export default function Memes() {
 
         <div className="grid gap-4 md:grid-cols-2">
           {memePrompts.sections.flatMap((s) => s.prompts).slice(0, 8).map((p, i) => (
-            <PromptCard key={i} text={p.text} guidance={p.guidance} />
+            <PromptCard key={i} title={p.title} text={p.text} guidance={p.guidance} />
           ))}
         </div>
 

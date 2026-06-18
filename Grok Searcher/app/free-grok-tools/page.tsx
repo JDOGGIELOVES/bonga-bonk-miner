@@ -199,8 +199,7 @@ export default function FreeGrokTools() {
         <div className="grid gap-4 md:grid-cols-2">
           {top10FreePrompts.map((p, i) => (
             <div key={i}>
-              <div className="font-semibold mb-1 text-sm uppercase tracking-wide text-blue-600">{p.title}</div>
-              <PromptCard text={p.text} />
+              <PromptCard title={p.title} text={p.text} />
               <p className="text-xs text-gray-600 mt-1">{p.why}</p>
             </div>
           ))}

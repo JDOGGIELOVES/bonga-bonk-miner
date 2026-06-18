@@ -1,48 +1,49 @@
 export interface Prompt {
   text: string;
+  title?: string;
   section?: string;
   guidance?: string;
 }
 
 export const bestPrompts: Record<string, Prompt[]> = {
   general: [
-    { text: "Explain [topic] like I'm a smart 15-year-old. Give 3 real-world examples and one common mistake people make.", guidance: "One of the most effective general grok prompts for breaking down complex ideas without jargon. Use it when you need clear explanations for any audience." },
-    { text: "Act as an expert [profession]. Review this [thing] and tell me what's good, what's weak, and give specific improvements.", guidance: "Versatile grok prompt that gives structured feedback. Perfect for code reviews, writing critiques, business plans, or any deliverable." },
-    { text: "Break down [complex problem] into the smallest possible logical steps, then solve it step by step. Show your reasoning.", guidance: "Powerful chain-of-thought grok prompt that dramatically improves accuracy on hard problems. Forces transparent thinking." },
-    { text: "Compare the pros and cons of [option A] vs [option B] for someone who [specific situation]. Give a clear recommendation.", guidance: "Excellent grok prompt for decision making. Helps weigh tradeoffs and land on the best choice based on your actual constraints." },
-    { text: "Brainstorm 10 unconventional ideas for [problem or goal]. Make at least 3 of them completely wild.", guidance: "Great for breaking out of conventional thinking in brainstorming sessions." },
-    { text: "Write a step-by-step guide on how to [task] that even a complete beginner can follow.", guidance: "Excellent for creating accessible tutorials or onboarding docs." },
+    { title: "Explain Like I'm 15", text: "Explain [topic] like I'm a smart 15-year-old. Give 3 real-world examples and one common mistake people make.", guidance: "One of the most effective general grok prompts for breaking down complex ideas without jargon. Use it when you need clear explanations for any audience." },
+    { title: "Expert Review Mode", text: "Act as an expert [profession]. Review this [thing] and tell me what's good, what's weak, and give specific improvements.", guidance: "Versatile grok prompt that gives structured feedback. Perfect for code reviews, writing critiques, business plans, or any deliverable." },
+    { title: "Step-by-Step Solver", text: "Break down [complex problem] into the smallest possible logical steps, then solve it step by step. Show your reasoning.", guidance: "Powerful chain-of-thought grok prompt that dramatically improves accuracy on hard problems. Forces transparent thinking." },
+    { title: "Decision Comparator", text: "Compare the pros and cons of [option A] vs [option B] for someone who [specific situation]. Give a clear recommendation.", guidance: "Excellent grok prompt for decision making. Helps weigh tradeoffs and land on the best choice based on your actual constraints." },
+    { title: "Wild Idea Brainstormer", text: "Brainstorm 10 unconventional ideas for [problem or goal]. Make at least 3 of them completely wild.", guidance: "Great for breaking out of conventional thinking in brainstorming sessions." },
+    { title: "Beginner Guide Creator", text: "Write a step-by-step guide on how to [task] that even a complete beginner can follow.", guidance: "Excellent for creating accessible tutorials or onboarding docs." },
   ],
   productivity: [
-    { text: "Turn this meeting note into a clear action plan with owners, deadlines and next steps.", guidance: "Go-to grok productivity prompt after every meeting. Turns vague discussions into trackable tasks that actually get done." },
-    { text: "Create a 30-day plan to achieve [goal]. Include daily/weekly habits and milestones.", guidance: "Solid grok prompt for turning big goals into realistic daily systems. Great for habit building and long-term progress tracking." },
-    { text: "Prioritize this list of tasks for someone with limited time. Explain the reasoning and suggest what to delegate or delete.", guidance: "Excellent for decision paralysis and ruthless prioritization." },
+    { title: "Meeting to Action Plan", text: "Turn this meeting note into a clear action plan with owners, deadlines and next steps.", guidance: "Go-to grok productivity prompt after every meeting. Turns vague discussions into trackable tasks that actually get done." },
+    { title: "30-Day Goal Planner", text: "Create a 30-day plan to achieve [goal]. Include daily/weekly habits and milestones.", guidance: "Solid grok prompt for turning big goals into realistic daily systems. Great for habit building and long-term progress tracking." },
+    { title: "Smart Task Prioritizer", text: "Prioritize this list of tasks for someone with limited time. Explain the reasoning and suggest what to delegate or delete.", guidance: "Excellent for decision paralysis and ruthless prioritization." },
   ],
   coding: [
-    { text: "Review this code for bugs, performance issues and readability. Suggest concrete refactors.", guidance: "Core grok prompt for developers doing code reviews. Catches issues and suggests practical improvements instead of just pointing out problems." },
-    { text: "Explain how [concept] works in [language/framework] with a minimal working example.", guidance: "Best grok prompt for learning or teaching new tech. Gives working code instead of abstract theory." },
-    { text: "Debug this error: [paste error + code snippet]. Explain the root cause and give 3 possible fixes.", guidance: "Highly effective for real debugging sessions with clear reasoning." },
-    { text: "Write a clean, well-commented [language] function that does [specific task]. Follow best practices.", guidance: "Great starting point for boilerplate and clean code generation." },
+    { title: "Code Reviewer", text: "Review this code for bugs, performance issues and readability. Suggest concrete refactors.", guidance: "Core grok prompt for developers doing code reviews. Catches issues and suggests practical improvements instead of just pointing out problems." },
+    { title: "Concept Explainer", text: "Explain how [concept] works in [language/framework] with a minimal working example.", guidance: "Best grok prompt for learning or teaching new tech. Gives working code instead of abstract theory." },
+    { title: "Error Debugger", text: "Debug this error: [paste error + code snippet]. Explain the root cause and give 3 possible fixes.", guidance: "Highly effective for real debugging sessions with clear reasoning." },
+    { title: "Clean Function Writer", text: "Write a clean, well-commented [language] function that does [specific task]. Follow best practices.", guidance: "Great starting point for boilerplate and clean code generation." },
   ],
 };
 
 export const imagePrompts: Prompt[] = [
-  { text: "A cinematic wide shot of [subject] at golden hour, dramatic lighting, highly detailed, in the style of [director]", guidance: "Strong starting grok image prompt for cinematic or storytelling visuals. Add specific lighting, mood, or camera angles for better results." },
-  { text: "Minimalist product shot of [product] on a clean background, soft shadows, studio lighting, modern aesthetic", guidance: "Reliable grok image prompt for clean product or marketing visuals. Great for e-commerce, social ads, or brand assets." },
-  { text: "Surreal floating islands with waterfalls, ethereal lighting, fantasy art style by [artist], ultra detailed, 8k", guidance: "Perfect for wild, imaginative scenes. Great for creative concepts and book covers." },
-  { text: "Cyberpunk street at night, neon reflections on wet pavement, flying cars, moody atmosphere, blade runner style", guidance: "Excellent for sci-fi and dystopian vibes. Specify character or vehicle for more focus." },
-  { text: "Elegant portrait of a [person description] in [outfit], soft window light, renaissance painting style, intricate details", guidance: "Ideal for character concepts, fashion, or editorial-style images." },
-  { text: "Whimsical cartoon fox in a magical forest, vibrant colors, storybook illustration style, playful expression", guidance: "Great for kids' content, memes, or light-hearted branding." },
-  { text: "Abstract geometric cityscape made of glowing crystals, vibrant colors, futuristic minimalism", guidance: "Use for modern art, tech branding, or wallpaper-style visuals." },
-  { text: "Epic battle scene between [creatures], dramatic clouds, cinematic composition, in the style of [famous artist]", guidance: "Strong for fantasy and action concepts. Great for game art or thumbnails." },
-  { text: "Cozy cabin in the snow at twilight, warm window lights, pine trees, peaceful winter wonderland", guidance: "Perfect for lifestyle, travel, or holiday marketing visuals." },
-  { text: "Hyper-realistic close-up of [food item], steam rising, fresh ingredients, food photography style", guidance: "Excellent for recipe books, restaurant menus, or product shots." },
-  { text: "Dreamlike underwater city with bioluminescent coral, mermaids, and ancient ruins, ethereal blue tones, highly detailed fantasy art", guidance: "Ideal for magical, immersive underwater or fantasy worlds." },
-  { text: "Vintage 1920s flapper in an art deco nightclub, warm golden lighting, elegant and mysterious, in the style of classic hollywood portraiture", guidance: "Great for period pieces, fashion editorials, or glamorous character concepts." },
-  { text: "Majestic dragon perched on a snowy mountain peak at sunrise, scales reflecting light, epic scale, in the style of [fantasy artist]", guidance: "Excellent for high-fantasy creature and landscape shots." },
-  { text: "Steampunk airship flying through stormy clouds, intricate brass and copper details, dramatic lighting, adventurous atmosphere", guidance: "Perfect for steampunk, adventure, or alternative history themes." },
-  { text: "Serene zen garden with koi pond, cherry blossoms, and soft morning mist, minimalist japanese aesthetic, peaceful and balanced composition", guidance: "Ideal for calm, meditative, or nature-inspired marketing visuals." },
-  { text: "Futuristic android in a neon-lit megacity street, reflective chrome surfaces, rain effects, cyberpunk noir style", guidance: "Strong for sci-fi character design and atmospheric cityscapes." },
+  { title: "Cinematic Golden Hour", text: "A cinematic wide shot of [subject] at golden hour, dramatic lighting, highly detailed, in the style of [director]", guidance: "Strong starting grok image prompt for cinematic or storytelling visuals. Add specific lighting, mood, or camera angles for better results." },
+  { title: "Minimalist Product Shot", text: "Minimalist product shot of [product] on a clean background, soft shadows, studio lighting, modern aesthetic", guidance: "Reliable grok image prompt for clean product or marketing visuals. Great for e-commerce, social ads, or brand assets." },
+  { title: "Surreal Floating Islands", text: "Surreal floating islands with waterfalls, ethereal lighting, fantasy art style by [artist], ultra detailed, 8k", guidance: "Perfect for wild, imaginative scenes. Great for creative concepts and book covers." },
+  { title: "Cyberpunk Night Street", text: "Cyberpunk street at night, neon reflections on wet pavement, flying cars, moody atmosphere, blade runner style", guidance: "Excellent for sci-fi and dystopian vibes. Specify character or vehicle for more focus." },
+  { title: "Renaissance Portrait", text: "Elegant portrait of a [person description] in [outfit], soft window light, renaissance painting style, intricate details", guidance: "Ideal for character concepts, fashion, or editorial-style images." },
+  { title: "Whimsical Cartoon Fox", text: "Whimsical cartoon fox in a magical forest, vibrant colors, storybook illustration style, playful expression", guidance: "Great for kids' content, memes, or light-hearted branding." },
+  { title: "Glowing Crystal City", text: "Abstract geometric cityscape made of glowing crystals, vibrant colors, futuristic minimalism", guidance: "Use for modern art, tech branding, or wallpaper-style visuals." },
+  { title: "Epic Creature Battle", text: "Epic battle scene between [creatures], dramatic clouds, cinematic composition, in the style of [famous artist]", guidance: "Strong for fantasy and action concepts. Great for game art or thumbnails." },
+  { title: "Snowy Cozy Cabin", text: "Cozy cabin in the snow at twilight, warm window lights, pine trees, peaceful winter wonderland", guidance: "Perfect for lifestyle, travel, or holiday marketing visuals." },
+  { title: "Hyper-Realistic Food", text: "Hyper-realistic close-up of [food item], steam rising, fresh ingredients, food photography style", guidance: "Excellent for recipe books, restaurant menus, or product shots." },
+  { title: "Bioluminescent Underwater City", text: "Dreamlike underwater city with bioluminescent coral, mermaids, and ancient ruins, ethereal blue tones, highly detailed fantasy art", guidance: "Ideal for magical, immersive underwater or fantasy worlds." },
+  { title: "1920s Art Deco Flapper", text: "Vintage 1920s flapper in an art deco nightclub, warm golden lighting, elegant and mysterious, in the style of classic hollywood portraiture", guidance: "Great for period pieces, fashion editorials, or glamorous character concepts." },
+  { title: "Dragon on Mountain Peak", text: "Majestic dragon perched on a snowy mountain peak at sunrise, scales reflecting light, epic scale, in the style of [fantasy artist]", guidance: "Excellent for high-fantasy creature and landscape shots." },
+  { title: "Steampunk Airship", text: "Steampunk airship flying through stormy clouds, intricate brass and copper details, dramatic lighting, adventurous atmosphere", guidance: "Perfect for steampunk, adventure, or alternative history themes." },
+  { title: "Japanese Zen Garden", text: "Serene zen garden with koi pond, cherry blossoms, and soft morning mist, minimalist japanese aesthetic, peaceful and balanced composition", guidance: "Ideal for calm, meditative, or nature-inspired marketing visuals." },
+  { title: "Neon Android Street", text: "Futuristic android in a neon-lit megacity street, reflective chrome surfaces, rain effects, cyberpunk noir style", guidance: "Strong for sci-fi character design and atmospheric cityscapes." },
   { text: "Whimsical floating market in the sky with colorful stalls, hot air balloons, and flying vendors, storybook fantasy illustration", guidance: "Great for fun, imaginative, or children's book style artwork." },
   { text: "Dramatic macro shot of a [insect or flower] covered in morning dew, extreme detail, soft bokeh background, nature photography style", guidance: "Excellent for scientific, artistic, or luxury product close-ups." },
   { text: "Ancient egyptian temple at night under a full moon, golden torchlight, sand dunes, mystical and cinematic atmosphere", guidance: "Perfect for historical, adventure, or mythological scenes." },
@@ -89,16 +90,16 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Meetings & Leadership",
         prompts: [
-          { text: "Summarize this meeting transcript into key decisions, action items and open questions.", guidance: "Use this grok prompt for business meetings to instantly extract decisions and owners so nothing falls through the cracks. Great for leaders who want clear action plans from long discussions." },
-          { text: "Turn these notes into a concise leadership briefing with risks, decisions needed, and recommended next steps.", guidance: "Perfect grok business prompt for turning raw notes into executive-ready updates. Helps with stakeholder communication and fast decision making." },
-          { text: "Generate 5 tough questions the board might ask about [initiative] and strong responses.", guidance: "Prepare for high-stakes meetings with this grok prompt for business strategy. Anticipate objections and build stronger cases before presenting." }
+          { title: "Meeting Summary Extractor", text: "Summarize this meeting transcript into key decisions, action items and open questions.", guidance: "Use this grok prompt for business meetings to instantly extract decisions and owners so nothing falls through the cracks. Great for leaders who want clear action plans from long discussions." },
+          { title: "Leadership Briefing Creator", text: "Turn these notes into a concise leadership briefing with risks, decisions needed, and recommended next steps.", guidance: "Perfect grok business prompt for turning raw notes into executive-ready updates. Helps with stakeholder communication and fast decision making." },
+          { title: "Board Question Prep", text: "Generate 5 tough questions the board might ask about [initiative] and strong responses.", guidance: "Prepare for high-stakes meetings with this grok prompt for business strategy. Anticipate objections and build stronger cases before presenting." }
         ]
       },
       {
         title: "Strategy & Competitive Intel",
         prompts: [
-          { text: "Analyze this competitor based on recent X posts and news. Give strengths, weaknesses and opportunities.", guidance: "This real-time grok prompt for competitive intelligence pulls fresh signals from X that traditional research misses. Ideal for strategy and market positioning." },
-          { text: "Compare [strategy A] vs [strategy B] for [company situation]. Recommend one with clear rationale.", guidance: "Use for grok business strategy decisions when you need an objective breakdown of options with pros, cons, and a clear winner." }
+          { title: "Competitor X Analysis", text: "Analyze this competitor based on recent X posts and news. Give strengths, weaknesses and opportunities.", guidance: "This real-time grok prompt for competitive intelligence pulls fresh signals from X that traditional research misses. Ideal for strategy and market positioning." },
+          { title: "Strategy Option Comparator", text: "Compare [strategy A] vs [strategy B] for [company situation]. Recommend one with clear rationale.", guidance: "Use for grok business strategy decisions when you need an objective breakdown of options with pros, cons, and a clear winner." }
         ]
       }
     ],
@@ -125,8 +126,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Content & Campaigns",
         prompts: [
-          { text: "Brainstorm a 30-day content calendar for [brand/niche] targeting [audience]. Include 10 post ideas with hook, format, and why it could perform well on [platform].", guidance: "This grok marketing prompt helps you plan consistent content that actually reaches your audience. Use it for campaign ideation and social media managers looking for ready-to-execute calendars." },
-          { text: "Create a detailed SEO-optimized blog post brief for the keyword '[target keyword]'. Include H2/H3 structure, key points to cover, internal link opportunities, and 5 title variations.", guidance: "Perfect for grok prompts for marketing SEO and content creation. Generates briefs that rank by incorporating search intent and structure." }
+          { title: "30-Day Content Calendar", text: "Brainstorm a 30-day content calendar for [brand/niche] targeting [audience]. Include 10 post ideas with hook, format, and why it could perform well on [platform].", guidance: "This grok marketing prompt helps you plan consistent content that actually reaches your audience. Use it for campaign ideation and social media managers looking for ready-to-execute calendars." },
+          { title: "SEO Blog Post Brief", text: "Create a detailed SEO-optimized blog post brief for the keyword '[target keyword]'. Include H2/H3 structure, key points to cover, internal link opportunities, and 5 title variations.", guidance: "Perfect for grok prompts for marketing SEO and content creation. Generates briefs that rank by incorporating search intent and structure." }
         ]
       }
     ],
@@ -151,10 +152,10 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Outreach & Research",
         prompts: [
-          { text: "Research this account using recent X activity. Give me 5 personalized talking points.", guidance: "Core grok sales prompt for account research that surfaces real-time signals and warm intros from X. Saves hours compared to manual LinkedIn stalking." },
-          { text: "Write a concise, warm outreach email to [Name/Role] at [Company]. Reference [specific recent trigger or insight]. Keep it under 120 words and end with one clear next step.", guidance: "Use this grok sales prompt for personalized cold outreach that feels relevant. Reference recent activity to dramatically improve reply rates." },
-          { text: "Write a 4-email follow-up sequence for a prospect who showed interest in [product] but went quiet after [last interaction]. Keep tones helpful and low-pressure. Goal: re-engage and book a call.", guidance: "Proven grok prompt for sales follow-ups that re-engage without being pushy. Perfect for moving stalled deals forward." },
-          { text: "Create an outline for a sales proposal for [Company] in [industry]. Include executive summary, problem statement, our solution, ROI examples, implementation timeline, and next steps. Tailor it to their recent X activity around [pain point].", guidance: "This grok sales prompt builds tailored proposals that speak directly to the prospect's current situation and pain points." }
+          { title: "Account Research Talking Points", text: "Research this account using recent X activity. Give me 5 personalized talking points.", guidance: "Core grok sales prompt for account research that surfaces real-time signals and warm intros from X. Saves hours compared to manual LinkedIn stalking." },
+          { title: "Warm Outreach Email", text: "Write a concise, warm outreach email to [Name/Role] at [Company]. Reference [specific recent trigger or insight]. Keep it under 120 words and end with one clear next step.", guidance: "Use this grok sales prompt for personalized cold outreach that feels relevant. Reference recent activity to dramatically improve reply rates." },
+          { title: "Re-engagement Follow-up Sequence", text: "Write a 4-email follow-up sequence for a prospect who showed interest in [product] but went quiet after [last interaction]. Keep tones helpful and low-pressure. Goal: re-engage and book a call.", guidance: "Proven grok prompt for sales follow-ups that re-engage without being pushy. Perfect for moving stalled deals forward." },
+          { title: "Tailored Sales Proposal Outline", text: "Create an outline for a sales proposal for [Company] in [industry]. Include executive summary, problem statement, our solution, ROI examples, implementation timeline, and next steps. Tailor it to their recent X activity around [pain point].", guidance: "This grok sales prompt builds tailored proposals that speak directly to the prospect's current situation and pain points." }
         ]
       }
     ],
@@ -179,9 +180,9 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Code & Architecture",
         prompts: [
-          { text: "Review this code for bugs, performance issues, and readability. Suggest concrete refactors.", guidance: "Essential grok prompts for engineers doing code reviews. Catches issues early and improves code quality without slowing down the team." },
-          { text: "Design a scalable [system] for [constraints]. Include trade-offs and recommended tech.", guidance: "Use this grok engineering prompt for system design discussions. Forces clear trade-off thinking that impresses in architecture reviews." },
-          { text: "Explain how [concept] works in [language] with a minimal working example and common pitfalls.", guidance: "Great grok prompt for developers learning new tech or explaining concepts to teammates. Produces practical examples instead of abstract theory." }
+          { title: "Code Review & Refactor", text: "Review this code for bugs, performance issues, and readability. Suggest concrete refactors.", guidance: "Essential grok prompts for engineers doing code reviews. Catches issues early and improves code quality without slowing down the team." },
+          { title: "Scalable System Design", text: "Design a scalable [system] for [constraints]. Include trade-offs and recommended tech.", guidance: "Use this grok engineering prompt for system design discussions. Forces clear trade-off thinking that impresses in architecture reviews." },
+          { title: "Concept Explainer with Pitfalls", text: "Explain how [concept] works in [language] with a minimal working example and common pitfalls.", guidance: "Great grok prompt for developers learning new tech or explaining concepts to teammates. Produces practical examples instead of abstract theory." }
         ]
       }
     ]
@@ -198,8 +199,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Validation & Pitching",
         prompts: [
-          { text: "Evaluate this startup idea for [market]. List risks, assumptions, and 3 experiments to run this week.", guidance: "Classic grok prompt for entrepreneurs validating ideas fast. Turns vague concepts into testable hypotheses with clear next steps." },
-          { text: "Create a compelling 10-slide pitch deck outline for [idea] including problem, solution, and traction hooks.", guidance: "Use this grok entrepreneur prompt when preparing to pitch investors. Structures the story around what actually matters for fundraising." }
+          { title: "Idea Validation & Experiments", text: "Evaluate this startup idea for [market]. List risks, assumptions, and 3 experiments to run this week.", guidance: "Classic grok prompt for entrepreneurs validating ideas fast. Turns vague concepts into testable hypotheses with clear next steps." },
+          { title: "Pitch Deck Outline", text: "Create a compelling 10-slide pitch deck outline for [idea] including problem, solution, and traction hooks.", guidance: "Use this grok entrepreneur prompt when preparing to pitch investors. Structures the story around what actually matters for fundraising." }
         ]
       }
     ]
@@ -216,8 +217,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Learning & Writing",
         prompts: [
-          { text: "Explain [concept] with a simple analogy, then give me a practice problem and the solution explained step by step.", guidance: "Ideal grok prompts for students who want to actually understand material instead of just memorizing. Turns complex topics into memorable explanations." },
-          { text: "Turn these notes into a well-structured essay outline with thesis, key arguments, and evidence.", guidance: "This grok student prompt helps organize scattered thoughts into clear, high-scoring essays. Great for research papers and exam prep." }
+          { title: "Concept Analogy + Practice", text: "Explain [concept] with a simple analogy, then give me a practice problem and the solution explained step by step.", guidance: "Ideal grok prompts for students who want to actually understand material instead of just memorizing. Turns complex topics into memorable explanations." },
+          { title: "Essay Outline from Notes", text: "Turn these notes into a well-structured essay outline with thesis, key arguments, and evidence.", guidance: "This grok student prompt helps organize scattered thoughts into clear, high-scoring essays. Great for research papers and exam prep." }
         ]
       }
     ]
@@ -234,8 +235,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Classroom Materials",
         prompts: [
-          { text: "Create a 45-minute lesson plan on [topic] for [grade] with objectives, activities, and exit ticket.", guidance: "Core grok prompts for teachers needing fast, standards-aligned lesson plans. Saves hours of prep while keeping lessons engaging." },
-          { text: "Differentiate this assignment for 3 levels of learners while keeping the same core standards.", guidance: "Use this grok prompt for teachers when differentiating instruction. Produces practical modifications that actually work in mixed classrooms." }
+          { title: "Lesson Plan Creator", text: "Create a 45-minute lesson plan on [topic] for [grade] with objectives, activities, and exit ticket.", guidance: "Core grok prompts for teachers needing fast, standards-aligned lesson plans. Saves hours of prep while keeping lessons engaging." },
+          { title: "Differentiation Adapter", text: "Differentiate this assignment for 3 levels of learners while keeping the same core standards.", guidance: "Use this grok prompt for teachers when differentiating instruction. Produces practical modifications that actually work in mixed classrooms." }
         ]
       }
     ]
@@ -252,8 +253,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Analysis & Communication",
         prompts: [
-          { text: "Review this dataset description. Suggest 5 high-impact questions to ask and visualizations to build.", guidance: "Strong grok prompts for data analysts who need to move from raw data to meaningful questions fast. Helps avoid analysis paralysis." },
-          { text: "Turn these findings into a clear executive summary with recommended actions.", guidance: "This grok data analyst prompt translates technical findings into business language that stakeholders actually understand and act on." }
+          { title: "Data Question & Viz Suggester", text: "Review this dataset description. Suggest 5 high-impact questions to ask and visualizations to build.", guidance: "Strong grok prompts for data analysts who need to move from raw data to meaningful questions fast. Helps avoid analysis paralysis." },
+          { title: "Executive Summary from Findings", text: "Turn these findings into a clear executive summary with recommended actions.", guidance: "This grok data analyst prompt translates technical findings into business language that stakeholders actually understand and act on." }
         ]
       }
     ]
@@ -270,8 +271,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Clinical & Patient",
         prompts: [
-          { text: "Explain [condition/treatment] to a patient in plain language. Include what to expect and common questions." },
-          { text: "Summarize the latest research on [topic] and highlight practical takeaways for clinicians." }
+          { title: "Patient-Friendly Explanation", text: "Explain [condition/treatment] to a patient in plain language. Include what to expect and common questions." },
+          { title: "Research Practical Takeaways", text: "Summarize the latest research on [topic] and highlight practical takeaways for clinicians." }
         ]
       }
     ]
@@ -288,8 +289,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Research & Analysis",
         prompts: [
-          { text: "Analyze recent X sentiment around [ticker or sector]. Summarize bull and bear cases with sources." },
-          { text: "Create a due diligence checklist and initial report for [company or asset class]." }
+          { title: "X Sentiment Bull/Bear Analysis", text: "Analyze recent X sentiment around [ticker or sector]. Summarize bull and bear cases with sources." },
+          { title: "Due Diligence Report Outline", text: "Create a due diligence checklist and initial report for [company or asset class]." }
         ]
       }
     ]
@@ -306,8 +307,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Training & Nutrition",
         prompts: [
-          { text: "Design a 4-week progressive program for [goal] for someone with [constraints]. Include progression and recovery." },
-          { text: "Create a weekly meal plan for [diet type] optimized for [goal] with shopping list and macros." }
+          { title: "Progressive Training Program", text: "Design a 4-week progressive program for [goal] for someone with [constraints]. Include progression and recovery." },
+          { title: "Optimized Weekly Meal Plan", text: "Create a weekly meal plan for [diet type] optimized for [goal] with shopping list and macros." }
         ]
       }
     ]
@@ -324,8 +325,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Systems & Routines",
         prompts: [
-          { text: "Design a personal operating system for someone who wants to ship more with less stress." },
-          { text: "Create a weekly review template that surfaces wins, lessons, and next priorities." }
+          { title: "Personal Operating System", text: "Design a personal operating system for someone who wants to ship more with less stress." },
+          { title: "Weekly Review Template", text: "Create a weekly review template that surfaces wins, lessons, and next priorities." }
         ]
       }
     ]
@@ -342,8 +343,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Story & Character",
         prompts: [
-          { text: "Help me brainstorm a high-concept premise for a [genre] story set in [setting]. Give 5 strong loglines." },
-          { text: "Develop a complex character with contradictions, arc, and key scenes." }
+          { title: "High-Concept Premise Brainstorm", text: "Help me brainstorm a high-concept premise for a [genre] story set in [setting]. Give 5 strong loglines." },
+          { title: "Complex Character Developer", text: "Develop a complex character with contradictions, arc, and key scenes." }
         ]
       }
     ]
@@ -360,8 +361,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Speaking & Listening",
         prompts: [
-          { text: "Role-play a conversation in [language] about [topic]. Correct my mistakes and suggest natural alternatives." },
-          { text: "Create 10 useful phrases for [situation] in [language] with pronunciation guide and context." }
+          { title: "Conversation Role-Play", text: "Role-play a conversation in [language] about [topic]. Correct my mistakes and suggest natural alternatives." },
+          { title: "Useful Phrases Pack", text: "Create 10 useful phrases for [situation] in [language] with pronunciation guide and context." }
         ]
       }
     ]
@@ -378,8 +379,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Planning & Logistics",
         prompts: [
-          { text: "Create a 7-day itinerary for [destination] for [traveler type] with daily schedule, costs, and hidden gems." },
-          { text: "Compare [option A] vs [option B] for travel to [place] including time, cost, and experience." }
+          { title: "7-Day Custom Itinerary", text: "Create a 7-day itinerary for [destination] for [traveler type] with daily schedule, costs, and hidden gems." },
+          { title: "Travel Option Comparator", text: "Compare [option A] vs [option B] for travel to [place] including time, cost, and experience." }
         ]
       }
     ]
@@ -396,8 +397,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Research Design & Insights",
         prompts: [
-          { text: "Design a survey to understand [target audience] attitudes toward [product/category]. Include 12 questions." },
-          { text: "Analyze current trends in [industry] and predict what will matter most in the next 12 months." }
+          { title: "Audience Attitudes Survey", text: "Design a survey to understand [target audience] attitudes toward [product/category]. Include 12 questions." },
+          { title: "Industry Trend Predictor", text: "Analyze current trends in [industry] and predict what will matter most in the next 12 months." }
         ]
       }
     ]
@@ -414,8 +415,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Communication Scripts",
         prompts: [
-          { text: "Draft a helpful response to this customer complaint: [complaint]. Keep tone empathetic and solution-focused." },
-          { text: "Create a decision tree for handling [common issue] including when to escalate." }
+          { title: "Empathetic Complaint Response", text: "Draft a helpful response to this customer complaint: [complaint]. Keep tone empathetic and solution-focused." },
+          { title: "Issue Escalation Decision Tree", text: "Create a decision tree for handling [common issue] including when to escalate." }
         ]
       }
     ]
@@ -432,8 +433,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Money Management",
         prompts: [
-          { text: "Build a realistic monthly budget for someone earning [income] in [location] with [goals]." },
-          { text: "Compare [investment option A] vs [B] for a [time horizon] goal. Include risks and expected outcomes." }
+          { title: "Realistic Monthly Budget", text: "Build a realistic monthly budget for someone earning [income] in [location] with [goals]." },
+          { title: "Investment Option Comparison", text: "Compare [investment option A] vs [B] for a [time horizon] goal. Include risks and expected outcomes." }
         ]
       }
     ]
@@ -450,8 +451,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Communication & Connection",
         prompts: [
-          { text: "Help me craft a thoughtful message to [partner] about [topic] that feels vulnerable but not overwhelming." },
-          { text: "Generate 8 creative date ideas for [city] that match [budget/personality] and encourage deep conversation." }
+          { title: "Vulnerable Message Crafter", text: "Help me craft a thoughtful message to [partner] about [topic] that feels vulnerable but not overwhelming." },
+          { title: "Creative Deep Conversation Dates", text: "Generate 8 creative date ideas for [city] that match [budget/personality] and encourage deep conversation." }
         ]
       }
     ]
@@ -468,8 +469,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Daily Parenting",
         prompts: [
-          { text: "Suggest 5 age-appropriate ways to handle [behavior issue] for a [age] year old." },
-          { text: "Create a family activity plan for the weekend that balances fun, learning, and screen-free time." }
+          { title: "Age-Appropriate Discipline Ideas", text: "Suggest 5 age-appropriate ways to handle [behavior issue] for a [age] year old." },
+          { title: "Screen-Free Family Activity Plan", text: "Create a family activity plan for the weekend that balances fun, learning, and screen-free time." }
         ]
       }
     ]
@@ -486,8 +487,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Care & Training",
         prompts: [
-          { text: "Create a 4-week training plan for teaching [command/trick] to a [breed/age] [pet type]." },
-          { text: "Help me troubleshoot why my [pet] is [behavior]. Suggest 3 possible causes and solutions." }
+          { title: "Pet Training Plan", text: "Create a 4-week training plan for teaching [command/trick] to a [breed/age] [pet type]." },
+          { title: "Pet Behavior Troubleshooter", text: "Help me troubleshoot why my [pet] is [behavior]. Suggest 3 possible causes and solutions." }
         ]
       }
     ]
@@ -504,8 +505,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Projects & Care",
         prompts: [
-          { text: "Design a beginner-friendly vegetable garden for a [space size] area in [climate]. Include plant list and timeline." },
-          { text: "Step-by-step guide to fix [common home issue] safely with basic tools." }
+          { title: "Beginner Vegetable Garden Design", text: "Design a beginner-friendly vegetable garden for a [space size] area in [climate]. Include plant list and timeline." },
+          { title: "DIY Home Fix Guide", text: "Step-by-step guide to fix [common home issue] safely with basic tools." }
         ]
       }
     ]
@@ -522,8 +523,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Action & Strategy",
         prompts: [
-          { text: "Create a 30-day plan to reduce household waste and energy use for a family of [size]." },
-          { text: "Draft an ESG report section for [company] covering [area]. Include metrics and improvement goals." }
+          { title: "Household Sustainability Plan", text: "Create a 30-day plan to reduce household waste and energy use for a family of [size]." },
+          { title: "ESG Report Section Drafter", text: "Draft an ESG report section for [company] covering [area]. Include metrics and improvement goals." }
         ]
       }
     ]
@@ -540,8 +541,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Fundraising & Operations",
         prompts: [
-          { text: "Write a compelling case for support for [cause] aimed at [donor type]." },
-          { text: "Design a volunteer program structure for [organization type] including roles, training, and retention strategies." }
+          { title: "Case for Support Writer", text: "Write a compelling case for support for [cause] aimed at [donor type]." },
+          { title: "Volunteer Program Designer", text: "Design a volunteer program structure for [organization type] including roles, training, and retention strategies." }
         ]
       }
     ]
@@ -558,8 +559,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Client Work",
         prompts: [
-          { text: "Outline a proposal for a [project type] engagement for a [client industry] company. Include scope, timeline, and pricing structure." },
-          { text: "Facilitate a 90-minute workshop on [topic] for [audience]. Provide agenda, exercises, and handout ideas." }
+          { title: "Client Engagement Proposal", text: "Outline a proposal for a [project type] engagement for a [client industry] company. Include scope, timeline, and pricing structure." },
+          { title: "Workshop Facilitation Plan", text: "Facilitate a 90-minute workshop on [topic] for [audience]. Provide agenda, exercises, and handout ideas." }
         ]
       }
     ]
@@ -576,8 +577,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Infrastructure & Automation",
         prompts: [
-          { text: "Design a scalable, cost-effective architecture for [app type] on [cloud provider] with high availability." },
-          { text: "Create a Terraform module for [resource] with best practices for security and tagging." }
+          { title: "Cloud Architecture Design", text: "Design a scalable, cost-effective architecture for [app type] on [cloud provider] with high availability." },
+          { title: "Terraform Module Creator", text: "Create a Terraform module for [resource] with best practices for security and tagging." }
         ]
       }
     ]
@@ -594,8 +595,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "ML Workflows",
         prompts: [
-          { text: "Outline an end-to-end ML pipeline for [problem] including data sources, features, model choice, and monitoring." },
-          { text: "Analyze potential biases in a [model type] trained on [data description] and suggest mitigation steps." }
+          { title: "End-to-End ML Pipeline", text: "Outline an end-to-end ML pipeline for [problem] including data sources, features, model choice, and monitoring." },
+          { title: "Bias Analysis & Mitigation", text: "Analyze potential biases in a [model type] trained on [data description] and suggest mitigation steps." }
         ]
       }
     ]
@@ -612,8 +613,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Planning & Execution",
         prompts: [
-          { text: "Create a complete timeline and checklist for a [event type] for [guest count] people." },
-          { text: "Draft vendor negotiation talking points and contract must-haves for [service]." }
+          { title: "Full Event Timeline & Checklist", text: "Create a complete timeline and checklist for a [event type] for [guest count] people." },
+          { title: "Vendor Negotiation Script", text: "Draft vendor negotiation talking points and contract must-haves for [service]." }
         ]
       }
     ]
@@ -630,8 +631,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Production Techniques",
         prompts: [
-          { text: "Help me build a [genre] beat in [DAW] starting from a simple melody. Give specific plugin and processing suggestions." },
-          { text: "Analyze this mix and give me targeted improvements for clarity, punch, and space." }
+          { title: "Genre Beat Builder", text: "Help me build a [genre] beat in [DAW] starting from a simple melody. Give specific plugin and processing suggestions." },
+          { title: "Mix Analysis & Fixes", text: "Analyze this mix and give me targeted improvements for clarity, punch, and space." }
         ]
       }
     ]
@@ -648,8 +649,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Store & Marketing",
         prompts: [
-          { text: "Write high-converting product descriptions for [product] targeting [audience] with SEO in mind." },
-          { text: "Design a 5-email abandoned cart sequence that feels helpful rather than pushy." }
+          { title: "High-Converting Product Copy", text: "Write high-converting product descriptions for [product] targeting [audience] with SEO in mind." },
+          { title: "Abandoned Cart Email Sequence", text: "Design a 5-email abandoned cart sequence that feels helpful rather than pushy." }
         ]
       }
     ]
@@ -900,8 +901,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Concepts & Applications",
         prompts: [
-          { text: "Explain [quantum concept] intuitively and then more formally with examples." },
-          { text: "Describe a practical use case for quantum computing in [industry] and current limitations." }
+          { title: "Intuitive Quantum Explainer", text: "Explain [quantum concept] intuitively and then more formally with examples." },
+          { title: "Quantum Use Case in Industry", text: "Describe a practical use case for quantum computing in [industry] and current limitations." }
         ]
       }
     ]
@@ -918,8 +919,8 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Analysis & Strategy",
         prompts: [
-          { text: "Evaluate the tokenomics of [project]. What works, what are red flags?" },
-          { text: "Explain how [DeFi protocol or NFT mechanic] works and its risks for users." }
+          { title: "Tokenomics Evaluator", text: "Evaluate the tokenomics of [project]. What works, what are red flags?" },
+          { title: "DeFi/NFT Risk Explainer", text: "Explain how [DeFi protocol or NFT mechanic] works and its risks for users." }
         ]
       }
     ]
@@ -936,32 +937,32 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Planning & Architecture",
         prompts: [
-          { text: "Help me plan a [type of website, e.g. SaaS landing page / portfolio / e-commerce] for [target audience]. Suggest page structure, tech stack, and key features.", guidance: "This prompt helps define scope and make smart tech decisions early. Perfect starting point for any website project." },
-          { text: "Create a detailed sitemap and user flow for [website type]. Include navigation structure and main conversion paths.", guidance: "Use this to visualize the entire site before coding. Great for client projects or personal sites." }
+          { title: "Website Planning & Tech Stack", text: "Help me plan a [type of website, e.g. SaaS landing page / portfolio / e-commerce] for [target audience]. Suggest page structure, tech stack, and key features.", guidance: "This prompt helps define scope and make smart tech decisions early. Perfect starting point for any website project." },
+          { title: "Sitemap & User Flow Creator", text: "Create a detailed sitemap and user flow for [website type]. Include navigation structure and main conversion paths.", guidance: "Use this to visualize the entire site before coding. Great for client projects or personal sites." }
         ]
       },
       {
         title: "Frontend & UI Development",
         prompts: [
-          { text: "Build a responsive [component or page, e.g. hero section / pricing table / dashboard layout] using HTML, Tailwind CSS, and [React/Next.js if needed]. Make it mobile-first and accessible.", guidance: "Core frontend prompt. Specify exact design details or reference a style guide for better results." },
-          { text: "Convert this design description into clean, production-ready code: [paste description or Figma-like spec]. Use semantic HTML and modern CSS.", guidance: "Excellent for turning rough ideas into real code quickly." },
-          { text: "Create a reusable [component type] in React/Next.js with TypeScript, proper props, and Tailwind styling. Include example usage.", guidance: "Build your component library faster with consistent, typed components." }
+          { title: "Responsive Component Builder", text: "Build a responsive [component or page, e.g. hero section / pricing table / dashboard layout] using HTML, Tailwind CSS, and [React/Next.js if needed]. Make it mobile-first and accessible.", guidance: "Core frontend prompt. Specify exact design details or reference a style guide for better results." },
+          { title: "Design to Clean Code", text: "Convert this design description into clean, production-ready code: [paste description or Figma-like spec]. Use semantic HTML and modern CSS.", guidance: "Excellent for turning rough ideas into real code quickly." },
+          { title: "Reusable React Component", text: "Create a reusable [component type] in React/Next.js with TypeScript, proper props, and Tailwind styling. Include example usage.", guidance: "Build your component library faster with consistent, typed components." }
         ]
       },
       {
         title: "Backend, Data & Integrations",
         prompts: [
-          { text: "Design a simple API endpoint for [feature, e.g. contact form / user authentication / fetching blog posts]. Use [Next.js API routes / Node / whatever stack].", guidance: "Good for backend logic without over-engineering." },
-          { text: "Add form handling with validation to this [page/component]. Support [email / database] submission and show success/error states.", guidance: "Critical for real websites. Include client and server validation." },
-          { text: "Connect this frontend to [data source, e.g. Supabase / Airtable / custom API]. Include fetching, loading states, and error handling.", guidance: "Practical integration prompt for real-world data." }
+          { title: "Simple API Endpoint Design", text: "Design a simple API endpoint for [feature, e.g. contact form / user authentication / fetching blog posts]. Use [Next.js API routes / Node / whatever stack].", guidance: "Good for backend logic without over-engineering." },
+          { title: "Form Handling with Validation", text: "Add form handling with validation to this [page/component]. Support [email / database] submission and show success/error states.", guidance: "Critical for real websites. Include client and server validation." },
+          { title: "Frontend Data Integration", text: "Connect this frontend to [data source, e.g. Supabase / Airtable / custom API]. Include fetching, loading states, and error handling.", guidance: "Practical integration prompt for real-world data." }
         ]
       },
       {
         title: "SEO, Performance & Deployment",
         prompts: [
-          { text: "Optimize this website for SEO and Core Web Vitals. Suggest improvements for [specific page or overall site].", guidance: "Helps rank better and load faster. Ask for Lighthouse audit tips too." },
-          { text: "Write meta tags, Open Graph, and structured data for [page type]. Include title, description, and social sharing best practices.", guidance: "Essential for visibility. Especially useful for new sites." },
-          { text: "Create a deployment checklist and configuration for deploying this [Next.js / static site] to Vercel. Include environment variables and CI tips.", guidance: "Get from code to live quickly and reliably." }
+          { title: "SEO & Core Web Vitals Optimizer", text: "Optimize this website for SEO and Core Web Vitals. Suggest improvements for [specific page or overall site].", guidance: "Helps rank better and load faster. Ask for Lighthouse audit tips too." },
+          { title: "Meta Tags & OG Writer", text: "Write meta tags, Open Graph, and structured data for [page type]. Include title, description, and social sharing best practices.", guidance: "Essential for visibility. Especially useful for new sites." },
+          { title: "Vercel Deployment Checklist", text: "Create a deployment checklist and configuration for deploying this [Next.js / static site] to Vercel. Include environment variables and CI tips.", guidance: "Get from code to live quickly and reliably." }
         ]
       }
     ],
@@ -980,22 +981,22 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Understanding & Awareness",
         prompts: [
-          { text: "Explain how a zero-click exploit works in apps like iMessage or WhatsApp. Include why it's dangerous and real-world examples.", guidance: "This grok prompt for zero click threats helps you grasp the mechanics so you can take the risk seriously and prioritize defenses." },
-          { text: "List the top zero-click threats in 2026 for mobile devices and how they typically spread without user action.", guidance: "Use this to stay informed on current vectors and adjust your habits accordingly for better protection." }
+          { title: "Zero-Click Exploit Explainer", text: "Explain how a zero-click exploit works in apps like iMessage or WhatsApp. Include why it's dangerous and real-world examples.", guidance: "This grok prompt for zero click threats helps you grasp the mechanics so you can take the risk seriously and prioritize defenses." },
+          { title: "Top 2026 Zero-Click Threats", text: "List the top zero-click threats in 2026 for mobile devices and how they typically spread without user action.", guidance: "Use this to stay informed on current vectors and adjust your habits accordingly for better protection." }
         ]
       },
       {
         title: "Prevention & Hardening",
         prompts: [
-          { text: "Create a prioritized checklist to protect my iPhone or Android from zero-click attacks. Focus on updates, settings, and apps to avoid.", guidance: "This practical grok prompt turns abstract threats into a simple daily/weekly routine you can actually follow." },
-          { text: "What settings in WhatsApp, Signal, or iMessage reduce zero-click risks the most? Explain why each one helps.", guidance: "Get targeted configuration advice to lock down your messaging apps against silent exploits." }
+          { title: "Zero-Click Protection Checklist", text: "Create a prioritized checklist to protect my iPhone or Android from zero-click attacks. Focus on updates, settings, and apps to avoid.", guidance: "This practical grok prompt turns abstract threats into a simple daily/weekly routine you can actually follow." },
+          { title: "Messaging App Hardening", text: "What settings in WhatsApp, Signal, or iMessage reduce zero-click risks the most? Explain why each one helps.", guidance: "Get targeted configuration advice to lock down your messaging apps against silent exploits." }
         ]
       },
       {
         title: "Detection & Response",
         prompts: [
-          { text: "What unusual signs might indicate a zero-click compromise on my phone? How should I investigate and respond safely?", guidance: "This grok prompt to keep you safe gives you early warning signs and a calm step-by-step response plan." },
-          { text: "Outline what to do in the first 30 minutes if I suspect a zero-click attack. Include preserving evidence and who to contact.", guidance: "Be prepared with this incident response prompt so you act quickly and correctly instead of panicking." }
+          { title: "Compromise Detection Signs", text: "What unusual signs might indicate a zero-click compromise on my phone? How should I investigate and respond safely?", guidance: "This grok prompt to keep you safe gives you early warning signs and a calm step-by-step response plan." },
+          { title: "30-Minute Incident Response", text: "Outline what to do in the first 30 minutes if I suspect a zero-click attack. Include preserving evidence and who to contact.", guidance: "Be prepared with this incident response prompt so you act quickly and correctly instead of panicking." }
         ]
       }
     ],
@@ -1022,25 +1023,25 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Meme Creation & Captions",
         prompts: [
-          { text: "Turn this situation into 5 different meme formats with perfect captions: [describe situation or paste text].", guidance: "Core grok meme prompt. Great for quickly producing multiple options with different vibes and formats." },
-          { text: "Write 8 savage or wholesome captions for this image/concept that would actually perform on X.", guidance: "This prompt for ultimate meme machine helps you nail tone and timing for maximum engagement." },
-          { text: "Create a brand new meme template based on [absurd premise]. Give it a name and 6 example uses.", guidance: "Use this when you want Grok to invent original formats instead of recycling old ones." },
-          { text: "Generate 7 variations of this meme idea, each in a completely different format (e.g. drake, expanding brain, one does not simply).", guidance: "Rapid prototyping for meme lords who want options fast." }
+          { title: "Multi-Format Meme Generator", text: "Turn this situation into 5 different meme formats with perfect captions: [describe situation or paste text].", guidance: "Core grok meme prompt. Great for quickly producing multiple options with different vibes and formats." },
+          { title: "High-Engagement Caption Writer", text: "Write 8 savage or wholesome captions for this image/concept that would actually perform on X.", guidance: "This prompt for ultimate meme machine helps you nail tone and timing for maximum engagement." },
+          { title: "Original Meme Template Inventor", text: "Create a brand new meme template based on [absurd premise]. Give it a name and 6 example uses.", guidance: "Use this when you want Grok to invent original formats instead of recycling old ones." },
+          { title: "Meme Variation Machine", text: "Generate 7 variations of this meme idea, each in a completely different format (e.g. drake, expanding brain, one does not simply).", guidance: "Rapid prototyping for meme lords who want options fast." }
         ]
       },
       {
         title: "Trend Surfing & Roasts",
         prompts: [
-          { text: "Roast [person/thing/trend] using only current meme formats and references. Keep it funny not mean.", guidance: "Excellent for savage meme-style roasts that feel fresh." },
-          { text: "Turn this boring fact into the most viral possible meme thread on X. Include hooks and punchlines.", guidance: "Perfect for turning dry topics into meme gold with Grok's real-time awareness." },
-          { text: "Create a full 6-tweet meme thread that turns [boring topic] into the funniest thing on the timeline.", guidance: "Thread mode for maximum virality and engagement." }
+          { title: "Current Meme Format Roaster", text: "Roast [person/thing/trend] using only current meme formats and references. Keep it funny not mean.", guidance: "Excellent for savage meme-style roasts that feel fresh." },
+          { title: "Boring Fact to Viral Thread", text: "Turn this boring fact into the most viral possible meme thread on X. Include hooks and punchlines.", guidance: "Perfect for turning dry topics into meme gold with Grok's real-time awareness." },
+          { title: "6-Tweet Meme Thread Creator", text: "Create a full 6-tweet meme thread that turns [boring topic] into the funniest thing on the timeline.", guidance: "Thread mode for maximum virality and engagement." }
         ]
       },
       {
         title: "Advanced Meme Strategies",
         prompts: [
-          { text: "Analyze this meme and improve it: [paste meme or describe]. Make it 10x funnier with better structure and timing.", guidance: "Meta prompt for iterating on your own meme game." },
-          { text: "Invent a meme format that combines [two unrelated things] and give 4 killer examples with captions.", guidance: "For when you want original, never-seen-before meme formats." }
+          { title: "Meme Improvement Analyzer", text: "Analyze this meme and improve it: [paste meme or describe]. Make it 10x funnier with better structure and timing.", guidance: "Meta prompt for iterating on your own meme game." },
+          { title: "Hybrid Meme Format Inventor", text: "Invent a meme format that combines [two unrelated things] and give 4 killer examples with captions.", guidance: "For when you want original, never-seen-before meme formats." }
         ]
       }
     ],
@@ -1063,16 +1064,16 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Classic & Savage Roasts",
         prompts: [
-          { text: "Roast [person or thing] in the style of a stand-up comedian but keep it clever and not mean. Use 5 short punchy lines.", guidance: "This classic savage roast prompt gives you quick, quotable material." },
-          { text: "Write a multi-layered roast for [target] that starts light and gets increasingly unhinged. End with a twist.", guidance: "Use for longer roast sessions or when you want escalating comedy." },
-          { text: "Create 7 savage but affectionate roasts for my friend who [specific trait or habit].", guidance: "Great for group chats and keeping things fun among friends." }
+          { title: "Stand-Up Style Roast Lines", text: "Roast [person or thing] in the style of a stand-up comedian but keep it clever and not mean. Use 5 short punchy lines.", guidance: "This classic savage roast prompt gives you quick, quotable material." },
+          { title: "Escalating Multi-Layered Roast", text: "Write a multi-layered roast for [target] that starts light and gets increasingly unhinged. End with a twist.", guidance: "Use for longer roast sessions or when you want escalating comedy." },
+          { title: "Affectionate Friend Roast Pack", text: "Create 7 savage but affectionate roasts for my friend who [specific trait or habit].", guidance: "Great for group chats and keeping things fun among friends." }
         ]
       },
       {
         title: "Trend & Situational Roasts",
         prompts: [
-          { text: "Roast this current trend or news story using only memes and pop culture references: [paste or describe].", guidance: "Leverages Grok's real-time knowledge for timely savage burns." },
-          { text: "Turn my embarrassing story into a roast I can tell on myself that actually gets laughs.", guidance: "Self-roast prompt that turns vulnerability into comedy gold." }
+          { title: "Trend/News Meme Roast", text: "Roast this current trend or news story using only memes and pop culture references: [paste or describe].", guidance: "Leverages Grok's real-time knowledge for timely savage burns." },
+          { title: "Self-Roast from Embarrassing Story", text: "Turn my embarrassing story into a roast I can tell on myself that actually gets laughs.", guidance: "Self-roast prompt that turns vulnerability into comedy gold." }
         ]
       }
     ],
@@ -1093,24 +1094,24 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Story Starters & Branching",
         prompts: [
-          { text: "Start a [genre] story in [setting]. At the end of each section give me 3 choices for what happens next.", guidance: "Classic story mode prompt for interactive, replayable narratives." },
-          { text: "Create a high-concept premise for a story where [wild premise]. Give me the first chapter and 4 possible directions.", guidance: "Good for kicking off longer collaborative storytelling sessions." },
-          { text: "Write an opening scene for a story called '[title]'. End it on a cliffhanger that forces the reader to continue.", guidance: "Perfect for grabbing attention and starting collaborative writing." }
+          { title: "Branching Story Starter", text: "Start a [genre] story in [setting]. At the end of each section give me 3 choices for what happens next.", guidance: "Classic story mode prompt for interactive, replayable narratives." },
+          { title: "High-Concept Premise Launcher", text: "Create a high-concept premise for a story where [wild premise]. Give me the first chapter and 4 possible directions.", guidance: "Good for kicking off longer collaborative storytelling sessions." },
+          { title: "Cliffhanger Opening Scene", text: "Write an opening scene for a story called '[title]'. End it on a cliffhanger that forces the reader to continue.", guidance: "Perfect for grabbing attention and starting collaborative writing." }
         ]
       },
       {
         title: "Worldbuilding & Characters",
         prompts: [
-          { text: "Build a weird but consistent world where [core rule or absurdity]. Include factions, daily life, and one major conflict.", guidance: "Excellent for deep lore and setting that feels real despite being unhinged." },
-          { text: "Create a morally gray protagonist with [quirk]. Show me 3 scenes that reveal different sides of them.", guidance: "Helps you develop layered characters instead of one-note heroes." },
-          { text: "Rewrite this basic plot as a [different genre] version with completely different tone and stakes.", guidance: "Great remix prompt for seeing how stories change with genre shifts." },
-          { text: "Design 5 unforgettable side characters for a story about [main premise]. Give each a secret and a flaw.", guidance: "Builds rich ensemble casts fast." }
+          { title: "Weird Consistent World Builder", text: "Build a weird but consistent world where [core rule or absurdity]. Include factions, daily life, and one major conflict.", guidance: "Excellent for deep lore and setting that feels real despite being unhinged." },
+          { title: "Morally Gray Protagonist", text: "Create a morally gray protagonist with [quirk]. Show me 3 scenes that reveal different sides of them.", guidance: "Helps you develop layered characters instead of one-note heroes." },
+          { title: "Genre Remix Plot Twister", text: "Rewrite this basic plot as a [different genre] version with completely different tone and stakes.", guidance: "Great remix prompt for seeing how stories change with genre shifts." },
+          { title: "Unforgettable Side Characters", text: "Design 5 unforgettable side characters for a story about [main premise]. Give each a secret and a flaw.", guidance: "Builds rich ensemble casts fast." }
         ]
       },
       {
         title: "Plot Twists & Endings",
         prompts: [
-          { text: "Generate 3 shocking but fair plot twists for a story where [current plot point].", guidance: "Story mode activated for those 'no way' moments that still make sense." }
+          { title: "Fair Plot Twist Generator", text: "Generate 3 shocking but fair plot twists for a story where [current plot point].", guidance: "Story mode activated for those 'no way' moments that still make sense." }
         ]
       }
     ],
@@ -1132,16 +1133,16 @@ export const categoryContent: Record<string, CategoryContent> = {
       {
         title: "Chaotic & Funny Prompts",
         prompts: [
-          { text: "A [normal thing] but it's [absurd twist] in the style of [artist or aesthetic]. Highly detailed, cinematic lighting.", guidance: "This wild image prompt template is reliable for creating shareable, laugh-out-loud concepts." },
-          { text: "Generate 5 completely unhinged image prompts based on this idea: [your seed concept]. Make them increasingly ridiculous.", guidance: "Use when you want Grok to escalate the weirdness for you." },
-          { text: "Turn this meme or joke into a detailed image prompt that would make the perfect visual: [paste meme or joke].", guidance: "Excellent bridge between text humor and actual image generation." }
+          { title: "Absurd Thing Remix", text: "A [normal thing] but it's [absurd twist] in the style of [artist or aesthetic]. Highly detailed, cinematic lighting.", guidance: "This wild image prompt template is reliable for creating shareable, laugh-out-loud concepts." },
+          { title: "Escalating Unhinged Prompts", text: "Generate 5 completely unhinged image prompts based on this idea: [your seed concept]. Make them increasingly ridiculous.", guidance: "Use when you want Grok to escalate the weirdness for you." },
+          { title: "Meme to Image Prompt", text: "Turn this meme or joke into a detailed image prompt that would make the perfect visual: [paste meme or joke].", guidance: "Excellent bridge between text humor and actual image generation." }
         ]
       },
       {
         title: "Style & Situation Remixes",
         prompts: [
-          { text: "A [profession or animal] having an existential crisis in [unexpected location], photorealistic, dramatic lighting.", guidance: "Reliable formula for funny yet high-quality wild images." },
-          { text: "Create a prompt for an image that perfectly captures the feeling of [emotion or vibe] but in the most over-the-top way possible.", guidance: "Good for emotional concepts turned visually extreme." }
+          { title: "Existential Crisis Scene", text: "A [profession or animal] having an existential crisis in [unexpected location], photorealistic, dramatic lighting.", guidance: "Reliable formula for funny yet high-quality wild images." },
+          { title: "Over-the-Top Emotion Visual", text: "Create a prompt for an image that perfectly captures the feeling of [emotion or vibe] but in the most over-the-top way possible.", guidance: "Good for emotional concepts turned visually extreme." }
         ]
       }
     ],
@@ -1168,10 +1169,10 @@ export const getCategoryPrompts = (slug: string): CategoryContent => {
       {
         title: "Core Prompts for " + title,
         prompts: [
-          { text: `Act as an expert ${title}. Help me with [specific task or challenge]. Give step-by-step guidance.`, guidance: `Strong all-purpose grok prompt for ${slug.replace(/-/g, ' ')}. Replace the brackets and get targeted, actionable help fast.` },
-          { text: `Analyze [situation] from a ${title} perspective. Highlight risks, opportunities, and recommended actions.`, guidance: `Use this grok ${slug} prompt when you need expert analysis from that specific viewpoint. Excellent for decision support.` },
-          { text: `Create a reusable template or checklist I can use for common ${title.toLowerCase()} tasks.`, guidance: `Practical grok prompt that generates ready-to-reuse systems. Great for building repeatable processes in ${slug.replace(/-/g, ' ')}.` },
-          { text: `Review this [document/plan/idea] as a ${title} professional and suggest specific improvements.`, guidance: `This grok prompt gives professional-grade feedback. Ideal for refining work in ${slug.replace(/-/g, ' ')}.` }
+          { title: `Expert ${title} Guidance`, text: `Act as an expert ${title}. Help me with [specific task or challenge]. Give step-by-step guidance.`, guidance: `Strong all-purpose grok prompt for ${slug.replace(/-/g, ' ')}. Replace the brackets and get targeted, actionable help fast.` },
+          { title: `${title} Perspective Analysis`, text: `Analyze [situation] from a ${title} perspective. Highlight risks, opportunities, and recommended actions.`, guidance: `Use this grok ${slug} prompt when you need expert analysis from that specific viewpoint. Excellent for decision support.` },
+          { title: `Reusable ${title} Template`, text: `Create a reusable template or checklist I can use for common ${title.toLowerCase()} tasks.`, guidance: `Practical grok prompt that generates ready-to-reuse systems. Great for building repeatable processes in ${slug.replace(/-/g, ' ')}.` },
+          { title: `${title} Professional Review`, text: `Review this [document/plan/idea] as a ${title} professional and suggest specific improvements.`, guidance: `This grok prompt gives professional-grade feedback. Ideal for refining work in ${slug.replace(/-/g, ' ')}.` }
         ]
       }
     ]

@@ -100,7 +100,7 @@ export default function BestGrokPrompts() {
         <p className="text-gray-600 mb-4">These everyday prompts are perfect for quick wins.</p>
         <div className="grid gap-6 md:grid-cols-2">
           {bestPrompts.general.map((p, idx) => (
-            <PromptCard key={idx} text={p.text} guidance={p.guidance} />
+            <PromptCard key={idx} title={p.title} text={p.text} guidance={p.guidance} />
           ))}
         </div>
       </section>
@@ -109,7 +109,7 @@ export default function BestGrokPrompts() {
         <h2 className="text-3xl font-bold mb-6 border-b pb-3">Productivity</h2>
         <div className="grid gap-6 md:grid-cols-2">
           {bestPrompts.productivity.map((p, idx) => (
-            <PromptCard key={idx} text={p.text} guidance={p.guidance} />
+            <PromptCard key={idx} title={p.title} text={p.text} guidance={p.guidance} />
           ))}
         </div>
       </section>
@@ -118,7 +118,7 @@ export default function BestGrokPrompts() {
         <h2 className="text-3xl font-bold mb-6 border-b pb-3">Coding &amp; Technical</h2>
         <div className="grid gap-6 md:grid-cols-2">
           {bestPrompts.coding.map((p, idx) => (
-            <PromptCard key={idx} text={p.text} guidance={p.guidance} />
+            <PromptCard key={idx} title={p.title} text={p.text} guidance={p.guidance} />
           ))}
         </div>
       </section>
