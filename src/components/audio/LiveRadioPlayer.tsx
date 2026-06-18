@@ -40,7 +40,7 @@ export function LiveRadioPlayer() {
 
       <Button
         onClick={handleToggle}
-        variant={isPlaying ? "destructive" : "default"}
+        variant={isPlaying ? "outline" : "default"}
         size="lg"
         className="w-full max-w-[260px] gap-2 text-base font-semibold"
       >
