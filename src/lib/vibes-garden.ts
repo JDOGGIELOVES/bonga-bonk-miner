@@ -3,7 +3,7 @@
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
 /** Max garden $BONGA credited per UTC day (idle + taps + quests). 
- * $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.
+ * On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).
  * All earnings auto-deposit to the vault below the threshold.
  */
 export const GARDEN_DAILY_EARN_CAP = 1500;

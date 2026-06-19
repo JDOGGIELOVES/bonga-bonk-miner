@@ -218,7 +218,7 @@ export interface BongaBankStatus {
   lifetimeWithdrawn: number;
   minWithdraw: number;
   canWithdraw: boolean;
-  // dailyOnChainWalletCap removed from bank status UI (primary limit is 10k bank min)
+  // No vault minimum (primary limit is the 20,001 daily on-chain wallet cap)
   pending: {
     miner: number;
     garden: number;

@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       claimed: record.claimed,
       dailyLimit: gardenDailyClaimLimit(),
       earnCap: gardenDailyClaimLimit(),
-      note: "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. All verified garden earnings auto-deposit to the vault for smaller amounts.",
+      note: "No minimum vault amount. On-chain withdrawals up to 20,001 $BONGA daily.",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Garden status unavailable.";

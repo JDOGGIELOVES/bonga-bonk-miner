@@ -292,7 +292,7 @@ export default async function TreasuryPage() {
           <div className="mt-10 text-center text-sm text-muted-foreground max-w-prose mx-auto">
             <p className="mb-2">
               <strong className="text-foreground">Sustainable economics:</strong> Players accumulate mined $BONGA in a personal off-chain <strong>Bonga Bank</strong>. 
-              Small claims auto-deposit there. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. 
+              Earnings auto-deposit there. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum). 
               This keeps Solana fees paid by the treasury much lower than the value of $BONGA distributed to the community.
             </p>
             <Link href="/bonga-bank" className="inline-flex items-center gap-1 text-bonga-teal hover:underline font-medium">

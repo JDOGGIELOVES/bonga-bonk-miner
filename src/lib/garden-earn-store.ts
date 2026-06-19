@@ -10,7 +10,7 @@ import {
 
 /**
  * Garden daily earn/claim cap (1500).
- * $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.
+ * On-chain withdrawals up to 20,001 $BONGA daily per wallet (no minimum vault threshold).
  * Earnings below the min auto-deposit to the player's vault.
  */
 

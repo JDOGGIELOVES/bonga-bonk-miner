@@ -15,26 +15,25 @@ export function minerDailyClaimLimit(): number {
 }
 
 /**
- * Combined daily on-chain wallet cap (explicitly pinned default: 2600).
- * Pinned components: minerDailyClaimLimit (1000) + gardenDailyClaimLimit (1500) + PET_LOVE_REWARD (1000).
+ * Combined daily on-chain wallet cap.
  * 
  * IMPORTANT CLARIFICATION FOR PLAYERS:
- * $BONGA earned from the games can ONLY be claimed on-chain after your personal BONGA BANK VAULT 
- * reaches 10,000 $BONGA (see onChainClaimRequiresBankMin / getBankMinWithdraw).
+ * $BONGA earned from the games can be claimed on-chain from your personal BONGA BANK VAULT 
+ * (no minimum threshold, up to 20,001 $BONGA daily per wallet — see walletMaxOnChainBongaPerDay).
  * All smaller earnings auto-deposit to the off-chain Bonga Bank Vault for free (no SOL cost to treasury).
  * 
  * This daily cap is a secondary velocity limit on actual treasury on-chain payouts per wallet per UTC day.
  */
-export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 10000; // raised to allow claiming full daily game earnings (e.g. 10k banked) in one go. Previously 3600 was too low and combined with min 10k withdraw + flags made it unplayable.
+export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 20001;
 
 export function walletMaxOnChainBongaPerDay(): number {
-  // Default raised so players can withdraw their full ~10k game earnings on-chain once bank min is hit.
-  // Old sum (1000+1500+1000) was causing "3700-ish" effective limits + flags blocking play.
-  const defaultCombined = 10000;
+  // Daily on-chain limit per wallet (across all sources: miner + garden + pet + stake etc.)
+  // Set to 20,001 as requested. Players can withdraw up to this daily from the vault.
+  const defaultCombined = 20001;
   return envInt("WALLET_MAX_ON_CHAIN_BONGA_PER_DAY", defaultCombined);
 }
 
-/** The primary threshold players must reach in their Bonga Bank before any on-chain claims/withdrawals are possible. */
+/** The minimum in Bonga Bank before on-chain withdrawals are allowed. Currently set very low (1) so nothing prevents withdrawing amounts like 10,000 from the vault (subject to daily on-chain cap of 20,001). */
 export function onChainClaimRequiresBankMin(): number {
   return getBankMinWithdraw();
 }

@@ -77,7 +77,7 @@ export async function GET(request: Request) {
     bankedBonga: bank.bankedBonga,
     lifetimeBanked: bank.lifetimeBanked,
     lifetimeWithdrawn: bank.lifetimeWithdrawn,
-    minWithdraw: min,
+    minWithdraw: min, // 0 = no minimum, allows withdrawing 10k+ up to daily 20,001 cap
     canWithdraw: bank.bankedBonga >= min,
     pending: {
       miner: pendingMiner,
@@ -93,6 +93,6 @@ export async function GET(request: Request) {
       totalUniquePlayers: community.totalUniquePlayers,
       lastUpdated: community.lastUpdated,
     },
-    note: "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches the minWithdraw (10,000 by default). All smaller earnings auto-deposit to the vault.",
+    note: "No minimum (0) to withdraw the 10,000 from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain per wallet.",
   });
 }

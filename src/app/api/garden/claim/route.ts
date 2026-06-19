@@ -271,6 +271,6 @@ export async function GET() {
     earnCap: gardenDailyClaimLimit(),
     maxClaimsPerIp: maxGardenClaimsPerIpPerDay(),
     walletOnChainCap: walletMaxOnChainBongaPerDay(),
-    note: "$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Garden earnings (up to daily cap) auto-deposit to Bonga Bank Vault for amounts below the threshold.",
+    note: "No minimum vault amount. On-chain up to 20,001 $BONGA daily per wallet.",
   });
 }

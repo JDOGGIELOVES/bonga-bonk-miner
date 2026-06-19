@@ -341,7 +341,7 @@ export const UTILITY = [
   {
     icon: "💰",
     title: "NFT Staking — Lock to Earn",
-    description: "Stake your Bonga NFT for daily $BONGA (up to 3,500 for Cosmic). All rewards automatically deposit to your Bonga Bank Vault — no manual claim button required. On-chain withdrawals from the vault only at the 10,000 $BONGA threshold. You keep full custody of the NFTs.",
+    description: "Stake your Bonga NFT for daily $BONGA (up to 3,500 for Cosmic). All rewards automatically deposit to your Bonga Bank Vault — no manual claim button required. On-chain withdrawals from the vault up to 20,001 $BONGA daily (no minimum threshold). You keep full custody of the NFTs.",
   },
   {
     icon: "👕",

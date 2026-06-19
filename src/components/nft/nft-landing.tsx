@@ -64,7 +64,7 @@ export function NFTLanding() {
 
                   <div className="mt-4 pt-3 border-t border-border/50 text-[10px] text-muted-foreground leading-snug">
                     Auto-deposited to your Bonga Bank Vault.<br />
-                    On-chain once you hit the 10,000 $BONGA threshold.
+                    On-chain withdrawals up to 20,001 $BONGA daily (no minimum).
                   </div>
                 </div>
               );

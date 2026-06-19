@@ -199,7 +199,7 @@ export default function BongaBankPage() {
                   <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
                 </div>
                 <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
-                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • 10,000 BANK CAP</div>
+                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • NO MIN • 20,001 DAILY ON-CHAIN CAP</div>
               </div>
 
               {/* Hinge and rivets */}
@@ -267,7 +267,7 @@ export default function BongaBankPage() {
                 {/* Rivets and frame details */}
                 <div className="absolute inset-0 pointer-events-none border border-zinc-500/30" style={{ background: 'repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(161,161,170,0.15) 19px, rgba(161,161,170,0.15) 20px)' }} />
               </div>
-              <p className="mt-4 text-center text-xs text-muted-foreground max-w-xs mx-auto">Your mined $BONGA savings are kept in a secure off-chain vault. <strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong> This keeps the economics sustainable for the whole community.</p>
+              <p className="mt-4 text-center text-xs text-muted-foreground max-w-xs mx-auto">Your mined $BONGA savings are kept in a secure off-chain vault. No minimum to withdraw on-chain (up to 20,001 $BONGA per day per wallet). This keeps the economics sustainable for the whole community.</p>
             </div>
           )}
 
@@ -295,28 +295,23 @@ export default function BongaBankPage() {
                 {status && (
                   <>
 
-                    {/* Progress toward withdrawable threshold for clear goal */}
+                    {/* Bank balance info - no minimum threshold */}
                     <div className="mb-6">
                       <div className="flex justify-between text-sm mb-1.5">
-                        <span>Progress to on-chain withdrawal</span>
-                        <span className="font-mono">{status.bankedBonga.toLocaleString()} / {status.minWithdraw.toLocaleString()}</span>
+                        <span>Your Bonga Bank balance</span>
+                        <span className="font-mono">{status.bankedBonga.toLocaleString()}</span>
                       </div>
                       <div className="h-3 bg-muted rounded-full overflow-hidden border border-border/60">
                         <div 
                           className="h-full bg-bonga-orange transition-all" 
-                          style={{ width: `${Math.min(100, Math.max(0, (status.bankedBonga / status.minWithdraw) * 100))}%` }}
+                          style={{ width: '100%' }}
                         />
                       </div>
-                      {!status.canWithdraw && status.bankedBonga > 0 && (
-                        <div className="text-xs text-muted-foreground mt-1 text-center">
-                          { (status.minWithdraw - status.bankedBonga).toLocaleString() } more $BONGA mined until you can withdraw your savings on-chain.
-                        </div>
-                      )}
-                      {status.canWithdraw && (
-                        <div className="text-xs text-bonga-teal mt-1 text-center font-medium">Ready to withdraw your mined savings!</div>
-                      )}
+                      <div className="text-xs text-muted-foreground mt-1 text-center">
+                        No minimum to withdraw. Up to 20,001 $BONGA per day on-chain.
+                      </div>
                       <div className="text-[10px] text-muted-foreground mt-2 text-center">
-                        $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches {status.minWithdraw?.toLocaleString() || "10,000"} $BONGA.
+                        No minimum to withdraw the 10,000 from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain.
                       </div>
                     </div>
 
@@ -436,7 +431,7 @@ export default function BongaBankPage() {
                 <ul className="list-disc pl-5 space-y-1">
                   <li>Play the Bonk Miner (1 tap = 1 $BONGA, 1000/day), Vibes Garden (up to 1500/day), Pet Love (1000 per validated image), or stake NFTs — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or "move" buttons in the games.</li>
                   <li>Open the Vault (connect wallet + ENTER) to see your balance and auto-flush any fresh pending earnings.</li>
-                  <li><strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong></li>
+                  <li><strong>No minimum — withdraw from your BONGA BANK VAULT any time (up to 20,001 $BONGA daily on-chain).</strong></li>
                   <li>This keeps Solana fees tiny compared to the value distributed to the community while you still accumulate 100% of everything you mine.</li>
                 </ul>
                 <p className="mt-3">

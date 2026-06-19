@@ -143,7 +143,7 @@ export function ClaimBonga({
       }
       onClaimSuccess?.();
 
-      // Note: $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. On-chain withdrawal from bank is done via the Bonga Bank page.
+      // Note: No vault minimum for on-chain claims. Daily on-chain limit 20,001 $BONGA. Withdraw via Bonga Bank page.
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Deposit to Bank failed.");
     } finally {
@@ -240,7 +240,7 @@ export function ClaimBonga({
               ? "Today\u2019s verified taps have been deposited to your Bonga Bank. Come back tomorrow UTC for more."
               : localClaimable > 0
                 ? "Local progress doesn\u2019t count. With your wallet connected, keep tapping — 1 tap = 1 $BONGA mined directly into your Bonga Bank (up to 1000/day)."
-                : `With your wallet connected, tap to mine. 1 tap = 1 $BONGA mined (up to ${DAILY_BONGA_LIMIT}/day) — goes directly into your Bonga Bank. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.`}
+                : `With your wallet connected, tap to mine. 1 tap = 1 $BONGA mined (up to ${DAILY_BONGA_LIMIT}/day) — goes directly into your Bonga Bank. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).`}
           </p>
           {serverEarned && (
             <p className="mt-2 text-xs text-muted-foreground">

@@ -439,7 +439,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <BongaBonkCharacter isBonking={isBonking} bonkAngle={bonkAngle} />
 
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
-              1 tap = 1 $BONGA · {DAILY_BONGA_LIMIT} max per day — automatically deposited to your Bonga Bank Vault. View & manage in the <a href="/bonga-bank" className="underline">Bonga Bank Vault</a>. On-chain only at 10,000 $BONGA.
+              1 tap = 1 $BONGA · {DAILY_BONGA_LIMIT} max per day — automatically deposited to your Bonga Bank Vault. View & manage in the <a href="/bonga-bank" className="underline">Bonga Bank Vault</a>. On-chain up to 20,001 $BONGA daily (no vault minimum).
             </p>
           </div>
 

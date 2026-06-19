@@ -472,7 +472,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
                 Daily cap {GARDEN_DAILY_EARN_CAP} garden $BONGA total (idle + taps + quests). All earnings auto-deposit to your Bonga Bank Vault. Resets at midnight UTC.
               </li>
               <li>
-                <strong>$BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA.</strong> Small verified claims go straight to bank (no SOL cost).
+                <strong>No vault minimum.</strong> On-chain withdrawals up to 20,001 $BONGA daily. Small earnings auto-deposit to bank.
               </li>
               <li>
                 <span className="font-semibold text-foreground">NFT holders</span> get +25% yield on everything. Connect wallet to activate.

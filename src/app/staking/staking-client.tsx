@@ -238,7 +238,7 @@ export function StakingClient() {
               Lock them up. Earn a lot of $BONGA. High-yield passive rewards from the community treasury while you keep custody of your NFTs.
             </p>
             <div className="mt-3 text-sm text-bonga-teal">
-              Tiered rewards: Common 1000 • Rare 1500 • Legendary 2000 • Cosmic 3500 $BONGA per day • Prorated • All earnings auto-deposited to Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA (combined daily on-chain wallet cap also applies).
+              Tiered rewards: Common 1000 • Rare 1500 • Legendary 2000 • Cosmic 3500 $BONGA per day • Prorated • All earnings auto-deposited to Bonga Bank Vault. No vault minimum for on-chain (up to 20,001 $BONGA daily per wallet).
             </div>
             <div className="mt-2 text-xs text-muted-foreground">
               Community has claimed <span className="font-medium text-foreground">{globalStakeTally ? globalStakeTally.bonga.toLocaleString() : '—'} $BONGA</span> from NFT staking across {globalStakeTally ? globalStakeTally.claims.toLocaleString() : '—'} claims.
@@ -456,7 +456,7 @@ export function StakingClient() {
                 All payouts are transparent on-chain from the community treasury (funded by 7% royalties + love).
               </p>
               <p className="mt-3 text-xs text-bonga-teal">
-                Example: 1 Cosmic = 3500/day (~105,000/month). All staking $BONGA auto-deposits directly to your Bonga Bank Vault. $BONGA can only be claimed on-chain after your BONGA BANK VAULT reaches 10,000 $BONGA. Combined daily on-chain wallet cap also applies. Rates are higher for rarer pieces.
+                Example: 1 Cosmic = 3500/day (~105,000/month). All staking $BONGA auto-deposits directly to your Bonga Bank Vault. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum). Rates are higher for rarer pieces.
               </p>
               <div className="mt-4 text-xs">
                 <Link href="/treasury" className="text-bonga-teal hover:underline">

@@ -252,7 +252,7 @@ export function verifyStakeUnlockSignature(params: {
   );
 }
 
-// --- Bonga Bank Withdraw (the >=10k on-chain claim / treasury spend) ---
+// --- Bonga Bank Withdraw (on-chain claim / treasury spend, up to daily cap) ---
 
 export function buildBankWithdrawMessage(params: {
   wallet: string;
