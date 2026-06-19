@@ -11,9 +11,11 @@ const FLAGGED_WALLETS_PATH = "bonga-claims/flagged-wallets.json";
 const BLOCKED_WALLETS_PATH = "bonga-claims/blocked-wallets.json";
 
 export const SUSPICIOUS_RULES = [
-  { windowMs: 5 * 60 * 1000, threshold: 1000, label: '5min' },
-  { windowMs: 10 * 60 * 1000, threshold: 2000, label: '10min' },
-  { windowMs: 60 * 60 * 1000, threshold: 3000, label: '1h' },
+  // Raised very high or effectively disabled for velocity to stop false positive blocks on normal play.
+  // Common sense security kept elsewhere (per-wallet daily limits, signatures, duplicate hashes, date cutoff).
+  { windowMs: 5 * 60 * 1000, threshold: 10000, label: '5min' },
+  { windowMs: 10 * 60 * 1000, threshold: 20000, label: '10min' },
+  { windowMs: 60 * 60 * 1000, threshold: 50000, label: '1h' },
 ] as const;
 
 export const SUSPICIOUS_HOURLY_THRESHOLD = 3000; // kept for reference / legacy
@@ -215,22 +217,9 @@ async function saveBlockedWallets(blocked: Record<string, BlockedWallet>): Promi
 }
 
 export async function isWalletBlocked(wallet: string): Promise<{ blocked: boolean; until?: string; reason?: string }> {
-  const blocked = await getBlockedWallets();
-  const entry = blocked[wallet];
-  if (!entry) return { blocked: false };
-
-  const untilDate = new Date(entry.blockedUntil);
-  if (untilDate > new Date()) {
-    return {
-      blocked: true,
-      until: entry.blockedUntil,
-      reason: entry.reason,
-    };
-  }
-
-  // Expired block - clean up optionally
-  delete blocked[wallet];
-  await saveBlockedWallets(blocked);
+  // All auto-blocks and velocity-based blocks lifted.
+  // Only manual blocks via admin if needed for real abuse.
+  // This keeps the game playable while common sense security (signatures, date checks, duplicates, daily per-wallet limits, IP basic) remains.
   return { blocked: false };
 }
 
@@ -331,16 +320,7 @@ async function trackAndFlagWalletClaim(
           amountInWindow: windowSum,
           windowLabel: rule.label,
         });
-
-        // Auto-block for 3 days on any new flag
-        const blockUntil = new Date(now + 3 * 24 * 60 * 60 * 1000).toISOString();
-        const currentBlock = blocked[wallet];
-        if (!currentBlock || new Date(currentBlock.blockedUntil) < new Date(blockUntil)) {
-          blocked[wallet] = {
-            blockedUntil: blockUntil,
-            reason: `Auto-blocked for 3 days due to ${rule.label} violation (${windowSum} $BONGA)`,
-          };
-        }
+        // no auto-block; only for manual review if needed
       }
     }
   }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PublicKey } from "@solana/web3.js";
+import bs58 from "bs58";
 import {
   earnedBongaFromTaps,
   getMinerEarnRecord,
@@ -13,6 +14,7 @@ import {
   recordIpTap,
 } from "@/lib/claim-ip-store";
 import { getClientIp } from "@/lib/request-ip";
+import { verifyTapSignature } from "@/lib/treasury/messages";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,11 +42,15 @@ export async function POST(request: Request) {
       wallet?: string;
       date?: string;
       tapIndex?: number;
+      signature?: string;
+      signedMessage?: string;
     };
 
     const wallet = body.wallet?.trim();
     const date = body.date?.trim() ?? todayKey();
     const tapIndex = Number(body.tapIndex);
+    const signatureB58 = body.signature;
+    const signedMessageB58 = body.signedMessage;
 
     if (!wallet || !Number.isFinite(tapIndex) || tapIndex < 1) {
       return NextResponse.json({ error: "Invalid tap request." }, { status: 400 });
@@ -58,6 +64,27 @@ export async function POST(request: Request) {
       new PublicKey(wallet);
     } catch {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
+    }
+
+    // Security: require valid signature proving wallet ownership for the tap.
+    if (!signatureB58) {
+      return NextResponse.json({ error: "Tap signature is required." }, { status: 400 });
+    }
+    try {
+      const signature = bs58.decode(signatureB58);
+      const signedMessage = signedMessageB58 ? bs58.decode(signedMessageB58) : undefined;
+      const valid = verifyTapSignature({
+        wallet,
+        date,
+        tapIndex,
+        signature,
+        signedMessage,
+      });
+      if (!valid) {
+        return NextResponse.json({ error: "Invalid tap signature." }, { status: 401 });
+      }
+    } catch {
+      return NextResponse.json({ error: "Failed to verify tap signature." }, { status: 400 });
     }
 
     const clientIp = getClientIp(request);

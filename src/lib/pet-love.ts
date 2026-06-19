@@ -84,10 +84,9 @@ export function isPetLoveClaimsPaused(): boolean {
   return process.env.PET_LOVE_CLAIMS_PAUSED !== "false";
 }
 
-/** Site-wide Pet Love claim count cap per UTC day (defaults to 30 for testing; set to 0 or unset for no cap). */
 export function getPetMaxDailyClaimsTotal(): number | null {
   const raw = process.env.PET_MAX_DAILY_CLAIMS_TOTAL?.trim();
-  if (!raw) return 30; // default to 30 so we can test the cap behavior
+  if (!raw) return null; // raised: no site-wide cap by default to keep Pet Love playable for real users. Set low only for testing abuse.
   const value = Number(raw);
   if (!Number.isFinite(value) || value <= 0) return null;
   return Math.floor(value);

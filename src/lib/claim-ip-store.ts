@@ -31,7 +31,8 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function maxWalletsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_WALLETS_PER_IP_DAY", 10);
+  // Increased to reduce false positives for players using multiple devices or networks.
+  return envInt("CLAIM_MAX_WALLETS_PER_IP_DAY", 20);
 }
 
 /** Legacy global IP cap — prefer per-kind limits below. */
@@ -61,16 +62,18 @@ function ipKindBongaSpent(
 }
 
 export function maxPetClaimsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_PET_CLAIMS_PER_IP_DAY", 1);
+  // Bumped; one per IP is the spirit, but allow a bit for legitimate retries or family sharing without blocking the feature.
+  return envInt("CLAIM_MAX_PET_CLAIMS_PER_IP_DAY", 3);
 }
 
 export function maxPetSubmissionsPerIpPerDay(): number {
-  return envInt("PET_MAX_SUBMISSIONS_PER_IP_DAY", 1);
+  // Bumped slightly; strict 1 was intended to stop bots but made real users on shared/VPN/mobile networks unable to participate.
+  return envInt("PET_MAX_SUBMISSIONS_PER_IP_DAY", 2);
 }
 
 /** Pet Love: one wallet per connection per day (stops scripted multi-wallet drains). */
 export function maxPetWalletsPerIpPerDay(): number {
-  return envInt("PET_MAX_WALLETS_PER_IP_DAY", 1);
+  return envInt("PET_MAX_WALLETS_PER_IP_DAY", 2);
 }
 
 export function isPetClientIpRequired(): boolean {
@@ -78,7 +81,8 @@ export function isPetClientIpRequired(): boolean {
 }
 
 export function maxMinerClaimsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_MINER_CLAIMS_PER_IP_DAY", 20);
+  // Raised; auto-deposits mean fewer "claims", but overlapping with other limits was excessive.
+  return envInt("CLAIM_MAX_MINER_CLAIMS_PER_IP_DAY", 100);
 }
 
 export function maxGardenClaimsPerIpPerDay(): number {
@@ -90,7 +94,8 @@ export function minMsBetweenIpClaims(): number {
 }
 
 export function maxTapsPerIpPerDay(): number {
-  return envInt("CLAIM_MAX_TAPS_PER_IP_DAY", 15_000);
+  // Raised significantly. Combined with per-wallet 1k and other checks, low caps were over-blocking normal fast tapping sessions.
+  return envInt("CLAIM_MAX_TAPS_PER_IP_DAY", 100_000);
 }
 
 export function isIpClaimLimitsEnabled(): boolean {

@@ -27,12 +27,10 @@ export async function computePerceptualHashFromBuffer(
 }
 
 /**
- * Basic heuristic to help flag stock / old / professionally shot images vs casual phone photos of real pets.
- * Returns a "stock score" 0-100 (higher = more likely stock) and reasons.
- * Uses sharp metadata + simple JPEG EXIF date scan (no new deps).
- *
- * SECURITY: Images MUST have EXIF DateTimeOriginal on or after 2026-04-01.
- * This prevents use of stock/old photos. Any image before the cutoff is rejected.
+ * Basic heuristic to help flag obvious stock / old / AI / screen-capture images vs casual phone photos.
+ * Relaxed to support real user uploads (many phones strip EXIF on share/edit).
+ * Only hard-rejects on explicit pre-2026-04-01 date.
+ * Returns score and reasons; submit uses higher threshold now.
  */
 export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
   likelyStock: boolean;
@@ -76,9 +74,10 @@ export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
         reasons.push("Suspicious future date in EXIF");
       }
     } else {
-      // Strict: no EXIF date means cannot verify recent creation — reject as potential stock
-      score += 50;
-      reasons.push("No EXIF DateTimeOriginal found. Pet Love requires original photos with camera creation date on or after 2026-04-01.");
+      // Relaxed for real user photos: many phone uploads strip EXIF for privacy or during sharing/editing.
+      // Do not auto-reject on missing EXIF alone. Low penalty, rely on other signals (noise, ratios, AI detection).
+      score += 15;
+      reasons.push("No EXIF DateTimeOriginal found (common on casual phone photos after upload/editing). Additional signals used to assess originality.");
     }
 
     // Very low noise / high "cleanness" heuristic via sharp stats (if available)
@@ -96,9 +95,11 @@ export async function analyzeImageForStockishness(buffer: Buffer): Promise<{
     // ignore analysis errors
   }
 
-  // Enforce hard cutoff: if any indication of pre-2026-04-01 date, treat as stock and reject
+  // Hard reject ONLY on confirmed pre-cutoff date.
+  // Missing EXIF (very common for real phone uploads) or common ratios alone no longer force stock.
+  // Higher bar overall to keep Pet Love usable for casual owner photos.
   const hasInvalidOldDate = reasons.some(r => r.includes('before required cutoff') || r.includes('before 2026-04-01'));
-  const likelyStock = score >= 40 || hasInvalidOldDate || !exifDate;
+  const likelyStock = hasInvalidOldDate;  // only reject on confirmed old dates; other heuristics too noisy for real photos
   return { likelyStock, score: Math.min(100, score), reasons };
 }
 

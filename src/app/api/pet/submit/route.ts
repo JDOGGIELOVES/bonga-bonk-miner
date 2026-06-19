@@ -108,15 +108,16 @@ export async function POST(request: Request) {
         );
       }
 
-      // Additional server-side check for stock / AI / old professional photos
+      // Stock check: only reject if creation date before cutoff (common sense anti-stock).
+      // Other heuristics (no EXIF, aspect ratios, etc.) were too aggressive and blocked real photos.
       try {
         const { analyzeImageForStockishness } = await import("@/lib/pet-image-hash-server");
         const stockAnalysis = await analyzeImageForStockishness(imageBuffer);
-        if (stockAnalysis.likelyStock && stockAnalysis.score >= 45) {
+        if (stockAnalysis.likelyStock) {
           return NextResponse.json(
             {
               error:
-                "This photo looks like it may be from stock, a screen capture, or AI-generated (or creation date before 2026-04-01). Pet Love only accepts original recent photos taken on or after April 1, 2026. Please upload a casual photo of your own hand petting your pet taken after that date.",
+                "This photo has a creation date before 2026-04-01. Pet Love only accepts original recent photos taken on or after April 1, 2026. Please upload a casual photo of your own hand petting your pet taken after that date.",
             },
             { status: 400 }
           );

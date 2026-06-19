@@ -60,6 +60,7 @@ export function PetLoveModule() {
   const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
   const { setVisible } = useWalletModal();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const currentVerifyFileRef = useRef<File | null>(null);
 
   const [gallery, setGallery] = useState<PetGalleryItem[]>([]);
   const [pastUploads, setPastUploads] = useState<PetGalleryItem[]>([]);
@@ -77,6 +78,7 @@ export function PetLoveModule() {
   const [petLabel, setPetLabel] = useState("");
   const [confidence, setConfidence] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -122,6 +124,7 @@ export function PetLoveModule() {
       setStatus(null);
       setTodaySubmission(null);
       setPastUploads([]);
+      currentVerifyFileRef.current = null;
       return;
     }
     const wallet = publicKey.toBase58();
@@ -156,6 +159,7 @@ export function PetLoveModule() {
     setVerifyReason("");
     setPetLabel("");
     setConfidence(0);
+    currentVerifyFileRef.current = null;
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -163,6 +167,7 @@ export function PetLoveModule() {
     resetSelection();
     if (!file) return;
 
+    currentVerifyFileRef.current = file;
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
     setSelectedFile(file);
@@ -170,6 +175,11 @@ export function PetLoveModule() {
     setError("");
 
     const result = await verifyPetPhotoOnDevice(file);
+    if (currentVerifyFileRef.current !== file) {
+      URL.revokeObjectURL(url);
+      return;
+    }
+
     if (result.ok) {
       setPetLabel(result.petLabel);
       setConfidence(result.confidence);
@@ -196,6 +206,8 @@ export function PetLoveModule() {
         computePerceptualHashFromFile(file),
       ]);
 
+      if (currentVerifyFileRef.current !== file) return;
+
       if (!perceptualHash) {
         setVerifyState("failed");
         setVerifyReason(
@@ -209,6 +221,8 @@ export function PetLoveModule() {
         perceptualHash,
       });
 
+      if (currentVerifyFileRef.current !== file) return;
+
       if (duplicateCheck.duplicate) {
         setVerifyState("failed");
         setVerifyReason(
@@ -218,8 +232,10 @@ export function PetLoveModule() {
         return;
       }
 
+      if (currentVerifyFileRef.current !== file) return;
       setVerifyState(nextState);
     } catch (err) {
+      if (currentVerifyFileRef.current !== file) return;
       setVerifyState("failed");
       setVerifyReason(
         err instanceof Error
@@ -241,6 +257,7 @@ export function PetLoveModule() {
     }
 
     setSubmitting(true);
+    setIsSigning(true);
     setError("");
     setMessage("");
 
@@ -290,6 +307,7 @@ export function PetLoveModule() {
       setError(err instanceof Error ? err.message : "Submission failed.");
     } finally {
       setSubmitting(false);
+      setIsSigning(false);
     }
   };
 
@@ -698,7 +716,7 @@ export function PetLoveModule() {
                   {submitting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing & sharing...
+                      {isSigning ? "Waiting for wallet signature..." : "Signing & sharing..."}
                     </>
                   ) : (
                     <>
@@ -717,7 +735,7 @@ export function PetLoveModule() {
                 {submitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing & sharing...
+                    {isSigning ? "Waiting for wallet signature..." : "Signing & sharing..."}
                   </>
                 ) : (
                   <>

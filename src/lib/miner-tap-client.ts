@@ -51,6 +51,8 @@ export async function fetchMinerEarned(wallet: string): Promise<MinerEarnedStatu
 export async function registerMinerTap(params: {
   wallet: string;
   tapIndex: number;
+  signature?: string;
+  signedMessage?: string;
 }): Promise<MinerTapSuccess | MinerTapError> {
   const response = await fetch("/api/miner/tap", {
     method: "POST",
@@ -59,6 +61,8 @@ export async function registerMinerTap(params: {
       wallet: params.wallet,
       date: todayKey(),
       tapIndex: params.tapIndex,
+      signature: params.signature,
+      signedMessage: params.signedMessage,
     }),
   });
 

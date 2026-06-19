@@ -6,7 +6,7 @@ import { withWalletClaimLock } from "@/lib/claim-lock";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
 
 const BANK_BLOB_DIR = "bonga-bank";
-const MIN_BANK_WITHDRAW = envInt("BONGA_BANK_MIN_WITHDRAW", 10000);
+const MIN_BANK_WITHDRAW = envInt("BONGA_BANK_MIN_WITHDRAW", 10000); // kept at 10k to batch small earnings off-chain (gas savings for treasury). All game earnings auto-deposit here until threshold.
 
 function envInt(name: string, fallback: number): number {
   const raw = process.env[name]?.trim();

@@ -25,11 +25,12 @@ export function minerDailyClaimLimit(): number {
  * 
  * This daily cap is a secondary velocity limit on actual treasury on-chain payouts per wallet per UTC day.
  */
-export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 3600; // pinned: 1000 (miner) + 1500 (garden) + 1000 (pet)
+export const DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY = 10000; // raised to allow claiming full daily game earnings (e.g. 10k banked) in one go. Previously 3600 was too low and combined with min 10k withdraw + flags made it unplayable.
 
 export function walletMaxOnChainBongaPerDay(): number {
-  const defaultCombined =
-    minerDailyClaimLimit() + gardenDailyClaimLimit() + PET_LOVE_REWARD; // matches DEFAULT_WALLET_MAX_ON_CHAIN_BONGA_PER_DAY when no envs set
+  // Default raised so players can withdraw their full ~10k game earnings on-chain once bank min is hit.
+  // Old sum (1000+1500+1000) was causing "3700-ish" effective limits + flags blocking play.
+  const defaultCombined = 10000;
   return envInt("WALLET_MAX_ON_CHAIN_BONGA_PER_DAY", defaultCombined);
 }
 
