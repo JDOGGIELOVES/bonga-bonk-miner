@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SolanaProvider } from "@/components/solana/solana-provider";
+import { SolanaProviderLoader } from "@/components/solana/solana-provider-loader";
 import { GlobalJsonLd } from "@/components/seo/site-json-ld";
 import {
   DEFAULT_DESCRIPTION,
@@ -90,7 +90,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${jakarta.variable} font-body`}>
         <GlobalJsonLd />
         <ThemeProvider>
-          <SolanaProvider>{children}</SolanaProvider>
+          <SolanaProviderLoader>{children}</SolanaProviderLoader>
         </ThemeProvider>
       </body>
     </html>

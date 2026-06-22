@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import { WalletReadyState } from "@solana/wallet-adapter-base";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { shortenAddress, formatSol } from "@/lib/solana";
@@ -13,13 +14,30 @@ interface WalletButtonProps {
   onConnect?: () => void;
 }
 
+function isInstalled(state: WalletReadyState) {
+  return (
+    state === WalletReadyState.Installed ||
+    state === WalletReadyState.Loadable
+  );
+}
+
 export function BongaWalletButton({ onConnect }: WalletButtonProps) {
   const { connection } = useConnection();
-  const { publicKey, disconnect, connecting, connected, wallet } = useWallet();
+  const {
+    publicKey,
+    disconnect,
+    connecting,
+    connected,
+    wallet,
+    wallets,
+    select,
+    connect,
+  } = useWallet();
   const { setVisible } = useWalletModal();
   const { isHolder, count: nftCount, checking: nftChecking } = useBongaNftHolder();
   const [balance, setBalance] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [connectError, setConnectError] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const prevConnected = useRef(false);
 
@@ -44,6 +62,7 @@ export function BongaWalletButton({ onConnect }: WalletButtonProps) {
 
   useEffect(() => {
     if (connected && !prevConnected.current) {
+      setConnectError(null);
       onConnect?.();
     }
     prevConnected.current = connected;
@@ -59,23 +78,64 @@ export function BongaWalletButton({ onConnect }: WalletButtonProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleConnect = useCallback(async () => {
+    setConnectError(null);
+
+    const installed = wallets.filter((w) => isInstalled(w.readyState));
+    const preferred =
+      installed.find((w) => /phantom/i.test(w.adapter.name)) ??
+      installed.find((w) => /solflare/i.test(w.adapter.name)) ??
+      installed[0];
+
+    if (preferred) {
+      try {
+        if (wallet?.adapter.name !== preferred.adapter.name) {
+          await select(preferred.adapter.name);
+        }
+        await connect();
+        return;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Wallet connection failed";
+        if (!/reject/i.test(message)) {
+          console.warn("[Bonga] Direct wallet connect failed:", message);
+        }
+      }
+    }
+
+    try {
+      setVisible(true);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not open wallet picker";
+      setConnectError(message);
+    }
+  }, [connect, select, setVisible, wallet?.adapter.name, wallets]);
+
   if (!connected || !publicKey) {
     return (
-      <Button
-        variant="peace"
-        size="sm"
-        className="h-9 gap-1.5 px-3 text-xs font-bold sm:h-10 sm:px-4 sm:text-sm"
-        onClick={() => setVisible(true)}
-        disabled={connecting}
-      >
-        {connecting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Wallet className="h-4 w-4" />
-        )}
-        <span className="hidden xs:inline sm:inline">Connect Wallet</span>
-        <span className="xs:hidden sm:hidden">Connect</span>
-      </Button>
+      <div className="flex flex-col items-end gap-1">
+        <Button
+          variant="peace"
+          size="sm"
+          className="h-9 gap-1.5 px-3 text-xs font-bold sm:h-10 sm:px-4 sm:text-sm"
+          onClick={() => void handleConnect()}
+          disabled={connecting}
+        >
+          {connecting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Wallet className="h-4 w-4" />
+          )}
+          <span className="hidden xs:inline sm:inline">Connect Wallet</span>
+          <span className="xs:hidden sm:hidden">Connect</span>
+        </Button>
+        {connectError ? (
+          <p className="max-w-[12rem] text-right text-[10px] text-red-500">
+            {connectError}
+          </p>
+        ) : null}
+      </div>
     );
   }
 
