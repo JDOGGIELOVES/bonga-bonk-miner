@@ -97,8 +97,13 @@ export default function BongaBankPage() {
     if (!walletAddress || !status || !connectedWallet || !signMessage) return;
     if (!status.canWithdraw) return;
 
-    const amount = status.bankedBonga;
-    if (amount < status.minWithdraw) return;
+    const amount =
+      status.withdrawableToday ??
+      Math.min(
+        status.bankedBonga,
+        status.remainingDailyCap ?? status.dailyOnChainCap ?? 20001,
+      );
+    if (amount < status.minWithdraw || amount <= 0) return;
 
     setLoading(true);
     setError(null);
@@ -111,7 +116,12 @@ export default function BongaBankPage() {
         connectedWallet,
         signMessage,
       });
-      setMessage(`Successfully withdrawn ${amount} $BONGA to your wallet!`);
+      const leftover = Math.max(0, (status.bankedBonga ?? 0) - amount);
+      setMessage(
+        leftover > 0
+          ? `Successfully withdrawn ${amount.toLocaleString()} $BONGA to your wallet! ${leftover.toLocaleString()} $BONGA remains in your vault for future days.`
+          : `Successfully withdrawn ${amount.toLocaleString()} $BONGA to your wallet!`,
+      );
       // show explorer in message or alert
       if ((res as any).explorerUrl) {
         window.open((res as any).explorerUrl, "_blank");
@@ -308,11 +318,24 @@ export default function BongaBankPage() {
                         />
                       </div>
                       <div className="text-xs text-muted-foreground mt-1 text-center">
-                        No minimum to withdraw. Up to 20,001 $BONGA per day on-chain.
+                        {status.withdrawableToday != null &&
+                        status.withdrawableToday < status.bankedBonga ? (
+                          <>
+                            Vault: {status.bankedBonga.toLocaleString()} $BONGA · Withdraw up to{" "}
+                            <span className="font-semibold text-bonga-teal">
+                              {status.withdrawableToday.toLocaleString()}
+                            </span>{" "}
+                            today ({(status.dailyOnChainCap ?? 20001).toLocaleString()} daily cap)
+                          </>
+                        ) : (
+                          <>No minimum to withdraw. Up to {(status.dailyOnChainCap ?? 20001).toLocaleString()} $BONGA per day on-chain.</>
+                        )}
                       </div>
-                      <div className="text-[10px] text-muted-foreground mt-2 text-center">
-                        No minimum to withdraw the 10,000 from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain.
-                      </div>
+                      {status.alreadyOnChainToday != null && status.alreadyOnChainToday > 0 ? (
+                        <div className="text-[10px] text-muted-foreground mt-2 text-center">
+                          Already withdrawn on-chain today: {status.alreadyOnChainToday.toLocaleString()} $BONGA
+                        </div>
+                      ) : null}
                     </div>
 
                     {/* Lifetime mined savings stats */}
@@ -341,13 +364,17 @@ export default function BongaBankPage() {
                           disabled={loading}
                           className="rounded-lg bg-bonga-teal px-6 py-2.5 font-semibold text-black hover:bg-bonga-teal/90 disabled:opacity-50"
                         >
-                          {loading ? "Signing &amp; Sending..." : `Withdraw ${status.bankedBonga.toLocaleString()} $BONGA to My Wallet`}
+                          {loading
+                            ? "Signing & Sending..."
+                            : `Withdraw ${(status.withdrawableToday ?? status.bankedBonga).toLocaleString()} $BONGA to My Wallet`}
                         </button>
                       )}
 
                       {!status.canWithdraw && status.bankedBonga > 0 && (
                         <div className="text-sm text-muted-foreground self-center px-2">
-                          Keep playing — bank more mined $BONGA to reach the withdrawal threshold.
+                          {(status.remainingDailyCap ?? 0) <= 0
+                            ? `Daily on-chain cap reached (${(status.dailyOnChainCap ?? 20001).toLocaleString()} $BONGA/day). Your vault balance stays safe — withdraw again tomorrow UTC.`
+                            : "Withdrawal unavailable right now — refresh or check your wallet connection."}
                         </div>
                       )}
 

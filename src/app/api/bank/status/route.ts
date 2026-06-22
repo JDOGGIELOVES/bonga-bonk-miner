@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { PublicKey } from "@solana/web3.js";
 import { getBongaBank, getBankMinWithdraw, getGlobalBankStats } from "@/lib/bonga-bank";
+import { getTreasuryConfig } from "@/lib/treasury/config";
+import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { computeBankWithdrawableAmount } from "@/lib/wallet-daily-cap";
 import { getMinerEarnRecord, claimableFromRecord } from "@/lib/miner-earn-store";
 import { gardenClaimableFromRecord, getGardenEarnRecord, rolloverGardenRecordIfNeeded } from "@/lib/garden-earn-store";
 import { getStakeRecord, computePendingStakeRewards } from "@/lib/stake-store";
@@ -73,12 +77,37 @@ export async function GET(request: Request) {
 
   const totalPending = pendingMiner + pendingGarden + pendingStake + pendingPet;
 
+  let alreadyOnChainToday = 0;
+  const treasuryConfig = getTreasuryConfig();
+  if (treasuryConfig) {
+    try {
+      alreadyOnChainToday = await getTodayClaimedFromTreasury({
+        treasury: treasuryConfig.treasuryPublicKey,
+        recipientWallet: new PublicKey(wallet),
+        mint: treasuryConfig.mint,
+        date,
+      });
+    } catch {
+      alreadyOnChainToday = 0;
+    }
+  }
+
+  const withdrawable = computeBankWithdrawableAmount({
+    bankedBonga: bank.bankedBonga,
+    alreadyOnChainToday,
+    minWithdraw: min,
+  });
+
   return NextResponse.json({
     bankedBonga: bank.bankedBonga,
     lifetimeBanked: bank.lifetimeBanked,
     lifetimeWithdrawn: bank.lifetimeWithdrawn,
     minWithdraw: min, // 0 = no minimum, allows withdrawing 10k+ up to daily 20,001 cap
-    canWithdraw: bank.bankedBonga >= min,
+    dailyOnChainCap: withdrawable.dailyOnChainCap,
+    alreadyOnChainToday: withdrawable.alreadyOnChainToday,
+    remainingDailyCap: withdrawable.remainingDailyCap,
+    withdrawableToday: withdrawable.withdrawableToday,
+    canWithdraw: withdrawable.canWithdraw,
     pending: {
       miner: pendingMiner,
       garden: pendingGarden,
@@ -93,6 +122,9 @@ export async function GET(request: Request) {
       totalUniquePlayers: community.totalUniquePlayers,
       lastUpdated: community.lastUpdated,
     },
-    note: "No minimum (0) to withdraw the 10,000 from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain per wallet.",
+    note:
+      withdrawable.withdrawableToday < bank.bankedBonga
+        ? `Vault holds ${bank.bankedBonga.toLocaleString()} $BONGA — withdraw up to ${withdrawable.withdrawableToday.toLocaleString()} today (${withdrawable.dailyOnChainCap.toLocaleString()} daily on-chain cap).`
+        : "No minimum (0) to withdraw from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain per wallet.",
   });
 }

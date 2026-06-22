@@ -37,3 +37,37 @@ export function walletMaxOnChainBongaPerDay(): number {
 export function onChainClaimRequiresBankMin(): number {
   return getBankMinWithdraw();
 }
+
+export type BankWithdrawableSnapshot = {
+  dailyOnChainCap: number;
+  alreadyOnChainToday: number;
+  remainingDailyCap: number;
+  withdrawableToday: number;
+  canWithdraw: boolean;
+};
+
+/**
+ * How much a player can withdraw from Bonga Bank today.
+ * Vault balance may exceed the daily on-chain cap — withdrawableToday is always capped.
+ */
+export function computeBankWithdrawableAmount(params: {
+  bankedBonga: number;
+  alreadyOnChainToday: number;
+  minWithdraw?: number;
+}): BankWithdrawableSnapshot {
+  const dailyOnChainCap = walletMaxOnChainBongaPerDay();
+  const min = params.minWithdraw ?? getBankMinWithdraw();
+  const banked = Math.max(0, params.bankedBonga);
+  const already = Math.max(0, params.alreadyOnChainToday);
+  const remainingDailyCap = Math.max(0, dailyOnChainCap - already);
+  const withdrawableToday = Math.min(banked, remainingDailyCap);
+  const canWithdraw = withdrawableToday >= min && withdrawableToday > 0;
+
+  return {
+    dailyOnChainCap,
+    alreadyOnChainToday: already,
+    remainingDailyCap,
+    withdrawableToday,
+    canWithdraw,
+  };
+}

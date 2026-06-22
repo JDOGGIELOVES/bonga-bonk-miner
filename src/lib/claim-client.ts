@@ -218,6 +218,14 @@ export interface BongaBankStatus {
   lifetimeWithdrawn: number;
   minWithdraw: number;
   canWithdraw: boolean;
+  /** Max on-chain payout allowed per wallet per UTC day (default 20,001). */
+  dailyOnChainCap?: number;
+  /** $BONGA already sent on-chain from treasury to this wallet today. */
+  alreadyOnChainToday?: number;
+  /** Remaining headroom under the daily on-chain cap. */
+  remainingDailyCap?: number;
+  /** min(vault balance, remaining daily cap) — amount to sign for withdraw today. */
+  withdrawableToday?: number;
   // No vault minimum (primary limit is the 20,001 daily on-chain wallet cap)
   pending: {
     miner: number;

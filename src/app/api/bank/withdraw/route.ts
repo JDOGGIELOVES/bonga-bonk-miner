@@ -135,8 +135,16 @@ export async function POST(request: Request) {
         date,
       });
       const walletCap = walletMaxOnChainBongaPerDay();
-      if (alreadyOnChain + amount > walletCap) {
-        throw new Error(`Daily on-chain limit reached (${walletCap} $BONGA/day).`);
+      const remainingDaily = Math.max(0, walletCap - alreadyOnChain);
+      if (remainingDaily <= 0) {
+        throw new Error(
+          `Daily on-chain limit reached (${walletCap.toLocaleString()} $BONGA/day). Come back tomorrow UTC.`,
+        );
+      }
+      if (amount > remainingDaily) {
+        throw new Error(
+          `Withdraw amount exceeds today's remaining on-chain cap. Withdraw up to ${remainingDaily.toLocaleString()} $BONGA today (vault balance: ${currentBank.bankedBonga.toLocaleString()}).`,
+        );
       }
 
       if (ipKey) {
