@@ -72,7 +72,6 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
   const effectIdRef = useRef(0);
   const serverTapsRef = useRef(0);
   const lastTapTimeRef = useRef(0);
-  const lastAutoDepositRef = useRef(0);
 
   useEffect(() => {
     const state = loadGameState();
@@ -239,19 +238,13 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
       if (publicKey) {
         const wallet = publicKey.toBase58();
         const tapIndex = serverTapsRef.current + 1;
+        // Silent server tracking only. No wallet signature or deposit action here.
+        // User is never prompted to sign on the tap screen.
         void registerMinerTap({ wallet, tapIndex }).then((tapResult) => {
             if ("ok" in tapResult && tapResult.ok) {
               serverTapsRef.current = tapResult.taps;
               setServerEarnRefreshKey((key) => key + 1);
               onTallyRefresh?.();
-              // Auto deposit to personal Bonga Bank Vault (no claim button in miner anymore)
-              // Debounce to avoid hammering the deposit API / lock during rapid tapping.
-              // This prevents the "deposit pending" state from appearing stuck due to concurrent operations.
-              const now = Date.now();
-              if (now - lastAutoDepositRef.current > 3000) {  // at most every ~3s
-                lastAutoDepositRef.current = now;
-                depositPendingToBank({ wallet, source: "miner" }).catch(() => {});
-              }
               return;
             }
             if (tapResult.taps != null) {
