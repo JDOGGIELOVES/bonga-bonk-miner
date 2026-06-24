@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { fetchClaimStatus } from "@/lib/claim-client";
 import { fetchMinerEarned, registerMinerTap } from "@/lib/miner-tap-client";
-import { buildTapMessage } from "@/lib/treasury/messages";
-import bs58 from "bs58";
 import { Button } from "@/components/ui/button";
 import { depositPendingToBank } from "@/lib/claim-client";
 
@@ -51,7 +49,7 @@ interface BonkMinerGameProps {
 }
 
 export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshKey: externalTallyRefreshKey, onTallyRefresh }: BonkMinerGameProps) {
-  const { connected, publicKey, signMessage, wallet: connectedWallet } = useWallet();
+  const { connected, publicKey } = useWallet();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [coins, setCoins] = useState<FloatingCoin[]>([]);
   const [effects, setEffects] = useState<BonkEffect[]>([]);
@@ -241,25 +239,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
       if (publicKey) {
         const wallet = publicKey.toBase58();
         const tapIndex = serverTapsRef.current + 1;
-        const date = new Date().toISOString().slice(0, 10);
-
-        // Sign the tap for security (proof of wallet ownership). This is fire-and-forget so the tap feel is not blocked.
-        // If signing fails or is not available we still send the tap (unsigned path for compatibility during rollout).
-        (async () => {
-          let signature: string | undefined;
-          let signedMessageB58: string | undefined;
-          if (signMessage) {
-            try {
-              const msg = buildTapMessage({ wallet, date, tapIndex });
-              const messageBytes = new TextEncoder().encode(msg);
-              const sigBytes = await signMessage(messageBytes);
-              signature = bs58.encode(sigBytes);
-              signedMessageB58 = bs58.encode(messageBytes);
-            } catch (e) {
-              console.warn("Failed to sign miner tap (proceeding):", e);
-            }
-          }
-          void registerMinerTap({ wallet, tapIndex, signature, signedMessage: signedMessageB58 }).then((tapResult) => {
+        void registerMinerTap({ wallet, tapIndex }).then((tapResult) => {
             if ("ok" in tapResult && tapResult.ok) {
               serverTapsRef.current = tapResult.taps;
               setServerEarnRefreshKey((key) => key + 1);
@@ -287,10 +267,9 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
               }));
             }
           });
-        })();
       }
     },
-    [gameState, coins, combo, respawnCoin, addEffect, addParticles, publicKey, signMessage]
+    [gameState, coins, combo, respawnCoin, addEffect, addParticles, publicKey]
   );
 
   const handlePointerDown = (e: React.PointerEvent) => {
