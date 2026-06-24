@@ -88,7 +88,18 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       setTimeout(() => setOfflineNotice((cur) => (cur ? null : cur)), 5200);
     }
 
-    setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
+    const next = applyIdleEarnings(state, isHolder);
+    setState(next);
+
+    // Push offline accrual to server so bongaFarmedToday and bank deposit include it
+    if (connected && publicKey) {
+      queueGardenSync({ type: "tick", now: Date.now() }, next);
+    }
+
+    // Auto sync the offline earnings to bank/vault like on actions
+    if (connected && walletAddress && offline > 0.01) {
+      depositPendingToBank({ wallet: walletAddress, source: "garden" }).catch(() => {});
+    }
   }, [state, isHolder, checking]);
 
   const flushGardenSync = useCallback(
@@ -150,7 +161,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
   useEffect(() => {
     if (!state || !catchupDoneRef.current) return;
     setState((prev) => (prev ? applyIdleEarnings(prev, isHolder) : prev));
-  }, [isHolder, state]);
+  }, [isHolder]);  // re-apply only if NFT holder multiplier changes; state dep removed to avoid re-apply loops
 
   useEffect(() => {
     if (!state) return;
@@ -347,15 +358,15 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     <div className="space-y-4">
       <div className="bonga-card grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-6">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Garden $BONGA</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">$BONGA</p>
           <p className="font-display text-xl font-bold text-bonga-orange tabular-nums">
             {formatGardenBonga(state.gardenBonga)}
           </p>
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Farmed today</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Earned today (to Bank)</p>
           <p className={`font-display text-xl font-bold tabular-nums ${capReached ? "text-amber-600" : "text-foreground"}`}>
-            {gardenStatus ? formatGardenBonga(gardenStatus.farmedToday) : formatGardenBonga(state.bongaFarmedToday)}
+            {formatGardenBonga(state.bongaFarmedToday)}
           </p>
           <p className="text-[10px] text-muted-foreground">/ {GARDEN_DAILY_EARN_CAP} cap</p>
         </div>
@@ -397,13 +408,13 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
       {/* Clear daily limit progress bar + label */}
       {(() => {
-        const farmed = gardenStatus ? gardenStatus.farmedToday : state.bongaFarmedToday;
+        const farmed = state.bongaFarmedToday;
         const cap = GARDEN_DAILY_EARN_CAP;
         const pct = Math.min(100, Math.max(0, (farmed / cap) * 100));
         return (
           <div className="bonga-card px-4 py-3">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
-              <span>Daily garden cap (to Bonga Bank)</span>
+              <span>Daily earn cap (to Bonga Bank)</span>
               <span className={capReached ? "text-amber-600 font-semibold" : "font-medium"}>
                 {formatGardenBonga(farmed)} / {cap} $BONGA
               </span>
@@ -425,7 +436,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
       {gardenStatus && (
         <p className="text-center text-[10px] text-muted-foreground -mt-1 mb-1">
-          Verified today: {gardenStatus.farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} (to Bonga Bank Vault)
+          {gardenStatus ? `Server verified: ${gardenStatus.farmedToday.toFixed(2)}` : ''} / {GARDEN_DAILY_EARN_CAP} (to Bonga Bank Vault)
         </p>
       )}
 
@@ -435,7 +446,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
       {capReached && (
         <p className="rounded-bonga-lg border border-amber-300/40 bg-amber-50/60 px-4 py-2 text-center text-xs text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
-          Daily farm cap reached ({GARDEN_DAILY_EARN_CAP} garden $BONGA). Resets at midnight UTC.
+          Daily cap reached ({GARDEN_DAILY_EARN_CAP} $BONGA). Resets at midnight UTC.
           All earnings go to Bonga Bank Vault. Idle and taps pause until tomorrow.
         </p>
       )}
@@ -469,7 +480,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
                 Tap any plant to water and earn instantly. Plants earn idle $BONGA in the background even when closed.
               </li>
               <li>
-                Daily cap {GARDEN_DAILY_EARN_CAP} garden $BONGA total (idle + taps + quests). All earnings auto-deposit to your Bonga Bank Vault. Resets at midnight UTC.
+                Daily cap {GARDEN_DAILY_EARN_CAP} $BONGA total (idle + taps + quests). All earnings auto-deposit to your Bonga Bank Vault. Resets at midnight UTC.
               </li>
               <li>
                 <strong>No vault minimum.</strong> On-chain withdrawals up to 20,001 $BONGA daily. Small earnings auto-deposit to bank.

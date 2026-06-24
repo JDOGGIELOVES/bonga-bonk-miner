@@ -11,7 +11,7 @@ import {
 /**
  * Garden daily earn/claim cap (1500).
  * On-chain withdrawals up to 20,001 $BONGA daily per wallet (no minimum vault threshold).
- * Earnings below the min auto-deposit to the player's vault.
+ * Earnings auto-deposit to the player's vault.
  */
 
 export interface GardenEarnRecord extends GardenState {

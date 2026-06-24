@@ -2,7 +2,7 @@
 
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
-/** Max garden $BONGA credited per UTC day (idle + taps + quests). 
+/** Max $BONGA credited per UTC day (idle + taps + quests) in the garden. 
  * On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).
  * All earnings auto-deposit to the vault below the threshold.
  */
@@ -390,7 +390,7 @@ export function buyPlant(
     }
   }
   if (state.gardenBonga < type.cost) {
-    return { state, ok: false, reason: "Need more garden $BONGA." };
+    return { state, ok: false, reason: "Need more $BONGA." };
   }
 
   const instanceId = `${plantTypeId}-${Date.now()}`;

@@ -78,7 +78,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
       const wallet = publicKey.toBase58();
       const claimAmount = Math.floor(claimable * 100) / 100;
       if (claimAmount <= 0) {
-        setErrorMsg("No verified garden $BONGA ready to claim yet.");
+        setErrorMsg("No verified $BONGA ready to claim yet.");
         return;
       }
 
@@ -90,7 +90,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
       });
 
       gameAudio.playCoinCollect();
-      setSuccessMsg(`Sent ${result.amount} garden $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`);
+      setSuccessMsg(`Sent ${result.amount} $BONGA on-chain! Tx: ${result.signature.slice(0, 8)}…`);
       setExplorerUrl(result.explorerUrl);
       setGardenStatus((prev) =>
         prev
@@ -249,7 +249,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
           </Badge>
           <p className="font-display text-xl font-bold tracking-tight">{claimable} $BONGA</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Sign to receive verified garden $BONGA from the treasury. Only server-tracked progress
+            Sign to receive verified $BONGA from the treasury. Only server-tracked progress
             counts toward payouts.
           </p>
           <Button
@@ -258,7 +258,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
             onClick={() => void handleClaim()}
             disabled={claiming || claimable <= 0}
           >
-            {claiming ? "Sending on-chain…" : `Claim ${claimable} Garden $BONGA`}
+            {claiming ? "Sending on-chain…" : `Claim ${claimable} $BONGA`}
           </Button>
         </motion.div>
       ) : null}

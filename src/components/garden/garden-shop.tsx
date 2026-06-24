@@ -78,7 +78,7 @@ export function GardenShop({
           <p className="font-semibold text-foreground">Shop tips</p>
           <p className="mt-1">
             Buy plants for your central garden. Duplicates stack full idle + tap income. Up to 10 free Peace Lilies. Max{" "}
-            {GARDEN_DAILY_EARN_CAP} garden $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain up to 20,001 daily, no min).
+            {GARDEN_DAILY_EARN_CAP} $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain up to 20,001 daily, no min).
           </p>
           <p className="mt-1.5">
             NFT holders get +25% yield on taps and idle. All progress saves locally.
