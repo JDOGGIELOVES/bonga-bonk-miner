@@ -1,4 +1,4 @@
-import { Connection, PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
 import {
   DEPLOYED_CANDY_MACHINE,
   getCandyMachineAddress,
@@ -7,7 +7,7 @@ import {
   isMintSimulated,
 } from "@/lib/mint-config";
 import { NFT_DEPLOY_SUPPLY } from "@/lib/nft-metadata";
-import { getSolanaRpcEndpoint } from "@/lib/solana";
+import { withRpcRetry } from "@/lib/treasury/rpc";
 
 /** Candy Machine v3 account layout — verified on mainnet BbWqpz... */
 const ITEMS_REDEEMED_OFFSET = 112;
@@ -17,14 +17,15 @@ async function fetchItemsRedeemed(
   candyMachineAddress: string
 ): Promise<number | null> {
   try {
-    const connection = new Connection(getSolanaRpcEndpoint(), "confirmed");
-    const account = await connection.getAccountInfo(
-      new PublicKey(candyMachineAddress)
-    );
-    if (!account?.data || account.data.length < ITEMS_AVAILABLE_OFFSET + 8) {
-      return null;
-    }
-    return Number(account.data.readBigUInt64LE(ITEMS_REDEEMED_OFFSET));
+    return await withRpcRetry(async (connection) => {
+      const account = await connection.getAccountInfo(
+        new PublicKey(candyMachineAddress)
+      );
+      if (!account?.data || account.data.length < ITEMS_AVAILABLE_OFFSET + 8) {
+        return null;
+      }
+      return Number(account.data.readBigUInt64LE(ITEMS_REDEEMED_OFFSET));
+    });
   } catch {
     return null;
   }
@@ -53,15 +54,15 @@ export async function getMintStatusPayload() {
   const itemsRedeemed = await fetchItemsRedeemed(candyMachineAddress);
   let itemsAvailable = NFT_DEPLOY_SUPPLY;
   try {
-    const connection = new Connection(getSolanaRpcEndpoint(), "confirmed");
-    const account = await connection.getAccountInfo(
-      new PublicKey(candyMachineAddress)
-    );
-    if (account?.data && account.data.length >= ITEMS_AVAILABLE_OFFSET + 8) {
-      itemsAvailable = Number(
-        account.data.readBigUInt64LE(ITEMS_AVAILABLE_OFFSET)
+    itemsAvailable = await withRpcRetry(async (connection) => {
+      const account = await connection.getAccountInfo(
+        new PublicKey(candyMachineAddress)
       );
-    }
+      if (account?.data && account.data.length >= ITEMS_AVAILABLE_OFFSET + 8) {
+        return Number(account.data.readBigUInt64LE(ITEMS_AVAILABLE_OFFSET));
+      }
+      return NFT_DEPLOY_SUPPLY;
+    });
   } catch {
     /* use default supply */
   }

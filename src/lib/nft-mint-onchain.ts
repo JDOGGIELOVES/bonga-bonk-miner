@@ -67,10 +67,23 @@ export async function mintBongaNFTOnChain(
       .use(mplTokenMetadata())
       .use(walletAdapterIdentity(wallet));
 
-    const candyMachine = await fetchCandyMachine(
-      umi,
-      publicKey(candyMachineAddress)
-    );
+    let candyMachine;
+    try {
+      candyMachine = await fetchCandyMachine(
+        umi,
+        publicKey(candyMachineAddress)
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/403|Access forbidden|failed to get info about account/i.test(msg)) {
+        return {
+          success: false,
+          error:
+            "Solana RPC blocked (403). The site needs SOLANA_RPC_URL (Helius/QuickNode) on the server. Try again after refresh — mint now uses /api/solana-rpc.",
+        };
+      }
+      throw e;
+    }
 
     if (candyMachine.itemsRedeemed >= candyMachine.data.itemsAvailable) {
       return { success: false, error: "Collection sold out" };

@@ -25,15 +25,29 @@ export function isRpcRateLimitError(error: unknown): boolean {
 }
 
 export function getRpcUrls(): string[] {
-  const raw =
-    process.env.SOLANA_RPC_URL ??
-    process.env.NEXT_PUBLIC_SOLANA_RPC_URL ??
-    "https://api.mainnet-beta.solana.com";
+  // Server-only. Never fall back to NEXT_PUBLIC_* (api keys leak into the JS bundle).
+  const raw = process.env.SOLANA_RPC_URL?.trim();
+  const configured = raw
+    ? raw
+        .split(/[,;\s]+/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+    : [];
 
-  return raw
-    .split(/[,;\s]+/)
-    .map((url) => url.trim())
-    .filter(Boolean);
+  // Fallbacks when keyless public RPC returns 403 / rate-limits
+  const fallbacks = [
+    "https://solana-rpc.publicnode.com",
+    "https://api.mainnet-beta.solana.com",
+  ];
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const u of [...configured, ...fallbacks]) {
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    out.push(u);
+  }
+  return out;
 }
 
 export function createTreasuryConnection(rpcUrl?: string): Connection {
