@@ -5,6 +5,8 @@ import {
   buildStakeLockMessage,
   buildStakeUnlockMessage,
   buildBankWithdrawMessage,
+  buildCoinStakeLockMessage,
+  buildCoinStakeUnlockMessage,
 } from "@/lib/treasury/messages";
 import { signClaimMessage } from "@/lib/wallet-claim-sign";
 
@@ -179,20 +181,9 @@ export interface FlaggedWallet {
   windowLabel?: string;
 }
 
+/** Admin-only on server — client stub returns empty (no public scrape). */
 export async function fetchFlaggedWallets(): Promise<Record<string, FlaggedWallet[]>> {
-  try {
-    const response = await fetch("/api/claim/flags", { cache: "no-store" });
-    if (!response.ok) return {};
-    const parsed = await response.json();
-    // Support legacy
-    const result: Record<string, FlaggedWallet[]> = {};
-    for (const [w, val] of Object.entries(parsed)) {
-      result[w] = Array.isArray(val) ? val : [val as FlaggedWallet];
-    }
-    return result;
-  } catch {
-    return {};
-  }
+  return {};
 }
 
 export interface BlockedWallet {
@@ -200,14 +191,9 @@ export interface BlockedWallet {
   reason: string;
 }
 
+/** Admin-only on server — client stub returns empty (no public scrape). */
 export async function fetchBlockedWallets(): Promise<Record<string, BlockedWallet>> {
-  try {
-    const response = await fetch("/api/claim/blocked", { cache: "no-store" });
-    if (!response.ok) return {};
-    return await response.json();
-  } catch {
-    return {};
-  }
+  return {};
 }
 
 // ====================== BONGA BANK (client) ======================
@@ -218,15 +204,17 @@ export interface BongaBankStatus {
   lifetimeWithdrawn: number;
   minWithdraw: number;
   canWithdraw: boolean;
-  /** Max on-chain payout allowed per wallet per UTC day (default 20,001). */
+  /** Max on-chain payout allowed per wallet per UTC day (default 5,200 = game 200 + stake 5,000). */
   dailyOnChainCap?: number;
+  gameDailyCap?: number;
+  stakeDailyCap?: number;
   /** $BONGA already sent on-chain from treasury to this wallet today. */
   alreadyOnChainToday?: number;
   /** Remaining headroom under the daily on-chain cap. */
   remainingDailyCap?: number;
   /** min(vault balance, remaining daily cap) — amount to sign for withdraw today. */
   withdrawableToday?: number;
-  // No vault minimum (primary limit is the 20,001 daily on-chain wallet cap)
+  // No vault minimum (primary limit is the split daily on-chain wallet cap)
   pending: {
     miner: number;
     garden: number;
@@ -251,7 +239,13 @@ export interface BongaBankStatus {
 
 export async function fetchBongaBankStatus(wallet: string): Promise<BongaBankStatus | null> {
   try {
-    const res = await fetch(`/api/bank/status?wallet=${encodeURIComponent(wallet)}`, { cache: "no-store" });
+    const { getStoredMinerSession } = await import("@/lib/miner-tap-client");
+    const sessionToken = getStoredMinerSession(wallet);
+    if (!sessionToken) return null;
+    const res = await fetch(
+      `/api/bank/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
+      { cache: "no-store", headers: { "x-miner-session": sessionToken } }
+    );
     if (!res.ok) return null;
     return await res.json();
   } catch {
@@ -364,7 +358,27 @@ export interface StakeStatus {
 
 export async function fetchStakeStatus(wallet: string): Promise<StakeStatus> {
   try {
-    const res = await fetch(`/api/stake/status?wallet=${encodeURIComponent(wallet)}`, { cache: "no-store" });
+    const { getStoredMinerSession } = await import("@/lib/miner-tap-client");
+    const sessionToken = getStoredMinerSession(wallet);
+    if (!sessionToken) {
+      return {
+        ok: false,
+        heldCount: 0,
+        isHolder: false,
+        stakedCount: 0,
+        stakedAt: null,
+        lastClaimedAt: null,
+        pendingBonga: 0,
+        dailyRate: 0,
+        canClaim: false,
+        minClaim: 10,
+        error: "Miner session required. Sign once on Miner to unlock status.",
+      };
+    }
+    const res = await fetch(
+      `/api/stake/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
+      { cache: "no-store", headers: { "x-miner-session": sessionToken } }
+    );
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
       return { ok: false, heldCount: 0, isHolder: false, stakedCount: 0, stakedAt: null, lastClaimedAt: null, pendingBonga: 0, dailyRate: 0, canClaim: false, minClaim: 10, error: j?.error || "Failed to load stake status" };
@@ -523,4 +537,156 @@ export async function requestStakeClaim(params: {
     throw new Error("error" in data ? data.error : "Stake claim failed.");
   }
   return data as StakeActionSuccess;
+}
+
+export type CoinStakeStatus = {
+  ok: boolean;
+  wallet: string;
+  walletBalance: number;
+  stakedAmount: number;
+  stakedAt: string | null;
+  lastSettledMonth: string | null;
+  lifetimeRewarded: number;
+  apr: number;
+  aprLabel: string;
+  monthlyPreview: number;
+  holdingOk: boolean;
+  tierMax: number;
+  aprHigh: number;
+  aprLow: number;
+  cycle: {
+    month: string;
+    monthLabel: string;
+    previousMonth: string;
+    endsAtIso: string;
+    msRemaining: number;
+  };
+  settledReward?: number;
+  settledMonth?: string | null;
+  settleNote?: string | null;
+  rules?: { summary: string };
+  error?: string;
+};
+
+export async function fetchCoinStakeStatus(
+  wallet: string,
+  opts?: {
+    connectedWallet?: Wallet | null;
+    signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+    /** If true, prompt wallet sign to create a session when missing. */
+    ensureSession?: boolean;
+  }
+): Promise<CoinStakeStatus> {
+  const { getStoredMinerSession, ensureMinerSession } = await import(
+    "@/lib/miner-tap-client"
+  );
+  let sessionToken = getStoredMinerSession(wallet);
+  if (!sessionToken && opts?.ensureSession) {
+    sessionToken = await ensureMinerSession({
+      wallet,
+      connectedWallet: opts.connectedWallet ?? null,
+      signMessage: opts.signMessage,
+    });
+  }
+  if (!sessionToken) {
+    throw new Error(
+      "Connect wallet and approve one short sign-in to load Coin Stake status."
+    );
+  }
+  const res = await fetch(
+    `/api/coin-stake/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
+    { cache: "no-store", headers: { "x-miner-session": sessionToken } }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Failed to load coin stake status");
+  return data as CoinStakeStatus;
+}
+
+export async function requestCoinStakeLock(params: {
+  wallet: string;
+  amount: number;
+  connectedWallet: Wallet | null;
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+}): Promise<{ ok: true; stakedAmount: number; aprLabel: string; monthlyPreview: number; note?: string }> {
+  const at = new Date().toISOString();
+  const nonce = generateNonce();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  const message = buildCoinStakeLockMessage({
+    wallet: params.wallet,
+    amount: params.amount,
+    at,
+    nonce,
+    expiresAt,
+  });
+  const messageBytes = new TextEncoder().encode(message);
+  const { signature, signedMessage } = await signClaimMessage({
+    wallet: params.connectedWallet,
+    signMessage: params.signMessage,
+    walletAddress: params.wallet,
+    messageBytes,
+  });
+  const payload: Record<string, string | number> = {
+    wallet: params.wallet,
+    amount: params.amount,
+    at,
+    nonce,
+    expiresAt,
+    signature: bs58.encode(signature),
+  };
+  const signedDiffers =
+    signedMessage.length !== messageBytes.length ||
+    signedMessage.some((b, i) => b !== messageBytes[i]);
+  if (signedDiffers) payload.signedMessage = bs58.encode(signedMessage);
+
+  const res = await fetch("/api/coin-stake/lock", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Coin stake lock failed");
+  return data;
+}
+
+export async function requestCoinStakeUnlock(params: {
+  wallet: string;
+  connectedWallet: Wallet | null;
+  signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+}): Promise<{ ok: true; unstakedAmount: number; forfeitedMonth: string; note?: string }> {
+  const at = new Date().toISOString();
+  const nonce = generateNonce();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+  const message = buildCoinStakeUnlockMessage({
+    wallet: params.wallet,
+    at,
+    nonce,
+    expiresAt,
+  });
+  const messageBytes = new TextEncoder().encode(message);
+  const { signature, signedMessage } = await signClaimMessage({
+    wallet: params.connectedWallet,
+    signMessage: params.signMessage,
+    walletAddress: params.wallet,
+    messageBytes,
+  });
+  const payload: Record<string, string> = {
+    wallet: params.wallet,
+    at,
+    nonce,
+    expiresAt,
+    signature: bs58.encode(signature),
+  };
+  const signedDiffers =
+    signedMessage.length !== messageBytes.length ||
+    signedMessage.some((b, i) => b !== messageBytes[i]);
+  if (signedDiffers) payload.signedMessage = bs58.encode(signedMessage);
+
+  const res = await fetch("/api/coin-stake/unlock", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error || "Coin stake unlock failed");
+  return data;
 }
