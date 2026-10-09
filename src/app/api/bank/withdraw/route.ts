@@ -14,9 +14,12 @@ import { getClientIp } from "@/lib/request-ip";
 import { assertIpCanClaim, recordIpClaim, ipStorageKey } from "@/lib/claim-ip-store";
 import { walletMaxOnChainBongaPerDay } from "@/lib/wallet-daily-cap";
 import { getTodayClaimedFromTreasury } from "@/lib/treasury/daily-claims";
+import { MISSING_BONGA_ATA_MESSAGE, walletHasBongaAta } from "@/lib/bonga-balance";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+/** Confirm + safety sim can exceed default 10s on public RPC. */
+export const maxDuration = 60;
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -85,6 +88,17 @@ export async function POST(request: Request) {
       recipient = new PublicKey(wallet);
     } catch {
       return NextResponse.json({ error: "Invalid wallet." }, { status: 400 });
+    }
+
+    // Fail fast before signature work if the wallet cannot receive $BONGA yet.
+    // This is the #1 "I signed and nothing happened / vault balance unchanged" cause.
+    try {
+      const hasAta = await walletHasBongaAta(wallet);
+      if (!hasAta) {
+        return NextResponse.json({ error: MISSING_BONGA_ATA_MESSAGE }, { status: 400 });
+      }
+    } catch {
+      // If RPC is flaky, continue — transfer path still enforces ATA.
     }
 
     const signature = bs58.decode(sigB58);
@@ -193,8 +207,13 @@ export async function POST(request: Request) {
     if (isRpcRateLimitError(error)) {
       return NextResponse.json({ error: rpcRateLimitMessage() }, { status: 503 });
     }
-    const msg = error instanceof Error ? error.message : "Bank withdraw failed.";
-    const status = /blocked|paused|treasury|limit|minimum|exceeds|nonce/i.test(msg) ? 400 : 500;
+    const raw = error instanceof Error ? error.message : "Bank withdraw failed.";
+    const msg = /token account \(ATA\) does not exist|ATA does not exist/i.test(raw)
+      ? MISSING_BONGA_ATA_MESSAGE
+      : raw;
+    const status = /blocked|paused|treasury|limit|minimum|exceeds|nonce|ATA|token account/i.test(msg)
+      ? 400
+      : 500;
     return NextResponse.json({ error: msg }, { status });
   }
 }

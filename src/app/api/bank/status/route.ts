@@ -9,9 +9,12 @@ import { gardenClaimableFromRecord, getGardenEarnRecord, rolloverGardenRecordIfN
 import { getStakeRecord, computePendingStakeRewards } from "@/lib/stake-store";
 import { hasClaimedPetRewardToday, getSubmissionForWalletToday } from "@/lib/pet-love-store";
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
+import { assertPlaySession } from "@/lib/play-session";
+import { walletHasBongaAta } from "@/lib/bonga-balance";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
@@ -37,6 +40,15 @@ export async function GET(request: Request) {
       },
     });
   }
+
+  try {
+    new PublicKey(wallet);
+  } catch {
+    return NextResponse.json({ error: "Invalid wallet." }, { status: 400 });
+  }
+
+  const session = assertPlaySession(request, wallet);
+  if (!session.ok) return session.response;
 
   const [bank, min] = await Promise.all([
     getBongaBank(wallet),
@@ -98,16 +110,27 @@ export async function GET(request: Request) {
     minWithdraw: min,
   });
 
+  let hasBongaAta = false;
+  try {
+    hasBongaAta = await walletHasBongaAta(wallet);
+  } catch {
+    hasBongaAta = false;
+  }
+
   return NextResponse.json({
     bankedBonga: bank.bankedBonga,
     lifetimeBanked: bank.lifetimeBanked,
     lifetimeWithdrawn: bank.lifetimeWithdrawn,
-    minWithdraw: min, // 0 = no minimum, allows withdrawing 10k+ up to daily 20,001 cap
+    minWithdraw: min, // 0 = no minimum; daily on-chain cap still applies
     dailyOnChainCap: withdrawable.dailyOnChainCap,
+    gameDailyCap: withdrawable.gameDailyCap,
+    stakeDailyCap: withdrawable.stakeDailyCap,
     alreadyOnChainToday: withdrawable.alreadyOnChainToday,
     remainingDailyCap: withdrawable.remainingDailyCap,
     withdrawableToday: withdrawable.withdrawableToday,
     canWithdraw: withdrawable.canWithdraw,
+    /** Recipient must already own a $BONGA ATA; treasury never creates one. */
+    hasBongaAta,
     pending: {
       miner: pendingMiner,
       garden: pendingGarden,
@@ -124,7 +147,7 @@ export async function GET(request: Request) {
     },
     note:
       withdrawable.withdrawableToday < bank.bankedBonga
-        ? `Vault holds ${bank.bankedBonga.toLocaleString()} $BONGA — withdraw up to ${withdrawable.withdrawableToday.toLocaleString()} today (${withdrawable.dailyOnChainCap.toLocaleString()} daily on-chain cap).`
-        : "No minimum (0) to withdraw from your BONGA BANK VAULT. Up to 20,001 $BONGA daily on-chain per wallet.",
+        ? `Vault holds ${bank.bankedBonga.toLocaleString()} $BONGA — withdraw up to ${withdrawable.withdrawableToday.toLocaleString()} today (${withdrawable.dailyOnChainCap.toLocaleString()} daily on-chain: game ${withdrawable.gameDailyCap.toLocaleString()} + staking ${withdrawable.stakeDailyCap.toLocaleString()}).`
+        : `No minimum to withdraw from your BONGA BANK VAULT. Up to ${withdrawable.dailyOnChainCap.toLocaleString()} $BONGA daily on-chain (game ${withdrawable.gameDailyCap.toLocaleString()} + staking ${withdrawable.stakeDailyCap.toLocaleString()}).`,
   });
 }

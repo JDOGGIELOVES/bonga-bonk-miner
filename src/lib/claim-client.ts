@@ -204,6 +204,8 @@ export interface BongaBankStatus {
   lifetimeWithdrawn: number;
   minWithdraw: number;
   canWithdraw: boolean;
+  /** False = no $BONGA ATA yet; treasury withdraw cannot complete. */
+  hasBongaAta?: boolean;
   /** Max on-chain payout allowed per wallet per UTC day (default 5,200 = game 200 + stake 5,000). */
   dailyOnChainCap?: number;
   gameDailyCap?: number;
@@ -290,6 +292,8 @@ export async function requestBankWithdraw(params: {
   date: string;
   connectedWallet: Wallet | null;
   signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
+  /** Optional UI hook: "sign" | "submit" */
+  onPhase?: (phase: "sign" | "submit") => void;
 }): Promise<BankWithdrawSuccess> {
   const nonce = generateNonce();
   const expiresAt = defaultClaimExpiresAt(params.date);
@@ -303,6 +307,7 @@ export async function requestBankWithdraw(params: {
   });
 
   const messageBytes = new TextEncoder().encode(message);
+  params.onPhase?.("sign");
   const { signature, signedMessage } = await signClaimMessage({
     wallet: params.connectedWallet,
     signMessage: params.signMessage,
@@ -324,15 +329,36 @@ export async function requestBankWithdraw(params: {
     signedMessage.some((b, i) => b !== messageBytes[i]);
   if (signedDiffers) payload.signedMessage = bs58.encode(signedMessage);
 
-  const res = await fetch("/api/bank/withdraw", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  params.onPhase?.("submit");
+  let res: Response;
+  try {
+    res = await fetch("/api/bank/withdraw", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    throw new Error(
+      e instanceof Error
+        ? `Network error after signing: ${e.message}. Your vault was not debited — try again. If Solscan later shows a treasury send, refresh the bank.`
+        : "Network error after signing. Vault not debited — try again."
+    );
+  }
 
-  const data = await res.json();
+  let data: any = null;
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(
+      res.ok
+        ? "Withdraw response was empty. Check Solscan for a treasury transfer, then refresh the bank."
+        : `Bank withdraw failed (HTTP ${res.status}). If this keeps happening after you approve the signature, your wallet may be missing a $BONGA token account — receive any tiny amount of $BONGA once, then retry.`
+    );
+  }
   if (!res.ok) {
-    throw new Error("error" in data ? data.error : "Bank withdraw failed.");
+    throw new Error(
+      data && typeof data.error === "string" ? data.error : "Bank withdraw failed."
+    );
   }
   return data as BankWithdrawSuccess;
 }

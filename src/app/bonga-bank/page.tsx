@@ -26,6 +26,7 @@ export default function BongaBankPage() {
 
   const [status, setStatus] = useState<BongaBankStatus | null>(null);
   const [loading, setLoading] = useState(false);
+  const [withdrawPhase, setWithdrawPhase] = useState<null | "sign" | "submit">(null);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [vaultOpen, setVaultOpen] = useState(false);
@@ -97,15 +98,24 @@ export default function BongaBankPage() {
     if (!walletAddress || !status || !connectedWallet || !signMessage) return;
     if (!status.canWithdraw) return;
 
+    // Preflight: missing $BONGA ATA is the usual "I signed and nothing happened" case.
+    if (status.hasBongaAta === false) {
+      setError(
+        "Your wallet has no $BONGA token account yet. Receive any tiny amount of $BONGA once (Phantom / Jupiter swap) to create it (~0.002 SOL rent), then withdraw again. The treasury never creates this account for you."
+      );
+      return;
+    }
+
     const amount =
       status.withdrawableToday ??
       Math.min(
         status.bankedBonga,
-        status.remainingDailyCap ?? status.dailyOnChainCap ?? 20001,
+        status.remainingDailyCap ?? status.dailyOnChainCap ?? 5200,
       );
     if (amount < status.minWithdraw || amount <= 0) return;
 
     setLoading(true);
+    setWithdrawPhase("sign");
     setError(null);
     setMessage(null);
     try {
@@ -115,6 +125,7 @@ export default function BongaBankPage() {
         date: todayKey(),
         connectedWallet,
         signMessage,
+        onPhase: setWithdrawPhase,
       });
       const leftover = Math.max(0, (status.bankedBonga ?? 0) - amount);
       setMessage(
@@ -128,9 +139,13 @@ export default function BongaBankPage() {
       }
       await refreshStatus();
     } catch (e: any) {
-      setError(e?.message || "Bank withdraw failed. Make sure you have a pre-created $BONGA ATA and enough SOL for fees.");
+      setError(
+        e?.message ||
+          "Bank withdraw failed. Make sure you have a pre-created $BONGA token account and enough SOL for fees."
+      );
     } finally {
       setLoading(false);
+      setWithdrawPhase(null);
     }
   };
 
@@ -209,7 +224,7 @@ export default function BongaBankPage() {
                   <div className="h-7 w-7 rounded-full border-[5px] border-bonga-orange/70" />
                 </div>
                 <div className="font-display text-white text-3xl tracking-[-1px] font-black">BONGA VAULT</div>
-                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • NO MIN • 20,001 DAILY ON-CHAIN CAP</div>
+                <div className="text-xs text-white/50 tracking-[2px] mt-0.5">MINED SAVINGS • NO MIN • 5,200 DAILY ON-CHAIN (GAME 200 + STAKE 5,000)</div>
               </div>
 
               {/* Hinge and rivets */}
@@ -277,7 +292,7 @@ export default function BongaBankPage() {
                 {/* Rivets and frame details */}
                 <div className="absolute inset-0 pointer-events-none border border-zinc-500/30" style={{ background: 'repeating-linear-gradient(90deg, transparent, transparent 18px, rgba(161,161,170,0.15) 19px, rgba(161,161,170,0.15) 20px)' }} />
               </div>
-              <p className="mt-4 text-center text-xs text-muted-foreground max-w-xs mx-auto">Your mined $BONGA savings are kept in a secure off-chain vault. No minimum to withdraw on-chain (up to 20,001 $BONGA per day per wallet). This keeps the economics sustainable for the whole community.</p>
+              <p className="mt-4 text-center text-xs text-muted-foreground max-w-xs mx-auto">Your mined $BONGA savings are kept in a secure off-chain vault. No minimum to withdraw on-chain (up to 5,200 $BONGA per day per wallet (game 200 + staking 5,000)). This keeps the economics sustainable for the whole community.</p>
             </div>
           )}
 
@@ -325,10 +340,18 @@ export default function BongaBankPage() {
                             <span className="font-semibold text-bonga-teal">
                               {status.withdrawableToday.toLocaleString()}
                             </span>{" "}
-                            today ({(status.dailyOnChainCap ?? 20001).toLocaleString()} daily cap)
+                            today (
+                            {(status.dailyOnChainCap ?? 5200).toLocaleString()}{" "}
+                            daily — game {(status.gameDailyCap ?? 200).toLocaleString()} +
+                            staking {(status.stakeDailyCap ?? 5000).toLocaleString()})
                           </>
                         ) : (
-                          <>No minimum to withdraw. Up to {(status.dailyOnChainCap ?? 20001).toLocaleString()} $BONGA per day on-chain.</>
+                          <>
+                            No minimum to withdraw. Up to{" "}
+                            {(status.dailyOnChainCap ?? 5200).toLocaleString()} $BONGA/day
+                            on-chain (game {(status.gameDailyCap ?? 200).toLocaleString()} +
+                            staking {(status.stakeDailyCap ?? 5000).toLocaleString()}).
+                          </>
                         )}
                       </div>
                       {status.alreadyOnChainToday != null && status.alreadyOnChainToday > 0 ? (
@@ -357,23 +380,36 @@ export default function BongaBankPage() {
                       </div>
                     </div>
 
+                    {status.canWithdraw && status.hasBongaAta === false && (
+                      <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200">
+                        <strong>Setup needed:</strong> this wallet has no $BONGA token account yet.
+                        Receive any tiny amount of $BONGA once (or swap on Jupiter) to create it, then
+                        withdraw. Until then, approving the signature cannot complete the payout —
+                        vault balance stays the same.
+                      </div>
+                    )}
+
                     <div className="flex flex-wrap gap-3">
                       {status.canWithdraw && (
                         <button
                           onClick={handleWithdraw}
-                          disabled={loading}
+                          disabled={loading || status.hasBongaAta === false}
                           className="rounded-lg bg-bonga-teal px-6 py-2.5 font-semibold text-black hover:bg-bonga-teal/90 disabled:opacity-50"
                         >
                           {loading
-                            ? "Signing & Sending..."
-                            : `Withdraw ${(status.withdrawableToday ?? status.bankedBonga).toLocaleString()} $BONGA to My Wallet`}
+                            ? withdrawPhase === "submit"
+                              ? "Sending from treasury… (can take up to ~60s)"
+                              : "Approve signature in wallet…"
+                            : status.hasBongaAta === false
+                              ? "Create $BONGA account first"
+                              : `Withdraw ${(status.withdrawableToday ?? status.bankedBonga).toLocaleString()} $BONGA to My Wallet`}
                         </button>
                       )}
 
                       {!status.canWithdraw && status.bankedBonga > 0 && (
                         <div className="text-sm text-muted-foreground self-center px-2">
                           {(status.remainingDailyCap ?? 0) <= 0
-                            ? `Daily on-chain cap reached (${(status.dailyOnChainCap ?? 20001).toLocaleString()} $BONGA/day). Your vault balance stays safe — withdraw again tomorrow UTC.`
+                            ? `Daily on-chain cap reached (${(status.dailyOnChainCap ?? 5200).toLocaleString()} $BONGA/day). Your vault balance stays safe — withdraw again tomorrow UTC.`
                             : "Withdrawal unavailable right now — refresh or check your wallet connection."}
                         </div>
                       )}
@@ -456,9 +492,9 @@ export default function BongaBankPage() {
               <div className="bonga-card p-6 text-sm text-muted-foreground">
                 <p className="mb-2 font-medium text-foreground">How the Bonga Bank works</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Play the Bonk Miner (1 tap = 1 $BONGA, 1000/day), Vibes Garden (up to 1500/day), Pet Love (1000 per validated image), or stake NFTs — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or "move" buttons in the games.</li>
+                  <li>Play the Bonk Miner (100 taps = 1 $BONGA, 10/day), Vibes Garden (up to 15/day), Pet Love (10 per validated image), or stake NFTs (tiered daily rates) — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or &quot;move&quot; buttons in the games.</li>
                   <li>Open the Vault (connect wallet + ENTER) to see your balance and auto-flush any fresh pending earnings.</li>
-                  <li><strong>No minimum — withdraw from your BONGA BANK VAULT any time (up to 20,001 $BONGA daily on-chain).</strong></li>
+                  <li><strong>No minimum — withdraw from your BONGA BANK VAULT any time (up to 5,200 $BONGA daily on-chain (game 200 + staking 5,000)).</strong></li>
                   <li>This keeps Solana fees tiny compared to the value distributed to the community while you still accumulate 100% of everything you mine.</li>
                 </ul>
                 <p className="mt-3">
