@@ -312,3 +312,168 @@ export function verifyBankWithdrawSignature(params: {
     publicKeyBytes
   );
 }
+
+// --- $BONGA coin staking (monthly APR soft-lock) ---
+
+export function buildMinerSessionMessage(params: {
+  wallet: string;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+}) {
+  const { wallet, at, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("MinerSession"),
+    `Wallet: ${wallet}`,
+    `At: ${at}`,
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
+}
+
+export function verifyMinerSessionSignature(params: {
+  wallet: string;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const canonicalMessage = buildMinerSessionMessage({
+    wallet: params.wallet,
+    at: params.at,
+    nonce: params.nonce,
+    expiresAt: params.expiresAt,
+  });
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}
+
+export function buildCoinStakeLockMessage(params: {
+  wallet: string;
+  amount: number;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+}) {
+  const { wallet, amount, at, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("CoinStakeLock"),
+    `Wallet: ${wallet}`,
+    `Amount: ${fmtAmount(amount)}`,
+    `At: ${at}`,
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
+}
+
+export function verifyCoinStakeLockSignature(params: {
+  wallet: string;
+  amount: number;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const canonicalMessage = buildCoinStakeLockMessage({
+    wallet: params.wallet,
+    amount: params.amount,
+    at: params.at,
+    nonce: params.nonce,
+    expiresAt: params.expiresAt,
+  });
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}
+
+export function buildCoinStakeUnlockMessage(params: {
+  wallet: string;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+}) {
+  const { wallet, at, nonce = "", expiresAt = "" } = params;
+  const lines = [
+    ...buildVersionedHeader("CoinStakeUnlock"),
+    `Wallet: ${wallet}`,
+    `At: ${at}`,
+  ];
+  if (nonce) lines.push(`Nonce: ${nonce}`);
+  if (expiresAt) lines.push(`Expires: ${expiresAt}`);
+  return lines.join("\n");
+}
+
+export function verifyCoinStakeUnlockSignature(params: {
+  wallet: string;
+  at: string;
+  nonce?: string;
+  expiresAt?: string;
+  signature: Uint8Array;
+  signedMessage?: Uint8Array;
+}): boolean {
+  const canonicalMessage = buildCoinStakeUnlockMessage({
+    wallet: params.wallet,
+    at: params.at,
+    nonce: params.nonce,
+    expiresAt: params.expiresAt,
+  });
+  const canonicalBytes = new TextEncoder().encode(canonicalMessage);
+
+  if (params.signedMessage && !bytesEqual(params.signedMessage, canonicalBytes)) {
+    return false;
+  }
+
+  let publicKeyBytes: Uint8Array;
+  try {
+    publicKeyBytes = bs58.decode(params.wallet);
+  } catch {
+    return false;
+  }
+
+  if (params.signature.length !== 64) return false;
+
+  return nacl.sign.detached.verify(
+    canonicalBytes,
+    params.signature,
+    publicKeyBytes
+  );
+}
