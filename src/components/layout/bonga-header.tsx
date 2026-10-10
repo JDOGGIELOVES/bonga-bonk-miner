@@ -161,7 +161,16 @@ export function BongaHeader({
                   "rounded-full border border-bonga-orange/30 px-2 py-0.5 text-[10px] font-semibold text-bonga-orange transition hover:bg-bonga-orange/10 sm:text-xs sm:px-2.5 sm:py-1"
                 )}
               >
-                Staking
+                NFT Stake
+              </Link>
+              <Link
+                href="/coin-staking"
+                className={getLinkClass(
+                  "/coin-staking",
+                  "rounded-full border border-bonga-teal/40 bg-bonga-teal/5 px-2 py-0.5 text-[10px] font-semibold text-bonga-teal transition hover:bg-bonga-teal/10 sm:text-xs sm:px-2.5 sm:py-1"
+                )}
+              >
+                Coin Stake
               </Link>
               <Link
                 href="/bonga-bank"
