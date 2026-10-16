@@ -9,7 +9,6 @@ import { gardenClaimableFromRecord, getGardenEarnRecord, rolloverGardenRecordIfN
 import { getStakeRecord, computePendingStakeRewards } from "@/lib/stake-store";
 import { hasClaimedPetRewardToday, getSubmissionForWalletToday } from "@/lib/pet-love-store";
 import { PET_LOVE_REWARD } from "@/lib/pet-love";
-import { assertPlaySession } from "@/lib/play-session";
 import { walletHasBongaAta } from "@/lib/bonga-balance";
 
 export const runtime = "nodejs";
@@ -47,9 +46,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Invalid wallet." }, { status: 400 });
   }
 
-  const session = assertPlaySession(request, wallet);
-  if (!session.ok) return session.response;
-
+  // Read-only vault status — no miner session. Withdraw still requires a wallet signature.
   const [bank, min] = await Promise.all([
     getBongaBank(wallet),
     Promise.resolve(getBankMinWithdraw()),

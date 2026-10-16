@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import bs58 from "bs58";
 import { PublicKey } from "@solana/web3.js";
-import { clearCoinStake, getCoinStake } from "@/lib/coin-stake-store";
+import {
+  clearCoinStake,
+  getCoinStake,
+  settlePreviousMonthIfDue,
+} from "@/lib/coin-stake-store";
 import { verifyCoinStakeUnlockSignature } from "@/lib/treasury/messages";
 import { isWalletBlocked } from "@/lib/claim-tally-store";
-import { utcMonthKey } from "@/lib/coin-stake";
+import { utcMonthKey, monthKeyToLabel } from "@/lib/coin-stake";
+import { depositToBank } from "@/lib/bonga-bank";
+import { getWalletBongaBalance } from "@/lib/bonga-balance";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,13 +79,43 @@ export async function POST(request: Request) {
     }
 
     const prev = await getCoinStake(wallet);
+
+    // Settle any prior UTC month before wiping the position (current month still forfeited).
+    let settledReward = 0;
+    let settledMonth: string | null = null;
+    if (prev && prev.stakedAmount > 0) {
+      try {
+        const bal = await getWalletBongaBalance(wallet);
+        if (bal + 1e-9 >= prev.stakedAmount) {
+          const settlement = await settlePreviousMonthIfDue(wallet);
+          if (settlement.paid && settlement.reward > 0) {
+            await depositToBank(wallet, settlement.reward, {
+              source: "coin-stake",
+              date: settlement.month || undefined,
+            });
+            settledReward = settlement.reward;
+            settledMonth = settlement.month;
+          }
+        }
+      } catch (e) {
+        console.warn("[coin-stake/unlock] prior-month settle failed", e);
+      }
+    }
+
     await clearCoinStake(wallet);
+
+    const settleBit =
+      settledReward > 0 && settledMonth
+        ? ` Credited ${settledReward.toLocaleString()} $BONGA for ${monthKeyToLabel(settledMonth)} to Bonga Bank before unstake.`
+        : "";
 
     return NextResponse.json({
       ok: true,
       unstakedAmount: prev?.stakedAmount || 0,
       forfeitedMonth: utcMonthKey(),
-      note: `Unstaked. You forfeit rewards for ${utcMonthKey()} (current UTC month). Prior settled months stay in your Bonga Bank.`,
+      settledReward,
+      settledMonth,
+      note: `Unstaked. You forfeit rewards for ${utcMonthKey()} (current UTC month). Prior settled months stay in your Bonga Bank.${settleBit}`,
     });
   } catch (e) {
     console.error("[coin-stake/unlock]", e);

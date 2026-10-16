@@ -33,9 +33,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Invalid wallet" }, { status: 400 });
     }
 
-    const { assertPlaySession } = await import("@/lib/play-session");
-    const session = assertPlaySession(request, wallet);
-    if (!session.ok) return session.response;
+    // Read-only + monthly settlement — no miner session required.
+    // Lock/unlock still require a wallet signature.
 
     let walletBalance = 0;
     try {

@@ -41,6 +41,7 @@ export default function BongaBankPage() {
       return;
     }
     try {
+      setError(null);
       let s = await fetchBongaBankStatus(walletAddress);
       setStatus(s);
 
@@ -51,14 +52,19 @@ export default function BongaBankPage() {
         await depositPendingToBank({ wallet: walletAddress, source: "all" });
         s = await fetchBongaBankStatus(walletAddress); // re-fetch to reflect the moved amounts in bankedBonga
         setStatus(s);
-      } catch (e) {
+      } catch {
         // non-fatal — user can refresh again
       }
 
       // Ensure revealed state
       setVaultOpen(true);
     } catch (e) {
-      setError("Failed to load Bonga Bank status.");
+      setStatus(null);
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Failed to load Bonga Bank status. Hard-refresh and try again."
+      );
     }
   }, [walletAddress]);
 
@@ -315,7 +321,21 @@ export default function BongaBankPage() {
                   <div className="text-2xl text-muted-foreground">$BONGA in your Bonga Bank</div>
                 </div>
 
-                {!status && <p className="text-muted-foreground text-sm">Loading your personal deposits…</p>}
+                {!status && !error && (
+                  <p className="text-muted-foreground text-sm">Loading your personal deposits…</p>
+                )}
+                {!status && error && (
+                  <div className="mb-4 space-y-3">
+                    <p className="text-sm text-red-600 dark:text-red-300">{error}</p>
+                    <button
+                      type="button"
+                      onClick={() => void refreshStatus()}
+                      className="rounded-lg border border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                    >
+                      Retry load vault
+                    </button>
+                  </div>
+                )}
 
                 {status && (
                   <>

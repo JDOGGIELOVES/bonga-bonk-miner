@@ -375,11 +375,40 @@ export function CoinStakingClient() {
             </div>
           )}
 
+          {connected && !status && !error && (
+            <p className="mt-8 text-center text-sm text-muted-foreground">
+              Loading your Coin Stake position…
+            </p>
+          )}
+
+          {connected && !status && error && (
+            <div className="mt-8 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setError(null);
+                  void refresh();
+                }}
+                className="rounded-xl border border-border px-5 py-3 text-sm font-semibold hover:bg-muted"
+              >
+                Retry load position
+              </button>
+            </div>
+          )}
+
           {!connected && (
             <p className="mt-8 text-center text-sm text-muted-foreground">
               Connect a wallet holding $BONGA to stake.
             </p>
           )}
+
+          <p className="mt-10 text-center text-xs text-muted-foreground max-w-xl mx-auto">
+            Coin Stake does <strong>not</strong> pay instantly. Monthly APR credits to{" "}
+            <Link href="/bonga-bank" className="text-bonga-teal underline">
+              Bonga Bank
+            </Link>
+            , then you withdraw from the vault to your wallet.
+          </p>
         </div>
       </main>
       <BongaFooter />

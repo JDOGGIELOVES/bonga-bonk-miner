@@ -241,16 +241,24 @@ export interface BongaBankStatus {
 
 export async function fetchBongaBankStatus(wallet: string): Promise<BongaBankStatus | null> {
   try {
-    const { getStoredMinerSession } = await import("@/lib/miner-tap-client");
-    const sessionToken = getStoredMinerSession(wallet);
-    if (!sessionToken) return null;
     const res = await fetch(
-      `/api/bank/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
-      { cache: "no-store", headers: { "x-miner-session": sessionToken } }
+      `/api/bank/status?wallet=${encodeURIComponent(wallet)}`,
+      { cache: "no-store" }
     );
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // Surface auth/server failures to the bank UI instead of looking like an empty vault.
+      let detail = `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body?.error) detail = String(body.error);
+      } catch {
+        /* ignore */
+      }
+      throw new Error(`Could not load Bonga Bank: ${detail}`);
+    }
     return await res.json();
-  } catch {
+  } catch (e) {
+    if (e instanceof Error) throw e;
     return null;
   }
 }
@@ -596,32 +604,16 @@ export type CoinStakeStatus = {
 
 export async function fetchCoinStakeStatus(
   wallet: string,
-  opts?: {
+  _opts?: {
     connectedWallet?: Wallet | null;
     signMessage?: (message: Uint8Array) => Promise<Uint8Array>;
-    /** If true, prompt wallet sign to create a session when missing. */
+    /** @deprecated Session no longer required to read Coin Stake status. */
     ensureSession?: boolean;
   }
 ): Promise<CoinStakeStatus> {
-  const { getStoredMinerSession, ensureMinerSession } = await import(
-    "@/lib/miner-tap-client"
-  );
-  let sessionToken = getStoredMinerSession(wallet);
-  if (!sessionToken && opts?.ensureSession) {
-    sessionToken = await ensureMinerSession({
-      wallet,
-      connectedWallet: opts.connectedWallet ?? null,
-      signMessage: opts.signMessage,
-    });
-  }
-  if (!sessionToken) {
-    throw new Error(
-      "Connect wallet and approve one short sign-in to load Coin Stake status."
-    );
-  }
   const res = await fetch(
-    `/api/coin-stake/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
-    { cache: "no-store", headers: { "x-miner-session": sessionToken } }
+    `/api/coin-stake/status?wallet=${encodeURIComponent(wallet)}`,
+    { cache: "no-store" }
   );
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error || "Failed to load coin stake status");
