@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LandingCaCopy } from "@/components/home/landing-ca-copy";
 import { LandingWallet } from "@/components/home/landing-wallet";
 import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
 
@@ -168,6 +169,8 @@ export function BongaLanding() {
             Coin Stake
           </Link>
         </div>
+
+        <LandingCaCopy />
       </section>
 
       <div
