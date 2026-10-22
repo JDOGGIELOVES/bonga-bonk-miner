@@ -45,7 +45,7 @@ export function GardenQuests({
                   {waterProgress ? ` · ${waterProgress}` : ""}
                 </p>
                 <p className="mt-1 text-[11px] font-medium text-bonga-teal">
-                  +{quest.reward} $BONGA
+                  +{quest.reward < 1 ? quest.reward.toFixed(2) : quest.reward} $BONGA
                 </p>
               </div>
               {done ? (

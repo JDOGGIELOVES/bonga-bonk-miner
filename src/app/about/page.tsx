@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { AboutHeader } from "@/components/about/about-header";
 import { AboutContent } from "@/components/about/about-content";
 import { AboutJsonLd } from "@/components/seo/site-json-ld";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { buildPageMetadata } from "@/lib/site-seo";
 
 export const metadata: Metadata = buildPageMetadata({
@@ -34,8 +34,9 @@ export default function AboutPage() {
   return (
     <>
       <AboutJsonLd />
-      <AboutHeader />
-      <AboutContent />
+      <BongaMarketingShell>
+        <AboutContent />
+      </BongaMarketingShell>
     </>
   );
 }

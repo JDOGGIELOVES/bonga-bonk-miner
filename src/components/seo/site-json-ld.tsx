@@ -77,7 +77,7 @@ export function HomeJsonLd() {
         url: absoluteUrl("/"),
         name: "Bonga Bonk Miner — Tap, Mine $BONGA, Bonk's Sister on Solana",
         description:
-          "Play the Bonga Bonk Miner game. Tap to bonk meme coins, mine $BONGA on Solana, and join the Bonga fam — Bonk's Sister raises the frequency.",
+          "Play Bonga Bonk Miner — 100 taps = 1 $BONGA (max 10/day), NFT stake up to 875/day. Bonk's Sister raises the frequency.",
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",
@@ -87,7 +87,7 @@ export function HomeJsonLd() {
           name: "Bonga Bonk Miner",
           alternateName: ["Bonk Miner", "Bonga game"],
           description:
-            "A free tap-to-bonk mining game on Solana. Earn $BONGA and climb the leaderboard.",
+            "Free Solana tap game: 100 taps = 1 $BONGA (max 10/day), NFT staking up to 875/day Cosmic.",
           genre: "Casual game",
           gamePlatform: "Web browser",
           operatingSystem: "Any",
@@ -116,7 +116,7 @@ export function NftJsonLd() {
         url: absoluteUrl("/nft"),
         name: "Bonga NFT Collection — Mint Bonk's Sister on Solana",
         description:
-          `${COLLECTION_STATS.totalSupply.toLocaleString()} unique Bonga NFTs on Solana. Hippie, cosmic, and bonk-powered art from Bonk's Sister. Mint yours and join the Bonga fam.`,
+          `${COLLECTION_STATS.totalSupply.toLocaleString()} unique Bonga NFTs on Solana. Stake up to 875 $BONGA/day (Cosmic). Mint and join the fam.`,
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",
@@ -126,7 +126,7 @@ export function NftJsonLd() {
           name: "Bonga NFT Collection",
           alternateName: ["Bonga NFTs", "Bonk Sister NFTs"],
           description:
-            `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — peaceful bonks, dreadlocks, and Solana vibes.`,
+            `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — stake for tiered daily $BONGA (250–875/day).`,
           brand: { "@id": ORG_ID },
           category: "NFT",
           image: absoluteUrl("/bonga-character.png"),

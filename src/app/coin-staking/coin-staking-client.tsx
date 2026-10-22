@@ -1,11 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Coins, Clock, Shield, TrendingUp, AlertTriangle } from "lucide-react";
-import { BongaHeader } from "@/components/layout/bonga-header";
-import { BongaFooter } from "@/components/layout/bonga-footer";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { BongaWalletButton } from "@/components/miner/wallet-button";
 import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
 import {
@@ -150,9 +149,8 @@ export function CoinStakingClient() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <BongaHeader />
-      <main className="flex-1 px-[30px] py-10">
+    <BongaMarketingShell>
+      <main className="flex-1 px-6 py-10">
         <div className="mx-auto max-w-3xl">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 rounded-full border border-bonga-teal/30 bg-bonga-teal/5 px-4 py-1 text-xs font-semibold tracking-[0.12em] text-bonga-teal mb-4">
@@ -411,7 +409,6 @@ export function CoinStakingClient() {
           </p>
         </div>
       </main>
-      <BongaFooter />
-    </div>
+    </BongaMarketingShell>
   );
 }

@@ -4,7 +4,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { fetchClaimStatus } from "@/lib/claim-client";
-import { fetchMinerEarned, registerMinerTap } from "@/lib/miner-tap-client";
+import {
+  ensureMinerSession,
+  fetchMinerEarned,
+  getStoredMinerSession,
+  registerMinerTap,
+} from "@/lib/miner-tap-client";
 import { Button } from "@/components/ui/button";
 import { depositPendingToBank } from "@/lib/claim-client";
 
@@ -49,7 +54,9 @@ interface BonkMinerGameProps {
 }
 
 export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshKey: externalTallyRefreshKey, onTallyRefresh }: BonkMinerGameProps) {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, wallet, signMessage } = useWallet();
+  const [minerSessionReady, setMinerSessionReady] = useState(false);
+  const [minerSessionHint, setMinerSessionHint] = useState<string | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [coins, setCoins] = useState<FloatingCoin[]>([]);
   const [effects, setEffects] = useState<BonkEffect[]>([]);
@@ -98,22 +105,48 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
   useEffect(() => {
     if (!publicKey) {
       serverTapsRef.current = 0;
+      setServerEarned(null);
+      setMinerSessionReady(false);
+      setMinerSessionHint(null);
       return;
     }
 
+    const walletAddr = publicKey.toBase58();
     let cancelled = false;
-    void fetchMinerEarned(publicKey.toBase58()).then((earned) => {
-      if (!cancelled && earned) {
-        serverTapsRef.current = earned.taps;
-        setServerEarned(earned); // capture full for limit message + reset time
-        setServerEarnRefreshKey((key) => key + 1);
+    void (async () => {
+      try {
+        if (!getStoredMinerSession(walletAddr)) {
+          setMinerSessionHint("One wallet sign unlocks silent taps for 24h…");
+        }
+        await ensureMinerSession({
+          wallet: walletAddr,
+          connectedWallet: wallet,
+          signMessage: signMessage || undefined,
+        });
+        if (cancelled) return;
+        setMinerSessionReady(true);
+        setMinerSessionHint(null);
+        const earned = await fetchMinerEarned(walletAddr);
+        if (earned) {
+          serverTapsRef.current = earned.taps;
+          setServerEarned(earned);
+          setServerEarnRefreshKey((key) => key + 1);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setMinerSessionReady(false);
+        setMinerSessionHint(
+          e instanceof Error
+            ? e.message
+            : "Sign once to enable server tap tracking (no per-tap popups)."
+        );
       }
-    });
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [publicKey]);
+  }, [publicKey, wallet, signMessage]);
 
   const respawnCoin = useCallback((hitId: string) => {
     setTimeout(() => {
@@ -123,12 +156,10 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             ? {
                 ...c,
                 hit: false,
-                x: 10 + Math.random() * 80,
-                y: 10 + Math.random() * 70,
-                coinId:
-                  ["doge", "pepe", "shib", "wojak", "bonk", "moon", "lmao"][
-                    Math.floor(Math.random() * 7)
-                  ],
+                // Edge-biased respawn so coins stay clear of the center logo.
+                x: Math.random() > 0.5 ? 4 + Math.random() * 18 : 78 + Math.random() * 16,
+                y: Math.random() > 0.5 ? 6 + Math.random() * 22 : 58 + Math.random() * 22,
+                coinId: MEME_COINS[Math.floor(Math.random() * MEME_COINS.length)].id,
               }
             : c
         )
@@ -235,34 +266,47 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
         gameAudio.playCoinCollect();
       }
 
-      if (publicKey) {
-        const wallet = publicKey.toBase58();
+      if (publicKey && minerSessionReady) {
+        const walletAddr = publicKey.toBase58();
         const tapIndex = serverTapsRef.current + 1;
-        // Silent server tracking only. No wallet signature or deposit action here.
-        // User is never prompted to sign on the tap screen.
-        void registerMinerTap({ wallet, tapIndex }).then((tapResult) => {
+        // Silent server tracking after one session sign — no per-tap popup.
+        void registerMinerTap({ wallet: walletAddr, tapIndex }).then((tapResult) => {
             if ("ok" in tapResult && tapResult.ok) {
               serverTapsRef.current = tapResult.taps;
               setServerEarnRefreshKey((key) => key + 1);
               onTallyRefresh?.();
               return;
             }
-            if (tapResult.taps != null) {
-              serverTapsRef.current = tapResult.taps;
-            }
-            // Capture limit info from error response for immediate UI feedback
-            if (tapResult.dailyLimitReached) {
-              setServerEarned((prev: any) => ({
-                ...(prev || {}),
-                dailyLimitReached: true,
-                nextDailyReset: tapResult.nextDailyReset,
-                limitMessage: tapResult.limitMessage,
-              }));
+            if ("error" in tapResult) {
+              if (tapResult.code === "MINER_SESSION") {
+                setMinerSessionReady(false);
+                setMinerSessionHint(tapResult.error);
+              }
+              if (tapResult.taps != null) {
+                serverTapsRef.current = tapResult.taps;
+              }
+              if (tapResult.dailyLimitReached) {
+                setServerEarned((prev: any) => ({
+                  ...(prev || {}),
+                  dailyLimitReached: true,
+                  nextDailyReset: tapResult.nextDailyReset,
+                  limitMessage: tapResult.limitMessage,
+                }));
+              }
             }
           });
       }
     },
-    [gameState, coins, combo, respawnCoin, addEffect, addParticles, publicKey]
+    [
+      gameState,
+      coins,
+      combo,
+      respawnCoin,
+      addEffect,
+      addParticles,
+      publicKey,
+      minerSessionReady,
+    ]
   );
 
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -329,6 +373,11 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
         <>
           <div className="mt-4 space-y-4">
             <GlobalClaimTally refreshKey={tallyRefreshKey} />
+            {minerSessionHint && connected && (
+              <p className="text-center text-xs text-amber-700 dark:text-amber-300">
+                {minerSessionHint}
+              </p>
+            )}
             <GameStats 
               state={gameState} 
               combo={combo} 
@@ -411,7 +460,7 @@ export function BonkMinerGame({ onWalletConnect, embedded = false, tallyRefreshK
             <BongaBonkCharacter isBonking={isBonking} bonkAngle={bonkAngle} />
 
             <p className="absolute bottom-5 px-4 text-center text-xs text-muted-foreground">
-              1 tap = 1 $BONGA · {DAILY_BONGA_LIMIT} max per day — automatically deposited to your Bonga Bank Vault. View & manage in the <a href="/bonga-bank" className="underline">Bonga Bank Vault</a>. On-chain up to 20,001 $BONGA daily (no vault minimum).
+              100 taps = 1 $BONGA · {DAILY_BONGA_LIMIT} max per day — automatically deposited to your Bonga Bank Vault. View & manage in the <a href="/bonga-bank" className="underline">Bonga Bank Vault</a>. On-chain up to 5,200 $BONGA daily (no vault minimum).
             </p>
           </div>
 

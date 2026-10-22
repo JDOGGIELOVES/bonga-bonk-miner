@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicKey } from "@solana/web3.js";
-import { BongaHeader } from "@/components/layout/bonga-header";
-import { BongaFooter } from "@/components/layout/bonga-footer";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { BongaCaBanner } from "@/components/about/bonga-ca-banner";
 import { buildPageMetadata } from "@/lib/site-seo";
 import { getPublicTreasuryInfo } from "@/lib/treasury/config";
@@ -87,9 +86,8 @@ export default async function TreasuryPage() {
   }
 
   return (
-    <>
-      <BongaHeader />
-      <div className="min-h-screen bg-bonga-page">
+    <BongaMarketingShell>
+      <div>
         <div className="mx-auto max-w-4xl px-[30px] py-12">
           {/* Hero */}
           <div className="text-center mb-12">
@@ -176,7 +174,7 @@ export default async function TreasuryPage() {
 
               <div className="pt-4 border-t border-border/50">
                 <p className="text-sm text-muted-foreground">
-                  <strong className="text-foreground">Transparency note:</strong> Every $BONGA paid out from this treasury (miner, garden, Pet Love, NFT staking rewards, etc.) is recorded on Solana and reflected in our public claim tally (now includes a dedicated staking category).
+                  <strong className="text-foreground">Transparency note:</strong> Every $BONGA paid out from this treasury (miner, Pet Love, NFT staking rewards, etc.) is recorded on Solana and reflected in our public claim tally (now includes a dedicated staking category).
                 </p>
               </div>
             </div>
@@ -195,7 +193,7 @@ export default async function TreasuryPage() {
               </div>
               <div className="text-xl text-muted-foreground mt-1">$BONGA paid out</div>
               <div className="text-sm text-muted-foreground mt-2">
-                Across {(totalClaims || 0).toLocaleString()} claims (miner, garden, pet love, and NFT staking)
+                Across {(totalClaims || 0).toLocaleString()} claims (miner, pet love, and NFT staking)
               </div>
             </div>
 
@@ -292,7 +290,7 @@ export default async function TreasuryPage() {
           <div className="mt-10 text-center text-sm text-muted-foreground max-w-prose mx-auto">
             <p className="mb-2">
               <strong className="text-foreground">Sustainable economics:</strong> Players accumulate mined $BONGA in a personal off-chain <strong>Bonga Bank</strong>. 
-              Earnings auto-deposit there. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum). 
+              Earnings auto-deposit there. On-chain withdrawals up to 5,200 $BONGA daily — game 200 + staking 5,000 (no vault minimum). 
               This keeps Solana fees paid by the treasury much lower than the value of $BONGA distributed to the community.
             </p>
             <Link href="/bonga-bank" className="inline-flex items-center gap-1 text-bonga-teal hover:underline font-medium">
@@ -301,7 +299,6 @@ export default async function TreasuryPage() {
           </div>
         </div>
       </div>
-      <BongaFooter />
-    </>
+    </BongaMarketingShell>
   );
 }

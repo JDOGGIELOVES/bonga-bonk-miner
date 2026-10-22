@@ -10,9 +10,8 @@ interface BongaBonkCharacterProps {
   clubScale?: number;
 }
 
-const MAIN_SPRITE = "/bonga-character.png";
-const SWING_SRC = "/characters/bonga-swing-impact.png";
-const HAPPY_SRC = "/characters/bonga-bonk-happy.png";
+/** Official $BONGA token logo (Dexscreener / Solana token image). */
+const TOKEN_LOGO = "/bonga-token-logo.png";
 
 export function BongaBonkCharacter({
   isBonking,
@@ -20,29 +19,20 @@ export function BongaBonkCharacter({
   clubScale: _clubScale = 1,
 }: BongaBonkCharacterProps) {
   const bodyControls = useAnimation();
-  const [showHappy, setShowHappy] = useState(false);
   const [usePng, setUsePng] = useState(true);
 
   useEffect(() => {
     if (isBonking) {
-      setShowHappy(false);
       void bodyControls.start({
         scale: [1, 1.1, 0.95, 1.04, 1],
         y: [0, -10, 6, -4, 0],
         rotate: [0, -4, 5, -2, 0],
         transition: { duration: 0.38, ease: "easeOut" },
       });
-      const happyTimer = setTimeout(() => setShowHappy(true), 280);
-      const resetTimer = setTimeout(() => setShowHappy(false), 520);
-      return () => {
-        clearTimeout(happyTimer);
-        clearTimeout(resetTimer);
-      };
     }
-    setShowHappy(false);
   }, [isBonking, bodyControls]);
 
-  const activeSrc = showHappy ? HAPPY_SRC : isBonking ? SWING_SRC : MAIN_SPRITE;
+  const activeSrc = TOKEN_LOGO;
 
   if (!usePng) {
     return <BongaSvgFallback isBonking={isBonking} />;
@@ -50,7 +40,7 @@ export function BongaBonkCharacter({
 
   return (
     <motion.div
-      className="relative z-20 flex flex-col items-center"
+      className="relative z-10 flex flex-col items-center"
       animate={isBonking ? bodyControls : { y: [0, -6, 0] }}
       transition={
         isBonking
@@ -58,10 +48,10 @@ export function BongaBonkCharacter({
           : { repeat: Infinity, duration: 3.6, ease: "easeInOut" }
       }
     >
-      <div className="absolute inset-0 -m-14 rounded-full bg-gradient-to-br from-bonga-orange/14 via-transparent to-emerald-400/10 blur-3xl" />
+      <div className="absolute inset-0 -m-8 rounded-full bg-gradient-to-br from-bonga-orange/10 via-transparent to-emerald-400/8 blur-2xl" />
 
       <motion.div
-        className="relative h-64 w-64 bg-transparent sm:h-80 sm:w-80 md:h-[22rem] md:w-[22rem]"
+        className="relative h-44 w-44 bg-transparent sm:h-52 sm:w-52 md:h-60 md:w-60"
         animate={
           isBonking
             ? {
@@ -110,11 +100,11 @@ export function BongaBonkCharacter({
         <Image
           key={activeSrc}
           src={activeSrc}
-          alt="Bonga — orange Shiba with dreadlocks, striped headband, bonk club, and $BONGA"
+          alt="Bonga — official $BONGA token logo"
           fill
           priority
           unoptimized
-          className="object-contain bg-transparent drop-shadow-2xl"
+          className="rounded-full object-contain bg-transparent drop-shadow-2xl"
           sizes="(max-width: 640px) 256px, (max-width: 768px) 320px, 352px"
           onError={() => setUsePng(false)}
         />

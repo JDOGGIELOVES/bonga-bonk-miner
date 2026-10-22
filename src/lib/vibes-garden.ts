@@ -2,11 +2,11 @@
 
 export const GARDEN_STORAGE_KEY = "bonga-vibes-garden";
 export const MAX_OFFLINE_HOURS = 8;
-/** Max $BONGA credited per UTC day (idle + taps + quests) in the garden. 
- * On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).
- * All earnings auto-deposit to the vault below the threshold.
+/** Max $BONGA credited per UTC day (idle + taps + quests) in the garden.
+ * Economy v2: 1% of prior garden payouts (was 1500).
+ * On-chain withdrawals still use the wallet daily vault cap separately.
  */
-export const GARDEN_DAILY_EARN_CAP = 1500;
+export const GARDEN_DAILY_EARN_CAP = 15;
 
 /** Returns the next daily reset (UTC midnight). */
 export function getNextDailyResetDate(): Date {
@@ -60,6 +60,7 @@ export const GARDEN_ZONES: {
   { id: "farm", label: "Farm", emoji: "🚜", description: "Cosmic crop rows" },
 ];
 
+/** Plant yields at 1% of prior rates; shop costs scaled so progression still feels fair. */
 export const PLANT_CATALOG: PlantType[] = [
   {
     id: "peace-lily",
@@ -67,8 +68,8 @@ export const PLANT_CATALOG: PlantType[] = [
     emoji: "🪷",
     description: "Soft petals, softer vibes.",
     cost: 0,
-    tapBonga: 0.05,
-    idleBongaPerSec: 0.01,
+    tapBonga: 0.0005,
+    idleBongaPerSec: 0.0001,
     rarity: "common",
     glow: "#2DB8A8",
     defaultZone: "meadow",
@@ -78,9 +79,9 @@ export const PLANT_CATALOG: PlantType[] = [
     name: "Love Lotus",
     emoji: "💗",
     description: "Opens hearts on every water.",
-    cost: 48,
-    tapBonga: 0.08,
-    idleBongaPerSec: 0.016,
+    cost: 0.48,
+    tapBonga: 0.0008,
+    idleBongaPerSec: 0.00016,
     rarity: "common",
     glow: "#FF6200",
     defaultZone: "meadow",
@@ -90,9 +91,9 @@ export const PLANT_CATALOG: PlantType[] = [
     name: "Frequency Crystal",
     emoji: "🔮",
     description: "Amplifies gentle energy.",
-    cost: 145,
-    tapBonga: 0.12,
-    idleBongaPerSec: 0.025,
+    cost: 1.45,
+    tapBonga: 0.0012,
+    idleBongaPerSec: 0.00025,
     rarity: "rare",
     glow: "#8B5CF6",
     defaultZone: "greenhouse",
@@ -102,9 +103,9 @@ export const PLANT_CATALOG: PlantType[] = [
     name: "Affirmation Tree",
     emoji: "🌳",
     description: "Leaves whisper good bonks.",
-    cost: 310,
-    tapBonga: 0.20,
-    idleBongaPerSec: 0.04,
+    cost: 3.1,
+    tapBonga: 0.002,
+    idleBongaPerSec: 0.0004,
     rarity: "rare",
     glow: "#4ADE80",
     defaultZone: "farm",
@@ -132,28 +133,28 @@ export const DAILY_QUESTS: DailyQuest[] = [
     title: "Morning mist",
     description: "Water plants 5 times",
     emoji: "💧",
-    reward: 3,
+    reward: 0.03,
   },
   {
     id: "affirm",
     title: "Speak peace",
     description: "Claim a daily affirmation vibe",
     emoji: "🌼",
-    reward: 3,
+    reward: 0.03,
   },
   {
     id: "meditate",
     title: "Breathe & bonk",
     description: "Take a 10-second peace pause",
     emoji: "🧘",
-    reward: 3,
+    reward: 0.03,
   },
   {
     id: "good-deed",
     title: "Spread love",
     description: "Send good vibes to the fam",
     emoji: "🫶",
-    reward: 3,
+    reward: 0.03,
   },
 ];
 
@@ -256,10 +257,11 @@ export function getNftMultiplier(isHolder: boolean): {
   if (!isHolder) {
     return { tap: 1, idle: 1, label: "" };
   }
+  // Economy v2: holder boost is 25% of the prior +25% bonus → +6.25%
   return {
-    tap: 1.25,
-    idle: 1.25,
-    label: "NFT holder · +25% yield",
+    tap: 1.0625,
+    idle: 1.0625,
+    label: "NFT holder · +6.25% yield",
   };
 }
 
@@ -462,7 +464,13 @@ export function gardenBeautyLevel(plantCount: number): number {
   return 1;
 }
 
+/** Display helper for garden $BONGA (supports tiny economy-v2 rates). */
 export function formatGardenBonga(value: number): string {
-  if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-  return value < 10 ? value.toFixed(2) : value.toFixed(1);
+  const n = Number(value);
+  if (!Number.isFinite(n) || n === 0) return "0";
+  if (Math.abs(n) >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  if (Math.abs(n) >= 10) return n.toFixed(1);
+  if (Math.abs(n) >= 0.01) return n.toFixed(2);
+  if (Math.abs(n) >= 0.001) return n.toFixed(3);
+  return n.toFixed(4);
 }

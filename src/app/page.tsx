@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { MinerShell } from "@/components/miner/miner-shell";
+import { BongaLanding } from "@/components/home/bonga-landing";
 import { HomeSeoContent } from "@/components/seo/home-seo-content";
 import { HomeJsonLd } from "@/components/seo/site-json-ld";
 import { buildPageMetadata } from "@/lib/site-seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Bonga Bonk Miner — Bonk's Sister, Mine $BONGA on Solana",
+  title: "Bonga Bonks — Bonk's Sister on Solana | Mine, Stake, Bank $BONGA",
   description:
-    "Play Bonga Bonk Miner — Bonk's Sister tap game on Solana. Bonk meme coins, mine $BONGA, and climb the leaderboard. Free at bongabonks.com.",
+    "Bonga — Bonk's Sister. Mine $BONGA, soft-stake coins, stake NFTs, and withdraw from Bonga Bank on Solana. Raise the frequency at bongabonks.com.",
   path: "/",
   keywords: [
     "Bonga",
@@ -18,25 +20,47 @@ export const metadata: Metadata = buildPageMetadata({
     "Bonk Miner",
     "Bonga Bonk Miner",
     "Bonga Solana",
-    "Bonga game",
-    "mine BONGA",
+    "Bonga Bank",
+    "Coin Stake",
     "$BONGA",
     "Solana meme coin",
     "bongabonks",
     "Raise the Frequency",
-    "Bonga NFT",
   ],
-  imageAlt: "Bonga Bonk Miner — Bonk's Sister mascot",
+  imageAlt: "Bonga Bonks — Bonk's Sister on Solana",
 });
 
-export default function Home() {
+type HomeProps = {
+  searchParams: Promise<{ mode?: string | string[] }>;
+};
+
+export default async function Home({ searchParams }: HomeProps) {
+  const sp = await searchParams;
+  const modeRaw = sp.mode;
+  const mode = Array.isArray(modeRaw) ? modeRaw[0] : modeRaw;
+  // Vibes Garden retired from UI — old bookmarks land on Miner.
+  if (mode === "garden") {
+    redirect("/?mode=miner");
+  }
+  const showGame = mode === "miner";
+
   return (
     <>
       <HomeJsonLd />
       <HomeSeoContent />
-      <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">Raising the frequency...</div>}>
-        <MinerShell />
-      </Suspense>
+      {showGame ? (
+        <Suspense
+          fallback={
+            <div className="flex min-h-[60vh] items-center justify-center text-sm text-muted-foreground">
+              Raising the frequency...
+            </div>
+          }
+        >
+          <MinerShell />
+        </Suspense>
+      ) : (
+        <BongaLanding />
+      )}
     </>
   );
 }

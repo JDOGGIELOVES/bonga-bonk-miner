@@ -17,11 +17,11 @@ The homepage is now a **Game Hub** with tabs: Bonk Miner (original) and Vibes Ga
 ## Features
 
 - Tap anywhere to bonk meme coins
-- 100 bonks = 1 $BONGA (max 10/day)
+- 100 bonks = 1 $BONGA (max 10/day) — economy v2 (~1% of prior game payouts)
 - Solana wallet connect (Phantom, Solflare)
-- Claim mined $BONGA (simulated)
+- Claim mined $BONGA to Bonga Bank Vault
 - Sound effects + lo-fi music
-- NFT whitelist perks for Bonk Miner players
+- NFT holder boosts + staking (stake rates at 25% of prior economy)
 
 ## Environment
 

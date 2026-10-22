@@ -78,10 +78,10 @@ export function GardenShop({
           <p className="font-semibold text-foreground">Shop tips</p>
           <p className="mt-1">
             Buy plants for your central garden. Duplicates stack full idle + tap income. Up to 10 free Peace Lilies. Max{" "}
-            {GARDEN_DAILY_EARN_CAP} $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain up to 20,001 daily, no min).
+            {GARDEN_DAILY_EARN_CAP} $BONGA per day across everything — all deposited to your Bonga Bank Vault (on-chain up to 5,200 daily (game 200 + staking 5,000), no min).
           </p>
           <p className="mt-1.5">
-            NFT holders get +25% yield on taps and idle. All progress saves locally.
+            NFT holders get +6.25% yield on taps and idle. All progress saves locally.
           </p>
         </div>
 
@@ -103,12 +103,13 @@ export function GardenShop({
                   <p className="font-semibold text-foreground">{plant.name}</p>
                   <p className="text-xs text-muted-foreground">{plant.description}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Per plant: tap +{plant.tapBonga} · idle {plant.idleBongaPerSec}/s · best in{" "}
+                    Per plant: tap +{formatGardenBonga(plant.tapBonga)} · idle{" "}
+                    {formatGardenBonga(plant.idleBongaPerSec)}/s · best in{" "}
                     {plant.defaultZone}
                   </p>
                   {owned > 0 && (
                     <p className="mt-1 text-[11px] font-medium text-bonga-teal">
-                      You own {owned} · {stackedIdle.toFixed(3)}/s idle from this type
+                      You own {owned} · {formatGardenBonga(stackedIdle)}/s idle from this type
                     </p>
                   )}
                   {plant.id === "peace-lily" && owned >= 10 && (

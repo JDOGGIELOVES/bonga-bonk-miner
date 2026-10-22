@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BongaHeader } from "@/components/layout/bonga-header";
-import { BongaFooter } from "@/components/layout/bonga-footer";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { buildPageMetadata } from "@/lib/site-seo";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "How to Connect Your Wallet | Play & Mine Bonga on Solana",
   description:
-    "Learn how to connect Phantom or Solflare wallet to bongabonks.com to play Bonk Miner, Vibes Garden, claim $BONGA, stake NFTs, and more. Step-by-step download and setup instructions.",
+    "Learn how to connect Phantom or Solflare wallet to bongabonks.com to play Bonk Miner, claim $BONGA, stake NFTs, and more. Step-by-step download and setup instructions.",
   path: "/how-to-connect",
   keywords: [
     "how to connect wallet",
@@ -24,9 +23,8 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function HowToConnectPage() {
   return (
-    <>
-      <BongaHeader />
-      <div className="min-h-screen bg-bonga-page">
+    <BongaMarketingShell>
+      <div>
         <div className="mx-auto max-w-3xl px-[30px] py-12">
           {/* Hero */}
           <div className="text-center mb-12">
@@ -34,7 +32,7 @@ export default function HowToConnectPage() {
               How to Connect Your Wallet
             </h1>
             <p className="mt-4 text-xl text-muted-foreground max-w-2xl mx-auto">
-              To play Bonk Miner, grow in Vibes Garden, claim $BONGA rewards, 
+              To play Bonk Miner, claim $BONGA rewards, 
               stake NFTs, or use Pet Love — you need a Solana wallet.
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -46,7 +44,7 @@ export default function HowToConnectPage() {
           <div className="bonga-card p-8 mb-8">
             <h2 className="font-display text-2xl font-bold mb-4">Why Connect a Wallet?</h2>
             <ul className="space-y-2 text-muted-foreground">
-              <li>• Claim your mined $BONGA from Bonk Miner and Vibes Garden (on-chain)</li>
+              <li>• Claim your mined $BONGA from Bonk Miner (on-chain / Bonga Bank)</li>
               <li>• Stake Bonga NFTs to earn passive rewards</li>
               <li>• Participate in Pet Love and other community features</li>
               <li>• Your progress and claims are tied to your wallet address</li>
@@ -174,7 +172,6 @@ export default function HowToConnectPage() {
           </div>
         </div>
       </div>
-      <BongaFooter />
-    </>
+    </BongaMarketingShell>
   );
 }

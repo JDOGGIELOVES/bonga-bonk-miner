@@ -217,10 +217,57 @@ async function saveBlockedWallets(blocked: Record<string, BlockedWallet>): Promi
 }
 
 export async function isWalletBlocked(wallet: string): Promise<{ blocked: boolean; until?: string; reason?: string }> {
-  // All auto-blocks and velocity-based blocks lifted.
-  // Only manual blocks via admin if needed for real abuse.
-  // This keeps the game playable while common sense security (signatures, date checks, duplicates, daily per-wallet limits, IP basic) remains.
-  return { blocked: false };
+  const normalized = wallet.toLowerCase().trim();
+  if (!normalized) return { blocked: false };
+  try {
+    const blocked = await getBlockedWallets();
+    const entry = blocked[normalized];
+    if (!entry?.blockedUntil) return { blocked: false };
+    const untilMs = Date.parse(entry.blockedUntil);
+    if (!Number.isFinite(untilMs) || untilMs <= Date.now()) {
+      // Expired — drop entry best-effort
+      delete blocked[normalized];
+      await saveBlockedWallets(blocked).catch(() => {});
+      return { blocked: false };
+    }
+    return { blocked: true, until: entry.blockedUntil, reason: entry.reason };
+  } catch {
+    return { blocked: false };
+  }
+}
+
+/** Clear blocks/flags created by the unauth /api/admin/flag-pet-exploits accident. */
+export async function clearAccidentalPetExploitBlocks(): Promise<{
+  clearedBlocked: string[];
+  clearedFlagged: string[];
+}> {
+  const needle = "pet love exploit";
+  const blocked = await getBlockedWallets();
+  const flagged = await getFlaggedWallets();
+  const clearedBlocked: string[] = [];
+  const clearedFlagged: string[] = [];
+
+  for (const [w, entry] of Object.entries(blocked)) {
+    if ((entry.reason || "").toLowerCase().includes(needle)) {
+      delete blocked[w];
+      clearedBlocked.push(w);
+    }
+  }
+
+  for (const [w, list] of Object.entries(flagged)) {
+    const kept = (list || []).filter(
+      (f) => !(f.reason || "").toLowerCase().includes(needle)
+    );
+    if (kept.length !== (list || []).length) {
+      clearedFlagged.push(w);
+    }
+    if (kept.length === 0) delete flagged[w];
+    else flagged[w] = kept;
+  }
+
+  await saveBlockedWallets(blocked);
+  await saveFlaggedWallets(flagged);
+  return { clearedBlocked, clearedFlagged };
 }
 
 export async function getGlobalClaimTally(): Promise<GlobalClaimTally> {

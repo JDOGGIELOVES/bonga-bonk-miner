@@ -13,6 +13,7 @@ import {
   recordIpTap,
 } from "@/lib/claim-ip-store";
 import { getClientIp } from "@/lib/request-ip";
+import { verifyMinerSessionToken } from "@/lib/miner-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,14 +41,24 @@ export async function POST(request: Request) {
       wallet?: string;
       date?: string;
       tapIndex?: number;
+      sessionToken?: string;
     };
 
     const wallet = body.wallet?.trim();
     const date = body.date?.trim() ?? todayKey();
     const tapIndex = Number(body.tapIndex);
+    const sessionToken =
+      body.sessionToken?.trim() ||
+      request.headers.get("x-miner-session")?.trim() ||
+      "";
 
     if (!wallet || !Number.isFinite(tapIndex) || tapIndex < 1) {
       return NextResponse.json({ error: "Invalid tap request." }, { status: 400 });
+    }
+
+    const session = verifyMinerSessionToken(wallet, sessionToken);
+    if (!session.ok) {
+      return NextResponse.json({ error: session.reason, code: "MINER_SESSION" }, { status: 401 });
     }
 
     if (date !== todayKey()) {

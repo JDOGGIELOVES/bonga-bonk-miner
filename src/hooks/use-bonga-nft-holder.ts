@@ -18,7 +18,7 @@ export interface BongaNftHolderStatus {
   checking: boolean;
 }
 
-/** NFT holder status for Vibes Garden bonuses + count of held NFTs (cached API check). */
+/** NFT holder status for Miner bonuses + count of held NFTs (cached API check). */
 export function useBongaNftHolder(): BongaNftHolderStatus {
   const { publicKey, connected } = useWallet();
   const [isHolder, setIsHolder] = useState(false);

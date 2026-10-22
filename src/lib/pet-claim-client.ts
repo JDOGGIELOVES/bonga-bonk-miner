@@ -111,11 +111,19 @@ export async function checkPetImageDuplicate(params: {
 }
 
 export async function fetchPetStatus(wallet: string): Promise<PetStatus> {
+  const { getStoredMinerSession } = await import("@/lib/miner-tap-client");
+  const sessionToken = getStoredMinerSession(wallet);
+  if (!sessionToken) {
+    throw new Error("Sign once on Miner to unlock pet status.");
+  }
   const response = await fetch(
-    `/api/pet/status?wallet=${encodeURIComponent(wallet)}`,
-    { cache: "no-store" }
+    `/api/pet/status?wallet=${encodeURIComponent(wallet)}&sessionToken=${encodeURIComponent(sessionToken)}`,
+    { cache: "no-store", headers: { "x-miner-session": sessionToken } }
   );
   const data = (await response.json()) as PetStatus;
+  if (!response.ok) {
+    throw new Error((data as { error?: string }).error || "Pet status failed.");
+  }
   return data;
 }
 

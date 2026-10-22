@@ -271,6 +271,6 @@ export async function GET() {
     earnCap: gardenDailyClaimLimit(),
     maxClaimsPerIp: maxGardenClaimsPerIpPerDay(),
     walletOnChainCap: walletMaxOnChainBongaPerDay(),
-    note: "No minimum vault amount. On-chain up to 20,001 $BONGA daily per wallet.",
+    note: "No minimum vault amount. On-chain up to 5,200 $BONGA daily per wallet (game 200 + staking 5,000).",
   });
 }

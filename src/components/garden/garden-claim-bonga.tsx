@@ -209,7 +209,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
           </Badge>
           <p className="text-sm text-muted-foreground">
             Connect your wallet to sync today&apos;s garden progress and claim verified $BONGA from
-            the treasury (up to {GARDEN_DAILY_EARN_CAP}/day). Earnings auto-deposit to your Bonga Bank Vault. No minimum for on-chain withdrawals (up to 20,001 $BONGA daily).
+            the treasury (up to {GARDEN_DAILY_EARN_CAP}/day). Earnings auto-deposit to your Bonga Bank Vault. No minimum for on-chain withdrawals (up to 5,200 $BONGA daily — game 200 + staking 5,000).
           </p>
           <Button variant="default" className="mt-4 w-full" onClick={() => setVisible(true)}>
             <Wallet className="mr-2 h-4 w-4" />
@@ -234,7 +234,7 @@ export function GardenClaimBonga({ refreshKey = 0, onClaimSuccess }: GardenClaim
             Verified garden earnings
           </Badge>
           <p className="font-display text-lg font-bold">
-            {farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} farmed today (deposits to Bonga Bank). On-chain withdrawals up to 20,001 $BONGA daily (no vault min).
+            {farmedToday.toFixed(2)} / {GARDEN_DAILY_EARN_CAP} farmed today (deposits to Bonga Bank). On-chain withdrawals up to 5,200 $BONGA daily — game 200 + staking 5,000 (no vault min).
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {gardenStatus?.claimed && gardenStatus.claimed > 0

@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
     "@metaplex-foundation/mpl-token-metadata",
     "@metaplex-foundation/mpl-toolbox",
   ],
+  async redirects() {
+    // Vibes Garden retired from UI — send old bookmarks to Miner.
+    return [
+      {
+        source: "/",
+        has: [{ type: "query", key: "mode", value: "garden" }],
+        destination: "/?mode=miner",
+        permanent: false,
+      },
+    ];
+  },
   webpack: (config) => {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;

@@ -1,22 +1,36 @@
-export const TAPS_PER_BONGA = 1;
-export const DAILY_BONGA_LIMIT = 1000;
-export const BONGA_CLAIM_BATCH = 1; // now 1:1 with bank deposits, no small batches needed
+/** Economy v2: ~1% of prior game payouts. 100 taps = 1 $BONGA, max 10/day. */
+export const TAPS_PER_BONGA = 100;
+export const DAILY_BONGA_LIMIT = 10;
+export const BONGA_CLAIM_BATCH = 1; // bank deposits still 1:1 with earned units
 export const STORAGE_KEY = "bonga-bonk-miner";
 
 // Client-side minimum interval between taps (ms) to prevent UI freeze, runaway audio,
 // and state update spam from super-rapid clicking. ~13 taps/sec feels fast but stable.
-// Players can still reach the 1000 daily limit in a reasonable ~75-80 second burst session.
+// Filling the 10/day cap takes ~1000 taps (~75–80s at this interval).
 export const CLIENT_MIN_TAP_INTERVAL_MS = 75;
 
-export const MEME_COINS = [
-  { id: "doge", emoji: "🐕", name: "Doge", color: "#C2A633" },
-  { id: "pepe", emoji: "🐸", name: "Pepe", color: "#4CAF50" },
-  { id: "shib", emoji: "🐕", name: "Shib", color: "#FF6B35" },  // dog emoji for the iconic Shiba Inu / SHIB logo look
-  { id: "wojak", emoji: "😢", name: "Wojak", color: "#90CAF9" },
-  { id: "bonk", emoji: "🔨", name: "BONK", color: "#FF8C42" },
-  { id: "moon", emoji: "🌙", name: "Moon", color: "#9B5DE5" },
-  { id: "lmao", emoji: "😂", name: "LMAO", color: "#FFD700" },  // laughing emoji + blue tears overlay in coin
-] as const;
+export type MemeCoin = {
+  id: string;
+  emoji: string;
+  name: string;
+  color: string;
+  /** Official DexScreener Solana token logo (local copy). */
+  logo: string;
+};
+
+/** Floating tap targets — popular Solana coins, OG token logos only. */
+export const MEME_COINS: MemeCoin[] = [
+  { id: "wif", emoji: "🐶", name: "WIF", color: "#E8A0BF", logo: "/meme-logos/wif.png" },
+  { id: "fartcoin", emoji: "💨", name: "Fartcoin", color: "#8B5A2B", logo: "/meme-logos/fartcoin.png" },
+  { id: "popcat", emoji: "🐱", name: "POPCAT", color: "#FF8C42", logo: "/meme-logos/popcat.png" },
+  { id: "coc", emoji: "🐱", name: "Cats of Crypto", color: "#FF6B9D", logo: "/meme-logos/coc.png" },
+  { id: "dreamcat", emoji: "😺", name: "Dream Cat", color: "#A78BFA", logo: "/meme-logos/dreamcat.png" },
+  { id: "bonk", emoji: "🔨", name: "BONK", color: "#F7931A", logo: "/meme-logos/bonk.png" },
+  { id: "pengu", emoji: "🐧", name: "PENGU", color: "#4FC3F7", logo: "/meme-logos/pengu.png" },
+  { id: "mew", emoji: "🐈", name: "MEW", color: "#7EC8E3", logo: "/meme-logos/mew.png" },
+  { id: "bome", emoji: "📖", name: "BOME", color: "#C9A227", logo: "/meme-logos/bome.png" },
+  { id: "moodeng", emoji: "🦛", name: "MOODENG", color: "#F4A460", logo: "/meme-logos/moodeng.png" },
+];
 
 export const UPGRADES = [
   {

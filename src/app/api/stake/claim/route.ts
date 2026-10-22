@@ -8,7 +8,7 @@ import { verifyClaimSignature } from "@/lib/treasury/messages";
 import { isWalletBlocked } from "@/lib/claim-tally-store";
 import { getStakeRecord, recordStakeClaim, computePendingStakeRewards, MIN_STAKE_CLAIM } from "@/lib/stake-store";
 import { consumeNonceIfFresh } from "@/lib/treasury/daily-claims";
-import { getBankMinWithdraw, depositToBank, getBongaBank } from "@/lib/bonga-bank";
+import { depositToBank, getBongaBank } from "@/lib/bonga-bank";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -122,19 +122,19 @@ export async function POST(request: Request) {
           throw new Error(nonceCheck.reason);
         }
 
-        // All staking rewards are deposited directly into the BONGA BANK VAULT.
-        // On-chain withdrawals from the bank only at the 10,000 $BONGA cap.
+        // All staking rewards deposit into the BONGA BANK VAULT.
+        // On-chain withdrawals use the wallet daily cap (no vault minimum).
         await recordStakeClaim(wallet, amount);
         await depositToBank(wallet, amount, { source: "stake" });
         const updatedBank = await getBongaBank(wallet);
 
-        const minBank = getBankMinWithdraw();
         return {
           ok: true,
           depositedToBank: amount,
           amount,
           newBankBalance: updatedBank.bankedBonga,
-          message: `Stake reward deposited to Bonga Bank Vault. On-chain withdrawal available at ${minBank} $BONGA bank cap.`,
+          message:
+            "Stake reward deposited to Bonga Bank Vault. Withdraw on-chain anytime from Bonga Bank (up to your daily wallet cap).",
         };
       },
       "stake"

@@ -308,13 +308,13 @@ export const ROADMAP = [
     phase: "Phase 2",
     title: "Game Boosts",
     status: "next" as const,
-    items: ["NFT holders get 2x bonk power", "Exclusive meme coins", "Rare club skins"],
+    items: ["NFT holders get Miner earn boosts", "Exclusive cosmetics", "Stake for tiered daily $BONGA"],
   },
   {
     phase: "Phase 3",
     title: "Staking & Rewards",
     status: "live" as const,
-    items: ["Stake Bonga NFTs for $BONGA (75/day per NFT)", "High-yield lock rewards", "IRL event access"],
+    items: ["Stake Bonga NFTs for $BONGA (tiered daily rates)", "Vault auto-deposit rewards", "IRL event access"],
   },
   {
     phase: "Phase 4",
@@ -335,13 +335,13 @@ export const TEAM = [
 export const UTILITY = [
   {
     icon: "🎮",
-    title: "Bonk Miner & Vibes Garden Boosts",
-    description: "NFT holders get earnings multipliers (+ in both games), faster progress, and exclusive plants/clubs.",
+    title: "Bonk Miner Boosts",
+    description: "NFT holders get Miner earnings multipliers, faster progress, and exclusive perks.",
   },
   {
     icon: "💰",
     title: "NFT Staking — Lock to Earn",
-    description: "Stake your Bonga NFT for daily $BONGA (up to 3,500 for Cosmic). All rewards automatically deposit to your Bonga Bank Vault — no manual claim button required. On-chain withdrawals from the vault up to 20,001 $BONGA daily (no minimum threshold). You keep full custody of the NFTs.",
+    description: "Stake your Bonga NFT for daily $BONGA (up to 875/day for Cosmic — economy v2). All rewards automatically deposit to your Bonga Bank Vault — no manual claim button required. On-chain withdrawals from the vault up to 5,200 $BONGA daily — game 200 + staking 5,000 (no minimum threshold). You keep full custody of the NFTs.",
   },
   {
     icon: "👕",
@@ -362,10 +362,10 @@ export const COMMUNITY_LINKS = [
   { label: "Telegram", href: "https://t.me/bonga_sol_community", icon: "✈️" },
 ];
 
-/** Staking reward rates per day by rarity (used by both client UI and server calc) */
+/** Staking reward rates per day by rarity (economy v2: 25% of prior rates) */
 export const STAKE_RATES: Record<RarityTier, number> = {
-  Common: 1000,
-  Rare: 1500,
-  Legendary: 2000,
-  "Cosmic Bonga": 3500,
+  Common: 250,
+  Rare: 375,
+  Legendary: 500,
+  "Cosmic Bonga": 875,
 };

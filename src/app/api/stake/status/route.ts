@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getWalletBongaNftsWithRarity } from "@/lib/nft-holder-server";
 import { getStakeStatusForWallet } from "@/lib/stake-store";
+import { assertPlaySession } from "@/lib/play-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,9 @@ export async function GET(request: Request) {
   if (!wallet) {
     return NextResponse.json({ error: "wallet required" }, { status: 400 });
   }
+
+  const session = assertPlaySession(request, wallet);
+  if (!session.ok) return session.response;
 
   try {
     // Get rich holdings with rarity (centralized)

@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { BongaHeader } from "@/components/layout/bonga-header";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { PeaceHero } from "@/components/peace/peace-hero";
 import { BreathingModule } from "@/components/peace/breathing-module";
 import { TaiChiModule } from "@/components/peace/tai-chi-module";
@@ -14,8 +14,7 @@ import { TranscendentalMeditationModule } from "@/components/peace/transcendenta
 
 export function PeaceLanding() {
   return (
-    <div className="min-h-screen bg-bonga-page">
-      <BongaHeader />
+    <BongaMarketingShell>
       <PeaceHero />
 
       <section id="breathe" className="section-anchor py-16">
@@ -169,7 +168,7 @@ export function PeaceLanding() {
           <Link href="/about" className="text-bonga-purple hover:underline">
             About Bonga
           </Link>
-          <Link href="/" className="text-bonga-orange hover:underline">
+          <Link href="/?mode=miner" className="text-bonga-orange hover:underline">
             Bonk Miner
           </Link>
           <Link href="/nft" className="text-bonga-teal hover:underline">
@@ -180,6 +179,6 @@ export function PeaceLanding() {
           </Link>
         </div>
       </footer>
-    </div>
+    </BongaMarketingShell>
   );
 }

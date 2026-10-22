@@ -65,21 +65,31 @@ function applyBootstrap(
     return { ok: false, reason: "Garden already linked to wallet today." };
   }
 
-  const plants = sanitizeBootstrapPlants(action.plants ?? []);
+  // Integrity: never trust client garden balance / paid plants on first link.
+  // Only allow free starter crops (cost 0). Shop balance starts at 0 server-side.
+  const plants = sanitizeBootstrapPlants(action.plants ?? []).filter((crop) => {
+    if (!validPlantTypeId(crop.plantTypeId)) return false;
+    const def = PLANT_CATALOG.find((p) => p.id === crop.plantTypeId);
+    return Boolean(def && def.cost <= 0);
+  });
+
   if (plants.length === 0) {
-    return { ok: false, reason: "Invalid garden bootstrap." };
-  }
-
-  for (const crop of plants) {
-    if (!validPlantTypeId(crop.plantTypeId)) {
-      return { ok: false, reason: "Unknown plant in bootstrap." };
+    // Fresh server garden — one free peace-lily if client sent junk
+    const freeId = PLANT_CATALOG.find((p) => p.cost <= 0)?.id;
+    if (!freeId) {
+      return { ok: false, reason: "Invalid garden bootstrap." };
     }
+    const now = Date.now();
+    plants.push({
+      instanceId: `srv-${now.toString(36)}`,
+      plantTypeId: freeId,
+      plantedAt: now,
+      zone: "meadow",
+    });
   }
 
-  const shopBalance = Math.max(0, Math.min(maxGardenShopBalance(), Number(action.gardenBonga) || 0));
-
-  record.plants = plants.slice(0, maxGardenPlantsPerWallet());
-  record.gardenBonga = shopBalance;
+  record.plants = plants.slice(0, Math.min(3, maxGardenPlantsPerWallet()));
+  record.gardenBonga = 0;
   record.bootstrapped = true;
   record.bongaFarmedToday = 0;
   record.claimed = 0;

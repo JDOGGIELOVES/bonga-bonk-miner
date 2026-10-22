@@ -6,7 +6,7 @@ import { withWalletClaimLock } from "@/lib/claim-lock";
 import { recordGlobalClaim } from "@/lib/claim-tally-store";
 
 const BANK_BLOB_DIR = "bonga-bank";
-const MIN_BANK_WITHDRAW = envInt("BONGA_BANK_MIN_WITHDRAW", 0); // 0 = no minimum. Players can withdraw any amount they have in vault (e.g. their 10,000) up to the daily on-chain cap of 20,001.
+const MIN_BANK_WITHDRAW = envInt("BONGA_BANK_MIN_WITHDRAW", 0); // 0 = no minimum. Withdraw any vault balance up to the daily on-chain cap (default 5,200).
 
 function envInt(name: string, fallback: number): number {
   const raw = process.env[name]?.trim();

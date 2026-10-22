@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Hammer, Sprout } from "lucide-react";
+import Link from "next/link";
+import { Coins, Hammer } from "lucide-react";
 
 export type GameMode = "miner" | "garden";
 
@@ -10,38 +10,22 @@ interface GameModeTabsProps {
   onChange: (mode: GameMode) => void;
 }
 
-export function GameModeTabs({ mode, onChange }: GameModeTabsProps) {
-  const isMiner = mode === "miner";
+/** Miner play strip + Coin Stake CTA. Vibes Garden retired from UI. */
+export function GameModeTabs({ mode }: GameModeTabsProps) {
+  void mode;
   return (
-    <div className="mx-auto flex w-full max-w-md rounded-full border border-border/60 bg-card p-1 shadow-card relative">
-      {/* Smooth sliding active pill */}
-      <motion.div
-        className="absolute top-1 bottom-1 rounded-full shadow-bonga"
-        initial={false}
-        animate={{
-          left: isMiner ? "4px" : "50%",
-          right: isMiner ? "50%" : "4px",
-          backgroundColor: isMiner ? "#FF6200" : "#2DB8A8",
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
-      />
-
-      <button
-        type="button"
-        onClick={() => onChange("miner")}
-        className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${isMiner ? "text-white" : "text-muted-foreground hover:text-foreground"}`}
-      >
+    <div className="mx-auto flex w-full max-w-xl flex-col gap-2">
+      <div className="flex w-full items-center justify-center gap-2 rounded-full border border-bonga-orange/40 bg-bonga-orange px-4 py-2.5 text-sm font-semibold text-white shadow-bonga">
         <Hammer className="h-4 w-4" />
         Bonk Miner
-      </button>
-      <button
-        type="button"
-        onClick={() => onChange("garden")}
-        className={`relative z-10 flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ${!isMiner ? "text-white" : "text-muted-foreground hover:text-foreground"}`}
+      </div>
+      <Link
+        href="/coin-staking"
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-bonga-teal/50 bg-bonga-teal/10 px-4 py-2.5 text-sm font-semibold text-bonga-teal transition hover:bg-bonga-teal/20"
       >
-        <Sprout className="h-4 w-4" />
-        Vibes Garden
-      </button>
+        <Coins className="h-4 w-4" />
+        Coin Stake · 25% / 7% APR monthly
+      </Link>
     </div>
   );
 }

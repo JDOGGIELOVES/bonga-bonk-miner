@@ -12,10 +12,11 @@ export function AboutContent() {
         <div className="mx-auto max-w-3xl px-4 text-center">
           <div className="relative mx-auto h-32 w-32 md:h-40 md:w-40">
             <Image
-              src="/bonga-character.png"
-              alt="Bonga Bonk's Sister — official Bonga mascot on Solana"
+              src="/bonga-token-logo.png"
+              alt="Bonga — official $BONGA token logo"
               fill
-              className="object-contain drop-shadow-lg"
+              unoptimized
+              className="rounded-full object-cover drop-shadow-lg"
               priority
             />
           </div>

@@ -9,8 +9,8 @@ import {
 } from "@/lib/vibes-garden";
 
 /**
- * Garden daily earn/claim cap (1500).
- * On-chain withdrawals up to 20,001 $BONGA daily per wallet (no minimum vault threshold).
+ * Garden daily earn/claim cap (economy v2: 15).
+ * On-chain withdrawals up to 5,200 $BONGA daily per wallet (game 200 + staking 5,000) (no minimum vault threshold).
  * Earnings auto-deposit to the player's vault.
  */
 
@@ -37,7 +37,7 @@ function envInt(name: string, fallback: number): number {
 }
 
 export function gardenDailyClaimLimit(): number {
-  // Defaults to the shared GARDEN_DAILY_EARN_CAP (1500). All small claims auto-deposit to Bonga Bank Vault.
+  // Defaults to the shared GARDEN_DAILY_EARN_CAP. All small claims auto-deposit to Bonga Bank Vault.
   return envInt("GARDEN_DAILY_CLAIM_LIMIT", GARDEN_DAILY_EARN_CAP);
 }
 

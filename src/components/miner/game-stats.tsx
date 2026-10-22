@@ -57,25 +57,23 @@ export function GameStats({ state, combo, connected, dailyLimitReached, nextDail
         </div>
       )}
 
-      {TAPS_PER_BONGA !== 1 && (
-        <div className="mt-5">
-          <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {dailyLimitReached || atLimit 
-                ? (limitMessage || `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`) 
-                : `Next reward in ${untilNext} bonks`}
-            </span>
-            <span className="font-semibold text-bonga-orange">{Math.round(progress)}%</span>
-          </div>
-          <Progress value={atLimit ? 100 : progress} />
+      <div className="mt-5">
+        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            {dailyLimitReached || atLimit
+              ? limitMessage ||
+                `Daily limit reached of ${DAILY_BONGA_LIMIT} Bonga. Come back tomorrow to mine more $Bonga!`
+              : `Next reward in ${untilNext} bonks (${TAPS_PER_BONGA} taps = 1 $BONGA)`}
+          </span>
+          <span className="font-semibold text-bonga-orange">
+            {Math.round(progress)}%
+          </span>
         </div>
-      )}
-
-      {TAPS_PER_BONGA === 1 && (
-        <div className="mt-5 text-xs text-muted-foreground text-center">
-          1 tap = 1 $BONGA — automatically deposited to your Bonga Bank Vault
-        </div>
-      )}
+        <Progress value={atLimit ? 100 : progress} />
+        <p className="mt-2 text-center text-[10px] text-muted-foreground">
+          {TAPS_PER_BONGA} taps = 1 $BONGA · max {DAILY_BONGA_LIMIT}/day — auto-deposited to Bonga Bank Vault
+        </p>
+      </div>
 
       {(dailyLimitReached || atLimit) && nextDailyReset && (
         <p className="mt-2 text-xs text-center text-amber-600 font-medium">

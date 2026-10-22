@@ -53,6 +53,7 @@ export const PUBLIC_ROUTES = [
   { path: "/community", changeFrequency: "weekly" as const, priority: 0.85 },
   { path: "/treasury", changeFrequency: "daily" as const, priority: 0.8 },
   { path: "/staking", changeFrequency: "weekly" as const, priority: 0.85 },
+  { path: "/coin-staking", changeFrequency: "weekly" as const, priority: 0.9 },
 ];
 
 export function absoluteUrl(path = ""): string {

@@ -8,6 +8,8 @@ import {
   isGardenEarnStorageReady,
   rolloverGardenRecordIfNeeded,
 } from "@/lib/garden-earn-store";
+import { assertPlaySession } from "@/lib/play-session";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -30,6 +32,9 @@ export async function GET(request: Request) {
     } catch {
       return NextResponse.json({ error: "Invalid wallet address." }, { status: 400 });
     }
+
+    const session = assertPlaySession(request, wallet);
+    if (!session.ok) return session.response;
 
     const storageReady = isGardenEarnStorageReady();
     const claimsPaused = isGardenClaimsPaused();
@@ -57,7 +62,7 @@ export async function GET(request: Request) {
       claimed: record.claimed,
       dailyLimit: gardenDailyClaimLimit(),
       earnCap: gardenDailyClaimLimit(),
-      note: "No minimum vault amount. On-chain withdrawals up to 20,001 $BONGA daily.",
+      note: "No minimum vault amount. On-chain withdrawals up to 5,200 $BONGA daily.",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Garden status unavailable.";

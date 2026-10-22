@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import Link from "next/link";
-import { BongaHeader } from "@/components/layout/bonga-header";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import { NFTHero } from "@/components/nft/nft-hero";
 import { NFTGallery } from "@/components/nft/nft-gallery";
 import { NFTMintPanel } from "@/components/nft/nft-mint-panel";
@@ -15,8 +15,7 @@ import { STAKE_RATES, RARITY_COLORS, type RarityTier } from "@/lib/nft-collectio
 
 export function NFTLanding() {
   return (
-    <div className="min-h-screen bg-bonga-page">
-      <BongaHeader />
+    <BongaMarketingShell>
       <NFTHero />
       <NFTGallery />
 
@@ -64,7 +63,7 @@ export function NFTLanding() {
 
                   <div className="mt-4 pt-3 border-t border-border/50 text-[10px] text-muted-foreground leading-snug">
                     Auto-deposited to your Bonga Bank Vault.<br />
-                    On-chain withdrawals up to 20,001 $BONGA daily (no minimum).
+                    On-chain up to 5,200/day (game 200 + staking 5,000).
                   </div>
                 </div>
               );
@@ -107,7 +106,7 @@ export function NFTLanding() {
           <Link href="/community" className="text-bonga-purple hover:underline">
             About Bonga
           </Link>
-          <Link href="/" className="text-bonga-orange hover:underline">
+          <Link href="/?mode=miner" className="text-bonga-orange hover:underline">
             Bonk Miner
           </Link>
           <Link href="/nft#mint" className="text-bonga-teal hover:underline">
@@ -121,6 +120,6 @@ export function NFTLanding() {
           </Link>
         </div>
       </footer>
-    </div>
+    </BongaMarketingShell>
   );
 }

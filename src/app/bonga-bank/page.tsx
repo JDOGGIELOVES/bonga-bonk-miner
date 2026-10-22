@@ -4,8 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import Link from "next/link";
-import { BongaHeader } from "@/components/layout/bonga-header";
-import { BongaFooter } from "@/components/layout/bonga-footer";
+import { BongaMarketingShell } from "@/components/layout/bonga-marketing-shell";
 import {
   fetchBongaBankStatus,
   depositPendingToBank,
@@ -167,9 +166,8 @@ export default function BongaBankPage() {
   };
 
   return (
-    <>
-      <BongaHeader />
-      <div className="min-h-screen bg-bonga-page">
+    <BongaMarketingShell>
+      <div>
         {/* BANK VAULT OPENING DESIGN */}
         <style>{`
           .vault-frame {
@@ -464,7 +462,7 @@ export default function BongaBankPage() {
 
                     {status.pending && (status.pending.total || 0) > 0 && (
                       <div className="mt-4 rounded bg-muted/40 p-3 text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">Pending from games (will be added to your bank balance on sync/open):</span> miner {status.pending.miner} + garden {status.pending.garden} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
+                        <span className="font-medium text-foreground">Pending from games (will be added to your bank balance on sync/open):</span> miner {status.pending.miner} + pet {status.pending.pet} + stake {status.pending.stake} ≈ {status.pending.total} $BONGA
                       </div>
                     )}
 
@@ -512,7 +510,7 @@ export default function BongaBankPage() {
               <div className="bonga-card p-6 text-sm text-muted-foreground">
                 <p className="mb-2 font-medium text-foreground">How the Bonga Bank works</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>Play the Bonk Miner (100 taps = 1 $BONGA, 10/day), Vibes Garden (up to 15/day), Pet Love (10 per validated image), or stake NFTs (tiered daily rates) — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or &quot;move&quot; buttons in the games.</li>
+                  <li>Play the Bonk Miner (100 taps = 1 $BONGA, 10/day), Pet Love (10 per validated image), or stake NFTs (tiered daily rates) — all earnings auto-deposit straight into your personal off-chain Bonga Bank Vault. No manual claim or &quot;move&quot; buttons in the games.</li>
                   <li>Open the Vault (connect wallet + ENTER) to see your balance and auto-flush any fresh pending earnings.</li>
                   <li><strong>No minimum — withdraw from your BONGA BANK VAULT any time (up to 5,200 $BONGA daily on-chain (game 200 + staking 5,000)).</strong></li>
                   <li>This keeps Solana fees tiny compared to the value distributed to the community while you still accumulate 100% of everything you mine.</li>
@@ -532,7 +530,6 @@ export default function BongaBankPage() {
           </div>
         </div>
       </div>
-      <BongaFooter />
-    </>
+    </BongaMarketingShell>
   );
 }

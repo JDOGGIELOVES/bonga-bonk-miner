@@ -354,30 +354,36 @@ export function PetLoveModule() {
 
   return (
     <div className="space-y-8">
-      <div className="bonga-card border-bonga-teal/20 bg-gradient-to-br from-bonga-teal/5 via-card to-bonga-purple/5 p-6">
-        <div className="flex flex-wrap items-start gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-bonga-teal/15 text-bonga-teal">
-            <PawPrint className="h-5 w-5" />
+      <div className="overflow-hidden rounded-2xl border border-[#E8D4A0] bg-[#FFFBEA] p-6 shadow-sm dark:border-[#3D3220] dark:bg-[#2A2114]">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border-2 border-[#E8D4A0] shadow-md dark:border-[#3D3220]">
+            <Image
+              src="/bonga-token-logo.png"
+              alt="Bonga"
+              fill
+              unoptimized
+              className="object-cover"
+            />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-display text-lg font-bold">Pet Love Daily</h3>
               <Badge variant="teal">{PET_LOVE_REWARD} $BONGA / day</Badge>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-[#6B5A3E] dark:text-[#A89068]">
               Share a photo of your hand petting any pet — cats, dogs, birds,
               horses, and more. Stay anonymous if you like; we only need the
               gentle hand-and-pet moment, not your face.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
-                <Shield className="h-3 w-3" /> Verified on your device — free & private
+            <div className="mt-3 flex flex-wrap gap-2 text-xs text-[#6B5A3E] dark:text-[#A89068]">
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#E8D4A0]/80 bg-white/70 px-2.5 py-1 dark:border-[#3D3220] dark:bg-[#1A1408]/60">
+                <Shield className="h-3 w-3 text-bonga-teal" /> Verified on your device — free &amp; private
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
-                <Heart className="h-3 w-3" /> One upload per wallet per day
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#E8D4A0]/80 bg-white/70 px-2.5 py-1 dark:border-[#3D3220] dark:bg-[#1A1408]/60">
+                <Heart className="h-3 w-3 text-[#ff6a00]" /> One upload per wallet per day
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1">
-                <Shield className="h-3 w-3" /> One share & one claim per IP / day
+              <span className="inline-flex items-center gap-1 rounded-full border border-[#E8D4A0]/80 bg-white/70 px-2.5 py-1 dark:border-[#3D3220] dark:bg-[#1A1408]/60">
+                <PawPrint className="h-3 w-3 text-bonga-purple" /> One share &amp; one claim per IP / day
               </span>
             </div>
           </div>
@@ -481,12 +487,13 @@ export function PetLoveModule() {
       <div ref={actionsRef} className="bonga-card p-6">
         {!connected ? (
           <div className="text-center">
-            <div className="relative mx-auto h-20 w-20">
+            <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full shadow-md">
               <Image
-                src="/bonga-character.png"
-                alt="Bonga"
+                src="/bonga-token-logo.png"
+                alt="Bonga — official $BONGA token logo"
                 fill
-                className="object-contain"
+                unoptimized
+                className="object-cover"
               />
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
@@ -563,9 +570,9 @@ export function PetLoveModule() {
             {status?.dailyOnChainLimit != null &&
               status.dailyOnChainLimit < PET_LOVE_REWARD && (
               <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                Treasury daily cap is {status.dailyOnChainLimit} $BONGA — raise
-                DAILY_CLAIM_LIMIT to {PET_LOVE_REWARD}+ in Vercel for full pet
-                payouts.
+                Wallet on-chain daily cap is {status.dailyOnChainLimit} $BONGA —
+                below the Pet Love reward of {PET_LOVE_REWARD}. Raise
+                WALLET_MAX_ON_CHAIN_BONGA_PER_DAY in Vercel if needed.
               </p>
             )}
           </div>

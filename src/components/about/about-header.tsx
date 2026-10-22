@@ -39,15 +39,11 @@ export function AboutHeader() {
               {item.label}
             </a>
           ))}
-          {/* Updated to match site-wide nav: Home / Bonk Miner | Vibes Garden | Peace | NFTs | Community */}
           <Link href="/" className={`text-sm font-medium transition-colors hover:underline ${isActive("/") ? "text-bonga-orange font-semibold" : "text-foreground/80"}`}>
             Home
           </Link>
           <Link href="/?mode=miner" className={`text-sm font-medium transition-colors hover:underline ${isActive("/?mode=miner") ? "text-bonga-orange font-semibold" : "text-bonga-orange"}`}>
             Bonk Miner
-          </Link>
-          <Link href="/?mode=garden" className={`text-sm font-medium transition-colors hover:underline ${isActive("/?mode=garden") ? "text-bonga-teal font-semibold" : "text-bonga-teal"}`}>
-            Vibes Garden
           </Link>
           <Link href="/peace" className={`text-sm font-medium transition-colors hover:underline ${isActive("/peace") ? "text-bonga-teal font-semibold" : "text-bonga-teal"}`}>
             Peace

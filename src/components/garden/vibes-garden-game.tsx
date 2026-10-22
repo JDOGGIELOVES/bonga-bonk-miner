@@ -83,7 +83,9 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
     // Compute & surface a friendly "welcome back" offline earnings notice
     const offline = computeOfflineEarnings(state, isHolder);
     if (offline > 0.01) {
-      setOfflineNotice(`Welcome back — your garden grew +${offline.toFixed(2)} $BONGA while you were away 🌱`);
+      setOfflineNotice(
+        `Welcome back — your garden grew +${formatGardenBonga(offline)} $BONGA while you were away 🌱`
+      );
       // Auto-hide after a nice readable moment
       setTimeout(() => setOfflineNotice((cur) => (cur ? null : cur)), 5200);
     }
@@ -226,7 +228,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       setState(next);
       queueGardenSync({ type: "water", instanceId }, next);
       if (earned > 0) {
-        showPlantPop(instanceId, `+${earned.toFixed(2)} $BONGA`);
+        showPlantPop(instanceId, `+${formatGardenBonga(earned)} $BONGA`);
         gameAudio.playCoinCollect();
       } else if (capped) {
         showPlantPop(instanceId, `Daily cap reached`);
@@ -268,7 +270,9 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
       if (result.ok && result.reward > 0) {
         setState(result.state);
         queueGardenSync({ type: "quest", questId }, result.state);
-        showGeneralFeedback(`Quest +${result.reward} $BONGA`);
+        showGeneralFeedback(
+          `Quest +${formatGardenBonga(result.reward)} $BONGA`
+        );
       } else if (result.capped) {
         showGeneralFeedback(`Daily cap (${GARDEN_DAILY_EARN_CAP}) reached — earnings go to Bonga Bank`);
       }
@@ -483,10 +487,10 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
                 Daily cap {GARDEN_DAILY_EARN_CAP} $BONGA total (idle + taps + quests). All earnings auto-deposit to your Bonga Bank Vault. Resets at midnight UTC.
               </li>
               <li>
-                <strong>No vault minimum.</strong> On-chain withdrawals up to 20,001 $BONGA daily. Small earnings auto-deposit to bank.
+                <strong>No vault minimum.</strong> On-chain withdrawals up to 5,200 $BONGA daily (game 200 + staking 5,000). Small earnings auto-deposit to bank.
               </li>
               <li>
-                <span className="font-semibold text-foreground">NFT holders</span> get +25% yield on everything. Connect wallet to activate.
+                <span className="font-semibold text-foreground">NFT holders</span> get +6.25% yield on everything. Connect wallet to activate.
               </li>
               <li>
                 Local progress saved automatically. Connect wallet to verify earnings for on-chain claims.
@@ -505,7 +509,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
 
       {connected && !checking && !isHolder && (
         <p className="text-center text-xs text-muted-foreground">
-          Hold a Bonga NFT for +25% garden yield.{" "}
+          Hold a Bonga NFT for +6.25% garden yield.{" "}
           <Link href="/nft" className="font-semibold text-bonga-teal hover:underline">
             Mint one
           </Link>
@@ -520,7 +524,7 @@ export function VibesGardenGame({ onClaimSuccess }: { onClaimSuccess?: () => voi
           onClick={() => setVisible(true)}
         >
           <Wallet className="h-4 w-4" />
-          Connect wallet for +25% yield
+          Connect wallet for +6.25% yield
         </Button>
       )}
 

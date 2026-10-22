@@ -7,7 +7,7 @@ import { STAKE_RATES, type RarityTier } from "@/lib/nft-collection";
 
 const STAKES_BLOB_PATH = "bonga-stakes/active-stakes.json";
 
-export const MIN_STAKE_CLAIM = 10; // smallest amount for auto-deposit to Bonga Bank Vault. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).
+export const MIN_STAKE_CLAIM = 10; // smallest amount for auto-deposit to Bonga Bank Vault. On-chain withdrawals up to 5,200 $BONGA daily — game 200 + staking 5,000 (no vault minimum).
 
 function envFlag(name: string): boolean {
   return Boolean(process.env[name]?.trim());

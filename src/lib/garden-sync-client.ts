@@ -44,9 +44,23 @@ function todayKey() {
 
 export async function fetchGardenEarnStatus(wallet: string): Promise<GardenEarnStatus> {
   try {
+    const { getStoredMinerSession } = await import("@/lib/miner-tap-client");
+    const sessionToken = getStoredMinerSession(wallet);
+    if (!sessionToken) {
+      return {
+        storageReady: false,
+        claimsPaused: true,
+        bootstrapped: false,
+        farmedToday: 0,
+        claimable: 0,
+        claimed: 0,
+        dailyLimit: 15,
+        error: "Sign once on Miner to unlock garden status.",
+      };
+    }
     const response = await fetch(
-      `/api/garden/status?wallet=${encodeURIComponent(wallet)}&date=${todayKey()}`,
-      { cache: "no-store" }
+      `/api/garden/status?wallet=${encodeURIComponent(wallet)}&date=${todayKey()}&sessionToken=${encodeURIComponent(sessionToken)}`,
+      { cache: "no-store", headers: { "x-miner-session": sessionToken } }
     );
     const data = (await response.json()) as GardenEarnStatus;
     return data;
@@ -58,7 +72,7 @@ export async function fetchGardenEarnStatus(wallet: string): Promise<GardenEarnS
       farmedToday: 0,
       claimable: 0,
       claimed: 0,
-      dailyLimit: 400,
+      dailyLimit: 15,
       error: "Could not reach garden status API.",
     };
   }

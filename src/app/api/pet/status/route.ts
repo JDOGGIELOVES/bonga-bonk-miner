@@ -9,6 +9,7 @@ import {
 import { getIpPetStatus } from "@/lib/claim-ip-store";
 import { getTreasuryConfig } from "@/lib/treasury/config";
 import { getClientIpKey } from "@/lib/request-ip";
+import { assertPlaySession } from "@/lib/play-session";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -18,6 +19,9 @@ export async function GET(request: Request) {
   if (!wallet) {
     return NextResponse.json({ error: "Wallet required." }, { status: 400 });
   }
+
+  const session = assertPlaySession(request, wallet);
+  if (!session.ok) return session.response;
 
   try {
     const submission = await getSubmissionForWalletToday(wallet);

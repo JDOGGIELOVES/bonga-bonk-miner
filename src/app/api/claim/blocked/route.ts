@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+import { assertAdminAuthorized } from "@/lib/admin-auth";
 import { getBlockedWallets } from "@/lib/claim-tally-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+/** Admin-only — was leaking the full blocked-wallet map publicly. */
+export async function GET(request: Request) {
+  const auth = assertAdminAuthorized(request);
+  if (!auth.ok) return auth.response;
+
   try {
     const allBlocked = await getBlockedWallets();
     const now = Date.now();
@@ -16,7 +21,8 @@ export async function GET() {
     }
     return NextResponse.json(active);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Blocked list unavailable.";
+    const message =
+      error instanceof Error ? error.message : "Blocked list unavailable.";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

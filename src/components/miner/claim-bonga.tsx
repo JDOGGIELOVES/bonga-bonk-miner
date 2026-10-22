@@ -111,7 +111,7 @@ export function ClaimBonga({
     try {
       const wallet = publicKey.toBase58();
 
-      // For the tap miner game: daily mined Bonga (max 1000) auto-deposited to Bonga Bank Vault (claim only on bank page)
+      // For the tap miner game: daily mined Bonga auto-deposited to Bonga Bank Vault (claim only on bank page)
       // Use the bank deposit (no signature needed for verified miner earnings; server uses the earn record)
       const amountToDeposit = Math.max(0, serverEarned?.claimable ?? claimable);
       if (amountToDeposit <= 0) return;
@@ -143,7 +143,7 @@ export function ClaimBonga({
       }
       onClaimSuccess?.();
 
-      // Note: No vault minimum for on-chain claims. Daily on-chain limit 20,001 $BONGA. Withdraw via Bonga Bank page.
+      // Note: No vault minimum for on-chain claims. Daily on-chain limit 5,200 $BONGA (game 200 + staking 5,000). Withdraw via Bonga Bank page.
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Deposit to Bank failed.");
     } finally {
@@ -239,8 +239,8 @@ export function ClaimBonga({
             {serverEarned && serverEarned.claimed > 0
               ? "Today\u2019s verified taps have been deposited to your Bonga Bank. Come back tomorrow UTC for more."
               : localClaimable > 0
-                ? "Local progress doesn\u2019t count. With your wallet connected, keep tapping — 1 tap = 1 $BONGA mined directly into your Bonga Bank (up to 1000/day)."
-                : `With your wallet connected, tap to mine. 1 tap = 1 $BONGA mined (up to ${DAILY_BONGA_LIMIT}/day) — goes directly into your Bonga Bank. On-chain withdrawals up to 20,001 $BONGA daily (no vault minimum).`}
+                ? `Local progress doesn\u2019t count. With your wallet connected, keep tapping — 100 taps = 1 $BONGA mined directly into your Bonga Bank (up to ${DAILY_BONGA_LIMIT}/day).`
+                : `With your wallet connected, tap to mine. 100 taps = 1 $BONGA mined (up to ${DAILY_BONGA_LIMIT}/day) — goes directly into your Bonga Bank. On-chain withdrawals up to 5,200 $BONGA daily — game 200 + staking 5,000 (no vault minimum).`}
           </p>
           {serverEarned && (
             <p className="mt-2 text-xs text-muted-foreground">

@@ -12,8 +12,8 @@ export function HomeSeoContent() {
       <h1>Bonga Bonk Miner — Bonga Bonk&apos;s Sister on Solana</h1>
       <p>
         Bonga Bonk&apos;s Sister is Bonk&apos;s Sister. Play the free Bonga Bonk Miner game at
-        bongabonks.com — tap to bonk meme coins, mine $BONGA on Solana, and
-        raise the frequency with peace, love, and good bonks.
+        bongabonks.com — 100 taps = 1 $BONGA (max 10/day),
+        NFT staking up to 875/day Cosmic. Raise the frequency with peace, love, and good bonks.
       </p>
       <p>
         The Bonga ecosystem includes the Bonk Miner tap game, a{" "}
@@ -24,7 +24,16 @@ export function HomeSeoContent() {
       <nav aria-label="Bonga site sections">
         <ul>
           <li>
-            <Link href="/">Bonga Bonk Miner — play and mine $BONGA</Link>
+            <Link href="/">Bonga Bonks — home</Link>
+          </li>
+          <li>
+            <Link href="/?mode=miner">Bonga Bonk Miner — play and mine $BONGA</Link>
+          </li>
+          <li>
+            <Link href="/coin-staking">Coin Stake — soft-lock $BONGA</Link>
+          </li>
+          <li>
+            <Link href="/bonga-bank">Bonga Bank — vault withdraw</Link>
           </li>
           <li>
             <Link href="/nft">Bonga NFT collection — mint on Solana</Link>

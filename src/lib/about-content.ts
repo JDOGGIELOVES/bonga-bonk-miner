@@ -24,7 +24,7 @@ export const ABOUT_FAQ = [
   {
     question: "What is $BONGA?",
     answer:
-      "$BONGA is the Bonga Bonk's Sister community token on Solana. Earn it in the Bonk Miner game — tap to bonk, stack bonks, and claim mined $BONGA when you connect your wallet.",
+      "$BONGA is the Bonga Bonk's Sister community token on Solana. Earn it in Bonk Miner (100 taps = 1 $BONGA, max 10/day), Pet Love (10/image), or NFT staking — all auto-deposit to your Bonga Bank Vault when you connect your wallet.",
   },
   {
     question: "Is Bonga Bonk's Sister affiliated with Bonk?",
@@ -38,7 +38,7 @@ export const ECOSYSTEM_LINKS = [
     href: "/",
     title: "Bonga Bonk Miner",
     description:
-      "Tap meme coins, mine $BONGA, and climb the leaderboard. Then mint your Bonga on /nft.",
+      "Tap meme coins — 100 taps = 1 $BONGA (max 10/day). Stake NFTs, then mint on /nft.",
     emoji: "🔨",
     accent: "text-bonga-orange",
   },

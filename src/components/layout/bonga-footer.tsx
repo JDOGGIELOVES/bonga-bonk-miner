@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 const LINKS = [
   { label: "Home", href: "/" },
   { label: "Bonk Miner", href: "/?mode=miner" },
-  { label: "Vibes Garden", href: "/?mode=garden" },
   { label: "Bonga Peace", href: "/peace" },
   { label: "NFTs", href: "/nft" },
   { label: "Staking", href: "/staking" },
