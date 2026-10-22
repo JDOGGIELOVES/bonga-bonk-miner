@@ -58,9 +58,10 @@ export const metadata: Metadata = {
     images: [
       {
         url: absoluteUrl(DEFAULT_OG_IMAGE),
-        width: 1024,
-        height: 1024,
-        alt: "Bonga — Bonk's Sister on Solana",
+        width: 500,
+        height: 500,
+        alt: "Bonga — official $BONGA token logo",
+        type: "image/png",
       },
     ],
   },
@@ -68,6 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: TWITTER_HANDLE,
     creator: TWITTER_HANDLE,
+    images: [absoluteUrl(DEFAULT_OG_IMAGE)],
   },
 };
 

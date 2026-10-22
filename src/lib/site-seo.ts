@@ -10,7 +10,8 @@ export const SITE_TAGLINE = "Raise the Frequency";
 export const DEFAULT_DESCRIPTION =
   "Bonga Bonk's Sister is Bonk's Sister on Solana — tap to bonk, mine $BONGA, mint Bonga NFTs, and unwind with Bonga Peace. The official Bonga & Bonk experience at bongabonks.com.";
 
-export const DEFAULT_OG_IMAGE = "/bonga-character.png";
+/** Official $BONGA token logo — used for link previews (Discord, X, Telegram, etc.). */
+export const DEFAULT_OG_IMAGE = "/bonga-token-logo.png";
 
 export const TWITTER_HANDLE = "@BongaSolana";
 
@@ -67,7 +68,7 @@ export function buildPageMetadata({
   path = "/",
   keywords = [...PRIMARY_KEYWORDS],
   image = DEFAULT_OG_IMAGE,
-  imageAlt = "Bonga — Bonk's Sister mascot on Solana",
+  imageAlt = "Bonga — official $BONGA token logo",
 }: {
   title: string;
   description?: string;
@@ -107,9 +108,10 @@ export function buildPageMetadata({
       images: [
         {
           url: imageUrl,
-          width: 1024,
-          height: 1024,
+          width: 500,
+          height: 500,
           alt: imageAlt,
+          type: "image/png",
         },
       ],
     },

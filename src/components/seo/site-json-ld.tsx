@@ -29,7 +29,7 @@ export function GlobalJsonLd() {
             "BONGA",
           ],
           url: SITE_URL,
-          logo: absoluteUrl("/bonga-character.png"),
+          logo: absoluteUrl("/bonga-token-logo.png"),
           description:
             "Bonga is Bonk's Sister — a Solana community built around the Bonga Bonk Miner game, $BONGA token, NFT collection, and Bonga Peace mindfulness.",
           sameAs: [
@@ -81,7 +81,7 @@ export function HomeJsonLd() {
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",
-        primaryImageOfPage: absoluteUrl("/bonga-character.png"),
+        primaryImageOfPage: absoluteUrl("/bonga-token-logo.png"),
         mainEntity: {
           "@type": "VideoGame",
           name: "Bonga Bonk Miner",
@@ -92,7 +92,7 @@ export function HomeJsonLd() {
           gamePlatform: "Web browser",
           operatingSystem: "Any",
           url: absoluteUrl("/"),
-          image: absoluteUrl("/bonga-character.png"),
+          image: absoluteUrl("/bonga-token-logo.png"),
           publisher: { "@id": ORG_ID },
           offers: {
             "@type": "Offer",
@@ -120,7 +120,7 @@ export function NftJsonLd() {
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": ORG_ID },
         inLanguage: "en-US",
-        primaryImageOfPage: absoluteUrl("/bonga-character.png"),
+        primaryImageOfPage: absoluteUrl("/bonga-token-logo.png"),
         mainEntity: {
           "@type": "Product",
           name: "Bonga NFT Collection",
@@ -129,7 +129,7 @@ export function NftJsonLd() {
             `${COLLECTION_STATS.totalSupply.toLocaleString()} chibi Shiba warrior NFTs — stake for tiered daily $BONGA (250–875/day).`,
           brand: { "@id": ORG_ID },
           category: "NFT",
-          image: absoluteUrl("/bonga-character.png"),
+          image: absoluteUrl("/bonga-token-logo.png"),
           url: absoluteUrl("/nft"),
           offers: {
             "@type": "Offer",
@@ -159,7 +159,7 @@ export function AboutJsonLd() {
           isPartOf: { "@id": WEBSITE_ID },
           about: { "@id": ORG_ID },
           inLanguage: "en-US",
-          primaryImageOfPage: absoluteUrl("/bonga-character.png"),
+          primaryImageOfPage: absoluteUrl("/bonga-token-logo.png"),
           mainEntity: {
             "@type": "CryptoCurrency",
             name: "$BONGA",
