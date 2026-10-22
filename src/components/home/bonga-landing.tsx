@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LandingCaCopy } from "@/components/home/landing-ca-copy";
-import { LandingWallet } from "@/components/home/landing-wallet";
 import { BONGA_TOKEN_CA } from "@/lib/bonga-token";
 
 const TOKEN_LOGO = "/bonga-token-logo.png";
@@ -124,17 +123,14 @@ export function BongaLanding() {
             Ecosystem
           </a>
         </nav>
-        <div className="flex items-center gap-2">
-          <a
-            href={JUP_BUY}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hidden bg-[#1A1408] px-3.5 py-2.5 text-[11px] font-bold tracking-[0.08em] text-white dark:bg-[#FFF6D8] dark:text-[#1A1408] sm:inline-block"
-          >
-            ACCESS $BONGA
-          </a>
-          <LandingWallet />
-        </div>
+        <a
+          href={JUP_BUY}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-[#1A1408] px-3.5 py-2.5 text-[11px] font-bold tracking-[0.08em] text-white dark:bg-[#FFF6D8] dark:text-[#1A1408]"
+        >
+          ACCESS $BONGA
+        </a>
       </header>
 
       <section className="mx-auto max-w-[1000px] px-6 pb-12 pt-12 text-center sm:pt-16">
