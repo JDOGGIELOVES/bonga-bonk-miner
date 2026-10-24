@@ -157,16 +157,31 @@ export function AboutContent() {
         </div>
       </section>
 
-      <section id="faq" className="section-anchor bg-muted/20 py-16">
+      <section
+        id="faq"
+        className="section-anchor border-y border-[#E8D4A0]/70 bg-[#FFFBEA]/60 py-16 dark:border-[#3D3220] dark:bg-[#2A2114]/40"
+      >
         <div className="mx-auto max-w-3xl px-4">
-          <h2 className="font-display text-3xl font-bold">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6B5A3E] dark:text-[#A89068]">
+            Straight answers
+          </p>
+          <h2 className="mt-2 font-display text-3xl font-bold">
             Bonga Bonk&apos;s Sister <span className="text-gradient">FAQ</span>
           </h2>
-          <dl className="mt-8 space-y-6">
+          <p className="mt-2 max-w-2xl text-sm text-[#6B5A3E] dark:text-[#A89068]">
+            Short, current facts about the token, Miner, Coin Stake, Bank, and
+            how Bonga relates to BONK.
+          </p>
+          <dl className="mt-8 space-y-4">
             {ABOUT_FAQ.map((item) => (
-              <div key={item.question} className="bonga-card p-5">
-                <dt className="font-display font-bold">{item.question}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <div
+                key={item.question}
+                className="rounded-2xl border border-[#E8D4A0] bg-[#FFFBEA] p-5 shadow-sm dark:border-[#3D3220] dark:bg-[#2A2114]"
+              >
+                <dt className="font-display text-base font-bold text-[#1A1408] dark:text-[#FFF6D8]">
+                  {item.question}
+                </dt>
+                <dd className="mt-2 text-sm leading-relaxed text-[#6B5A3E] dark:text-[#A89068]">
                   {item.answer}
                 </dd>
               </div>
