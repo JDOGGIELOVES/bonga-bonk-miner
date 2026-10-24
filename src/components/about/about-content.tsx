@@ -52,9 +52,9 @@ export function AboutContent() {
           <div className="mt-6 space-y-4 text-base leading-relaxed text-muted-foreground">
             <p>
               <strong className="text-foreground">Bonga Bonk&apos;s Sister</strong> is
-              the mascot and soul of bongabonks.com — an orange Shiba warrior with
-              dreadlocks, a striped headband, and an oversized wooden bonk club. She
-              smokes peace, not stress. Where Bonk brings the bonk, Bonga brings the
+              the mascot and soul of bongabonks.com — an orange Shiba with
+              dreadlocks, a teal headband, and a peace-sign necklace. She
+              brings peace, not stress. Where Bonk brings the bonk, Bonga brings the
               balance.
             </p>
             <p>

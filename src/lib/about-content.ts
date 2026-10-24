@@ -15,7 +15,7 @@ export const ABOUT_FAQ = [
   {
     question: "Who is Bonga Bonk's Sister?",
     answer:
-      "Bonga is Bonk's Sister on Solana — a chill orange Shiba with dreadlocks, a peace-first vibe, and a wooden club for good bonks. She's the face of the $BONGA token, the Miner, NFTs, and the Bonga community at bongabonks.com.",
+      "Bonga is Bonk's Sister on Solana — a chill orange Shiba with dreadlocks, a teal headband, peace-sign necklace, and a peace-first vibe. She's the face of the $BONGA token, the Miner, NFTs, and the Bonga community at bongabonks.com.",
   },
   {
     question: "How is Bonga different from BONK?",
